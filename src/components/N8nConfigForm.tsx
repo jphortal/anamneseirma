@@ -12,7 +12,7 @@ interface N8nConfigFormProps {
 
 export const N8nConfigForm = ({ onSave }: N8nConfigFormProps) => {
   const [worklistUrl, setWorklistUrl] = useState('');
-  const [chatUrl, setChatUrl] = useState('');
+  const [chatUrl, setChatUrl] = useState('https://jphortal.app.n8n.cloud/webhook-test/7ce83803-a02b-4ce9-9732-a07adb3b0127');
   const [reportUrl, setReportUrl] = useState('');
   const [transcriptionUrl, setTranscriptionUrl] = useState('');
   const { toast } = useToast();

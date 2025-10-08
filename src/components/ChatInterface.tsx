@@ -42,17 +42,17 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
     setLoading(true);
 
     try {
-      const response = await fetch(chatUrl, {
-        method: 'POST',
+      const url = new URL(chatUrl);
+      url.searchParams.append('message', text);
+      url.searchParams.append('patientId', patient.id || '');
+      url.searchParams.append('patientName', patient.name);
+      url.searchParams.append('conversationHistory', JSON.stringify(messages));
+
+      const response = await fetch(url.toString(), {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message: text,
-          patientId: patient.id,
-          patientName: patient.name,
-          conversationHistory: messages,
-        }),
       });
 
       if (!response.ok) throw new Error('Erro ao enviar mensagem');
@@ -92,13 +92,23 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       let transcriptionText = '';
 
       if (transcriptionUrl) {
-        // Send to n8n for transcription
-        const formData = new FormData();
-        formData.append('audio', audioBlob, 'recording.webm');
+        const reader = new FileReader();
+        const audioBase64 = await new Promise<string>((resolve) => {
+          reader.onloadend = () => {
+            const base64 = (reader.result as string).split(',')[1];
+            resolve(base64);
+          };
+          reader.readAsDataURL(audioBlob);
+        });
 
-        const transcriptionResponse = await fetch(transcriptionUrl, {
-          method: 'POST',
-          body: formData,
+        const url = new URL(transcriptionUrl);
+        url.searchParams.append('audio', audioBase64);
+
+        const transcriptionResponse = await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
 
         if (transcriptionResponse.ok) {
