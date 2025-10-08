@@ -5,16 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { N8nConfig } from '@/types/medical';
+import { useN8nConfig } from '@/hooks/useN8nConfig';
 
 interface N8nConfigFormProps {
   onSave: (config: N8nConfig) => void;
 }
 
 export const N8nConfigForm = ({ onSave }: N8nConfigFormProps) => {
-  const [worklistUrl, setWorklistUrl] = useState('');
+  const { config } = useN8nConfig();
+  const [worklistUrl, setWorklistUrl] = useState(config?.worklistUrl || '');
   const [chatUrl, setChatUrl] = useState('https://jphortal.app.n8n.cloud/webhook-test/7ce83803-a02b-4ce9-9732-a07adb3b0127');
-  const [reportUrl, setReportUrl] = useState('');
-  const [transcriptionUrl, setTranscriptionUrl] = useState('');
+  const [reportUrl, setReportUrl] = useState(config?.reportUrl || '');
+  const [transcriptionUrl, setTranscriptionUrl] = useState(config?.transcriptionUrl || '');
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
