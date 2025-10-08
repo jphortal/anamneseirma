@@ -27,6 +27,16 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Send initial message when chat starts
+  useEffect(() => {
+    const sendInitialMessage = async () => {
+      const initialMessage = 'Iniciar coleta de dados clínicos';
+      await sendMessage(initialMessage);
+    };
+    
+    sendInitialMessage();
+  }, []); // Empty dependency array ensures this runs only once on mount
+
   const sendMessage = async (text: string) => {
     if (!text.trim()) return;
 
