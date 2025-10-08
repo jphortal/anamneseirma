@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Patient } from '@/types/medical';
 import { Loader2 } from 'lucide-react';
@@ -11,51 +13,69 @@ interface PatientSelectorProps {
 }
 
 export const PatientSelector = ({ worklistUrl, onSelectPatient }: PatientSelectorProps) => {
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [prontuario, setProntuario] = useState('');
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchPatients();
-  }, []);
+  const fetchPatient = async () => {
+    if (!prontuario.trim()) {
+      toast({
+        title: 'Atenção',
+        description: 'Por favor, informe o número do prontuário',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-  const fetchPatients = async () => {
     setLoading(true);
     try {
-      const response = await fetch(worklistUrl, {
+      const url = new URL(worklistUrl);
+      url.searchParams.append('prontuario', prontuario);
+      
+      const response = await fetch(url.toString(), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      if (!response.ok) throw new Error('Erro ao buscar pacientes');
+      if (!response.ok) throw new Error('Erro ao buscar paciente');
 
       const data = await response.json();
       
       // Map n8n response to Patient interface
-      const mappedPatients = Array.isArray(data) ? data.map((item: any, index: number) => ({
-        id: item.cd_atendimento || item.id || `patient-${index}`,
-        name: item.ds_paciente || item.name || 'Sem nome',
-        birthDate: item.birth_date || item.birthDate || '',
-        patientId: item.nr_controle || item.patientId || item.id || `${index}`,
-        studyDescription: item.ds_procedimento || item.studyDescription || '',
-        modality: item.ds_modalidade || item.modality || '',
-        procedure: item.ds_procedimento || item.procedure || '',
-        // Keep original fields for reference
-        ds_paciente: item.ds_paciente,
-        nr_controle: item.nr_controle,
-        cd_atendimento: item.cd_atendimento,
-        ds_modalidade: item.ds_modalidade,
-        ds_procedimento: item.ds_procedimento,
-      })) : [];
+      const patientData = Array.isArray(data) ? data[0] : data;
       
-      setPatients(mappedPatients);
+      if (!patientData) {
+        toast({
+          title: 'Paciente não encontrado',
+          description: 'Verifique o número do prontuário e tente novamente',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const mappedPatient: Patient = {
+        id: patientData.cd_atendimento || patientData.id || `patient-${Date.now()}`,
+        name: patientData.ds_paciente || patientData.name || 'Sem nome',
+        birthDate: patientData.birth_date || patientData.birthDate || '',
+        patientId: patientData.nr_controle || patientData.patientId || prontuario,
+        studyDescription: patientData.ds_procedimento || patientData.studyDescription || '',
+        modality: patientData.ds_modalidade || patientData.modality || '',
+        procedure: patientData.ds_procedimento || patientData.procedure || '',
+        ds_paciente: patientData.ds_paciente,
+        nr_controle: patientData.nr_controle,
+        cd_atendimento: patientData.cd_atendimento,
+        ds_modalidade: patientData.ds_modalidade,
+        ds_procedimento: patientData.ds_procedimento,
+      };
+      
+      onSelectPatient(mappedPatient);
     } catch (error) {
-      console.error('Error fetching patients:', error);
+      console.error('Error fetching patient:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível carregar a lista de pacientes',
+        description: 'Não foi possível buscar os dados do paciente',
         variant: 'destructive',
       });
     } finally {
@@ -63,66 +83,47 @@ export const PatientSelector = ({ worklistUrl, onSelectPatient }: PatientSelecto
     }
   };
 
-  if (loading) {
-    return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Selecionar Paciente</CardTitle>
+        <CardTitle>Buscar Paciente</CardTitle>
         <CardDescription>
-          Escolha o paciente para iniciar o atendimento
+          Informe o número do prontuário para iniciar o atendimento
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          {patients.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              Nenhum paciente encontrado na lista de trabalho
-            </p>
-          ) : (
-            patients.map((patient) => (
-              <Button
-                key={patient.id}
-                variant="outline"
-                className="w-full justify-start text-left h-auto py-4"
-                onClick={() => onSelectPatient(patient)}
-              >
-                <div className="flex flex-col gap-1">
-                  <div className="font-semibold">{patient.name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    Controle: {patient.patientId}
-                    {patient.birthDate && ` | Nascimento: ${patient.birthDate}`}
-                  </div>
-                  {patient.modality && (
-                    <div className="text-xs text-muted-foreground">
-                      Modalidade: {patient.modality}
-                    </div>
-                  )}
-                  {patient.procedure && (
-                    <div className="text-xs text-muted-foreground">
-                      Procedimento: {patient.procedure}
-                    </div>
-                  )}
-                </div>
-              </Button>
-            ))
-          )}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="prontuario">Número do Prontuário</Label>
+            <Input
+              id="prontuario"
+              type="text"
+              placeholder="Digite o número do prontuário"
+              value={prontuario}
+              onChange={(e) => setProntuario(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  fetchPatient();
+                }
+              }}
+              disabled={loading}
+            />
+          </div>
+          <Button
+            className="w-full"
+            onClick={fetchPatient}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Buscando...
+              </>
+            ) : (
+              'Buscar Paciente'
+            )}
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          className="w-full mt-4"
-          onClick={fetchPatients}
-        >
-          Recarregar Lista
-        </Button>
       </CardContent>
     </Card>
   );
