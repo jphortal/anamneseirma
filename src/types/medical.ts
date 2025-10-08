@@ -1,9 +1,16 @@
 export interface Patient {
   id: string;
   name: string;
-  birthDate: string;
+  birthDate?: string;
   patientId: string;
   studyDescription?: string;
+  modality?: string;
+  procedure?: string;
+  ds_paciente?: string;
+  nr_controle?: string;
+  cd_atendimento?: string;
+  ds_modalidade?: string;
+  ds_procedimento?: string;
 }
 
 export interface Message {

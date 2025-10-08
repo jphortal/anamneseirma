@@ -32,7 +32,25 @@ export const PatientSelector = ({ worklistUrl, onSelectPatient }: PatientSelecto
       if (!response.ok) throw new Error('Erro ao buscar pacientes');
 
       const data = await response.json();
-      setPatients(Array.isArray(data) ? data : []);
+      
+      // Map n8n response to Patient interface
+      const mappedPatients = Array.isArray(data) ? data.map((item: any, index: number) => ({
+        id: item.cd_atendimento || item.id || `patient-${index}`,
+        name: item.ds_paciente || item.name || 'Sem nome',
+        birthDate: item.birth_date || item.birthDate || '',
+        patientId: item.nr_controle || item.patientId || item.id || `${index}`,
+        studyDescription: item.ds_procedimento || item.studyDescription || '',
+        modality: item.ds_modalidade || item.modality || '',
+        procedure: item.ds_procedimento || item.procedure || '',
+        // Keep original fields for reference
+        ds_paciente: item.ds_paciente,
+        nr_controle: item.nr_controle,
+        cd_atendimento: item.cd_atendimento,
+        ds_modalidade: item.ds_modalidade,
+        ds_procedimento: item.ds_procedimento,
+      })) : [];
+      
+      setPatients(mappedPatients);
     } catch (error) {
       console.error('Error fetching patients:', error);
       toast({
@@ -80,11 +98,17 @@ export const PatientSelector = ({ worklistUrl, onSelectPatient }: PatientSelecto
                 <div className="flex flex-col gap-1">
                   <div className="font-semibold">{patient.name}</div>
                   <div className="text-sm text-muted-foreground">
-                    ID: {patient.patientId} | Nascimento: {patient.birthDate}
+                    Controle: {patient.patientId}
+                    {patient.birthDate && ` | Nascimento: ${patient.birthDate}`}
                   </div>
-                  {patient.studyDescription && (
+                  {patient.modality && (
                     <div className="text-xs text-muted-foreground">
-                      {patient.studyDescription}
+                      Modalidade: {patient.modality}
+                    </div>
+                  )}
+                  {patient.procedure && (
+                    <div className="text-xs text-muted-foreground">
+                      Procedimento: {patient.procedure}
                     </div>
                   )}
                 </div>

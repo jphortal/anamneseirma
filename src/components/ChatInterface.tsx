@@ -44,8 +44,11 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
     try {
       const url = new URL(chatUrl);
       url.searchParams.append('message', text);
-      url.searchParams.append('patientId', patient.id || '');
-      url.searchParams.append('patientName', patient.name);
+      url.searchParams.append('patientId', patient.id || patient.patientId || '');
+      url.searchParams.append('patientName', patient.name || '');
+      url.searchParams.append('patientControl', patient.patientId || '');
+      url.searchParams.append('modality', patient.modality || '');
+      url.searchParams.append('procedure', patient.procedure || '');
       url.searchParams.append('conversationHistory', JSON.stringify(messages));
 
       const response = await fetch(url.toString(), {
@@ -55,28 +58,46 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
         },
       });
 
-      if (!response.ok) throw new Error('Erro ao enviar mensagem');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Response error:', response.status, errorText);
+        throw new Error('Erro ao enviar mensagem');
+      }
 
       const data = await response.json();
+      
+      // Handle different response formats
+      let responseContent = '';
+      if (typeof data === 'string') {
+        responseContent = data;
+      } else if (data.response) {
+        responseContent = data.response;
+      } else if (data.message) {
+        responseContent = data.message;
+      } else if (data.choices?.[0]?.message?.content) {
+        responseContent = data.choices[0].message.content;
+      } else {
+        responseContent = JSON.stringify(data);
+      }
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: data.response || data.message || '',
+        content: responseContent,
         timestamp: new Date(),
       };
 
       setMessages(prev => [...prev, assistantMessage]);
 
       // Check if this is the final report
-      if (data.isFinalReport || data.report) {
-        onReportGenerated(data.response || data.report);
+      if (data.isFinalReport || data.isReport || data.report) {
+        onReportGenerated(responseContent);
       }
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível enviar a mensagem',
+        description: 'Não foi possível enviar a mensagem. Verifique a URL do webhook.',
         variant: 'destructive',
       });
     } finally {
