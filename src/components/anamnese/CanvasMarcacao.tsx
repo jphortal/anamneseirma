@@ -35,22 +35,35 @@ export const CanvasMarcacao = ({ tipo, onImagemChange }: CanvasMarcacaoProps) =>
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Desenhar placeholder (imagem anatômica simulada)
-    ctx.fillStyle = '#F3F4F6';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Carregar imagem anatômica real
+    const img = new Image();
+    img.src = imagemSelecionada.url;
     
-    ctx.fillStyle = '#9CA3AF';
-    ctx.font = '16px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(imagemSelecionada.nome, canvas.width / 2, 50);
-    ctx.fillText('(Placeholder - Adicionar imagem real)', canvas.width / 2, 80);
+    img.onload = () => {
+      // Limpar canvas
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Desenhar imagem ajustada ao canvas
+      const scale = Math.min(
+        canvas.width / img.width,
+        canvas.height / img.height
+      );
+      const x = (canvas.width - img.width * scale) / 2;
+      const y = (canvas.height - img.height * scale) / 2;
+      
+      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+    };
     
-    // Desenhar silhueta básica como exemplo
-    ctx.strokeStyle = '#6B7280';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.ellipse(canvas.width / 2, canvas.height / 2, 80, 120, 0, 0, Math.PI * 2);
-    ctx.stroke();
+    img.onerror = () => {
+      // Fallback se imagem não carregar
+      ctx.fillStyle = '#F3F4F6';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#9CA3AF';
+      ctx.font = '16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Imagem não disponível', canvas.width / 2, canvas.height / 2);
+    };
   }, [imagemSelecionada]);
 
   const salvarEstado = () => {
@@ -122,21 +135,23 @@ export const CanvasMarcacao = ({ tipo, onImagemChange }: CanvasMarcacaoProps) =>
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Redesenhar fundo
-    ctx.fillStyle = '#F3F4F6';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Recarregar imagem base
+    const img = new Image();
+    img.src = imagemSelecionada.url;
     
-    ctx.fillStyle = '#9CA3AF';
-    ctx.font = '16px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(imagemSelecionada.nome, canvas.width / 2, 50);
-    ctx.fillText('(Placeholder - Adicionar imagem real)', canvas.width / 2, 80);
-    
-    ctx.strokeStyle = '#6B7280';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.ellipse(canvas.width / 2, canvas.height / 2, 80, 120, 0, 0, Math.PI * 2);
-    ctx.stroke();
+    img.onload = () => {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      const scale = Math.min(
+        canvas.width / img.width,
+        canvas.height / img.height
+      );
+      const x = (canvas.width - img.width * scale) / 2;
+      const y = (canvas.height - img.height * scale) / 2;
+      
+      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+    };
     
     setHistoricoDesenhos([]);
   };
