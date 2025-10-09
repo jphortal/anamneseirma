@@ -1,0 +1,62 @@
+import { TipoFormulario, ImagemAnatomica } from '@/types/anamnese';
+
+export const imagensAnatomicas: Record<TipoFormulario, ImagemAnatomica[]> = {
+  punho: [
+    { id: 'punho-frontal', nome: 'Punho - Vista Frontal', url: '/images/anatomia/punho-frontal.png' },
+    { id: 'punho-lateral', nome: 'Punho - Vista Lateral', url: '/images/anatomia/punho-lateral.png' },
+    { id: 'mao-palmar', nome: 'Mão - Vista Palmar', url: '/images/anatomia/mao-palmar.png' },
+  ],
+  abdome: [
+    { id: 'abdome-frontal', nome: 'Abdome - Vista Frontal', url: '/images/anatomia/abdome-frontal.png' },
+    { id: 'abdome-orgaos', nome: 'Abdome - Órgãos Internos', url: '/images/anatomia/abdome-orgaos.png' },
+  ],
+  atm: [
+    { id: 'atm-lateral', nome: 'ATM - Vista Lateral', url: '/images/anatomia/atm-lateral.png' },
+    { id: 'pescoco-frontal', nome: 'Pescoço - Vista Frontal', url: '/images/anatomia/pescoco-frontal.png' },
+  ],
+  cabeca: [
+    { id: 'cranio-frontal', nome: 'Crânio - Vista Frontal', url: '/images/anatomia/cranio-frontal.png' },
+    { id: 'cranio-lateral', nome: 'Crânio - Vista Lateral', url: '/images/anatomia/cranio-lateral.png' },
+    { id: 'cerebro-corte', nome: 'Cérebro - Corte Sagital', url: '/images/anatomia/cerebro-corte.png' },
+  ],
+  coluna: [
+    { id: 'coluna-cervical', nome: 'Coluna Cervical', url: '/images/anatomia/coluna-cervical.png' },
+    { id: 'coluna-toracica', nome: 'Coluna Torácica', url: '/images/anatomia/coluna-toracica.png' },
+    { id: 'coluna-lombar', nome: 'Coluna Lombar', url: '/images/anatomia/coluna-lombar.png' },
+    { id: 'coluna-completa', nome: 'Coluna Completa', url: '/images/anatomia/coluna-completa.png' },
+  ],
+  cotovelo: [
+    { id: 'cotovelo-frontal', nome: 'Cotovelo - Vista Frontal', url: '/images/anatomia/cotovelo-frontal.png' },
+    { id: 'cotovelo-lateral', nome: 'Cotovelo - Vista Lateral', url: '/images/anatomia/cotovelo-lateral.png' },
+  ],
+  joelho: [
+    { id: 'joelho-frontal', nome: 'Joelho - Vista Frontal', url: '/images/anatomia/joelho-frontal.png' },
+    { id: 'joelho-lateral', nome: 'Joelho - Vista Lateral', url: '/images/anatomia/joelho-lateral.png' },
+    { id: 'joelho-posterior', nome: 'Joelho - Vista Posterior', url: '/images/anatomia/joelho-posterior.png' },
+  ],
+  membros: [
+    { id: 'braco-frontal', nome: 'Braço - Vista Frontal', url: '/images/anatomia/braco-frontal.png' },
+    { id: 'antebraco-frontal', nome: 'Antebraço - Vista Frontal', url: '/images/anatomia/antebraco-frontal.png' },
+    { id: 'coxa-frontal', nome: 'Coxa - Vista Frontal', url: '/images/anatomia/coxa-frontal.png' },
+    { id: 'perna-frontal', nome: 'Perna - Vista Frontal', url: '/images/anatomia/perna-frontal.png' },
+  ],
+  ombro: [
+    { id: 'ombro-frontal', nome: 'Ombro - Vista Frontal', url: '/images/anatomia/ombro-frontal.png' },
+    { id: 'ombro-lateral', nome: 'Ombro - Vista Lateral', url: '/images/anatomia/ombro-lateral.png' },
+    { id: 'escapula-posterior', nome: 'Escápula - Vista Posterior', url: '/images/anatomia/escapula-posterior.png' },
+  ],
+  quadril: [
+    { id: 'quadril-frontal', nome: 'Quadril - Vista Frontal', url: '/images/anatomia/quadril-frontal.png' },
+    { id: 'quadril-lateral', nome: 'Quadril - Vista Lateral', url: '/images/anatomia/quadril-lateral.png' },
+    { id: 'bacia-completa', nome: 'Bacia Completa', url: '/images/anatomia/bacia-completa.png' },
+  ],
+  tornozelo: [
+    { id: 'tornozelo-frontal', nome: 'Tornozelo - Vista Frontal', url: '/images/anatomia/tornozelo-frontal.png' },
+    { id: 'tornozelo-lateral', nome: 'Tornozelo - Vista Lateral', url: '/images/anatomia/tornozelo-lateral.png' },
+    { id: 'pe-plantar', nome: 'Pé - Vista Plantar', url: '/images/anatomia/pe-plantar.png' },
+  ],
+  mama: [
+    { id: 'mama-frontal', nome: 'Mama - Vista Frontal', url: '/images/anatomia/mama-frontal.png' },
+    { id: 'mama-lateral', nome: 'Mama - Vista Lateral', url: '/images/anatomia/mama-lateral.png' },
+  ],
+};
