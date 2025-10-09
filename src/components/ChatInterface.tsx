@@ -131,20 +131,36 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
 
     setLoading(true);
     try {
+      // Envia como arquivo multipart/form-data no campo "data" (exigido pelo n8n)
+      const file = new File([audioBlob], 'audio.webm', { type: audioBlob.type || 'audio/webm' });
       const formData = new FormData();
-      formData.append('data', audioBlob, 'audio.webm');
+      formData.append('data', file);
 
       const transcriptionResponse = await fetch(transcriptionUrl, {
         method: 'POST',
-        body: formData,
+        body: formData, // Não defina manualmente Content-Type para FormData
       });
 
       if (!transcriptionResponse.ok) {
-        throw new Error('Erro na transcrição');
+        const errorText = await transcriptionResponse.text().catch(() => '');
+        throw new Error(`Erro na transcrição (${transcriptionResponse.status}): ${errorText}`);
       }
 
-      const transcriptionData = await transcriptionResponse.json();
-      const transcriptionText = transcriptionData.text || transcriptionData.transcription || transcriptionData.output || '';
+      // Tenta ler JSON; se não for JSON, usa texto puro
+      const contentType = transcriptionResponse.headers.get('content-type') || '';
+      let transcriptionText = '';
+      if (contentType.includes('application/json')) {
+        const data = await transcriptionResponse.json();
+        transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
+      } else {
+        const text = await transcriptionResponse.text();
+        try {
+          const data = JSON.parse(text);
+          transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
+        } catch {
+          transcriptionText = text;
+        }
+      }
 
       if (transcriptionText) {
         await sendMessage(transcriptionText);
@@ -156,7 +172,7 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       console.error('Error processing audio:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível processar o áudio. Verifique a URL de transcrição.',
+        description: 'Não foi possível processar o áudio. Verifique a URL de transcrição e o formato esperado (campo "data").',
         variant: 'destructive',
       });
     } finally {
