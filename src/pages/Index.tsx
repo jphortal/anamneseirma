@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
+import { Settings, ClipboardList } from 'lucide-react';
 import { useN8nConfig } from '@/hooks/useN8nConfig';
 import { N8nConfigForm } from '@/components/N8nConfigForm';
 import { PatientSelector } from '@/components/PatientSelector';
@@ -11,6 +12,7 @@ import { Patient } from '@/types/medical';
 type AppState = 'config' | 'patient-selection' | 'chat' | 'report';
 
 const Index = () => {
+  const navigate = useNavigate();
   const { config, saveConfig, hasConfig } = useN8nConfig();
   const [appState, setAppState] = useState<AppState>(hasConfig ? 'patient-selection' : 'config');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -51,15 +53,24 @@ const Index = () => {
             <h1 className="text-3xl font-bold text-foreground">Sistema de Laudos Médicos</h1>
             <p className="text-muted-foreground">Interface conversacional com IA</p>
           </div>
-          {hasConfig && appState !== 'config' && (
+          <div className="flex gap-2">
             <Button
               variant="outline"
-              size="icon"
-              onClick={() => setAppState('config')}
+              onClick={() => navigate('/revisao-anamnese')}
             >
-              <Settings className="h-5 w-5" />
+              <ClipboardList className="h-5 w-5 mr-2" />
+              Revisão de Anamnese
             </Button>
-          )}
+            {hasConfig && appState !== 'config' && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setAppState('config')}
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+            )}
+          </div>
         </header>
 
         <main>
