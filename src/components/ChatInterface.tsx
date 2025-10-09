@@ -120,52 +120,52 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
   const handleAudioSubmit = async () => {
     if (!audioBlob) return;
 
+    if (!transcriptionUrl) {
+      toast({
+        title: 'Configuração Necessária',
+        description: 'Configure a URL de transcrição nas configurações (ícone ⚙️)',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      let transcriptionText = '';
+      const reader = new FileReader();
+      const audioBase64 = await new Promise<string>((resolve) => {
+        reader.onloadend = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          resolve(base64);
+        };
+        reader.readAsDataURL(audioBlob);
+      });
 
-      if (transcriptionUrl) {
-        const reader = new FileReader();
-        const audioBase64 = await new Promise<string>((resolve) => {
-          reader.onloadend = () => {
-            const base64 = (reader.result as string).split(',')[1];
-            resolve(base64);
-          };
-          reader.readAsDataURL(audioBlob);
-        });
+      const transcriptionResponse = await fetch(transcriptionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ audio: audioBase64 }),
+      });
 
-        const url = new URL(transcriptionUrl);
-        url.searchParams.append('audio', audioBase64);
-
-        const transcriptionResponse = await fetch(url.toString(), {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (transcriptionResponse.ok) {
-          const transcriptionData = await transcriptionResponse.json();
-          transcriptionText = transcriptionData.text || transcriptionData.transcription || '';
-        }
+      if (!transcriptionResponse.ok) {
+        throw new Error('Erro na transcrição');
       }
+
+      const transcriptionData = await transcriptionResponse.json();
+      const transcriptionText = transcriptionData.text || transcriptionData.transcription || '';
 
       if (transcriptionText) {
         await sendMessage(transcriptionText);
+        clearAudio();
       } else {
-        toast({
-          title: 'Aviso',
-          description: 'Configure a URL de transcrição para usar áudio',
-          variant: 'destructive',
-        });
+        throw new Error('Transcrição vazia');
       }
-
-      clearAudio();
     } catch (error) {
       console.error('Error processing audio:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível processar o áudio',
+        description: 'Não foi possível processar o áudio. Verifique a URL de transcrição.',
         variant: 'destructive',
       });
     } finally {
