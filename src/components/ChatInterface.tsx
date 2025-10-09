@@ -182,13 +182,23 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       if (contentType.includes('application/json')) {
         const data = await transcriptionResponse.json();
         console.log('Resposta JSON:', data);
-        transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
+        // Apenas extrai o texto transcrito, sem processar como pergunta da IA
+        transcriptionText = data.text || data.transcription || '';
+        
+        // Se não encontrou nos campos comuns de transcrição, tenta output/message
+        // mas adiciona como mensagem do usuário apenas
+        if (!transcriptionText && (data.output || data.message || data.result)) {
+          transcriptionText = data.output || data.message || data.result || '';
+        }
       } else {
         const text = await transcriptionResponse.text();
         console.log('Resposta texto:', text);
         try {
           const data = JSON.parse(text);
-          transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
+          transcriptionText = data.text || data.transcription || '';
+          if (!transcriptionText && (data.output || data.message || data.result)) {
+            transcriptionText = data.output || data.message || data.result || '';
+          }
         } catch {
           transcriptionText = text;
         }
@@ -197,11 +207,19 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       console.log('Texto transcrito:', transcriptionText);
 
       if (transcriptionText) {
-        await sendMessage(transcriptionText);
+        // Adiciona apenas a mensagem transcrita do usuário
+        const userMessage: Message = {
+          id: Date.now().toString(),
+          role: 'user',
+          content: transcriptionText,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, userMessage]);
+        
         clearAudio();
         toast({
           title: 'Sucesso',
-          description: 'Áudio transcrito e enviado',
+          description: 'Áudio transcrito com sucesso',
         });
       } else {
         throw new Error('Transcrição vazia');
