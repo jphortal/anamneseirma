@@ -130,30 +130,56 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
     }
 
     setLoading(true);
+    console.log('=== INICIANDO ENVIO DE ÁUDIO ===');
+    console.log('URL de transcrição:', transcriptionUrl);
+    console.log('Tamanho do blob:', audioBlob.size, 'bytes');
+    console.log('Tipo do blob:', audioBlob.type);
+    
     try {
-      // Envia como arquivo multipart/form-data no campo "data" (exigido pelo n8n)
-      const file = new File([audioBlob], 'audio.webm', { type: audioBlob.type || 'audio/webm' });
+      // Cria o arquivo com nome e tipo corretos
+      const file = new File([audioBlob], 'audio.webm', { 
+        type: audioBlob.type || 'audio/webm' 
+      });
+      
+      console.log('Arquivo criado:', {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      });
+
       const formData = new FormData();
       formData.append('data', file);
+      
+      console.log('FormData criado, enviando requisição...');
 
       const transcriptionResponse = await fetch(transcriptionUrl, {
         method: 'POST',
-        body: formData, // Não defina manualmente Content-Type para FormData
+        body: formData,
+      });
+
+      console.log('Resposta recebida:', {
+        status: transcriptionResponse.status,
+        statusText: transcriptionResponse.statusText,
+        headers: Object.fromEntries(transcriptionResponse.headers.entries())
       });
 
       if (!transcriptionResponse.ok) {
         const errorText = await transcriptionResponse.text().catch(() => '');
+        console.error('Erro na resposta:', errorText);
         throw new Error(`Erro na transcrição (${transcriptionResponse.status}): ${errorText}`);
       }
 
-      // Tenta ler JSON; se não for JSON, usa texto puro
       const contentType = transcriptionResponse.headers.get('content-type') || '';
+      console.log('Content-Type da resposta:', contentType);
+      
       let transcriptionText = '';
       if (contentType.includes('application/json')) {
         const data = await transcriptionResponse.json();
+        console.log('Resposta JSON:', data);
         transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
       } else {
         const text = await transcriptionResponse.text();
+        console.log('Resposta texto:', text);
         try {
           const data = JSON.parse(text);
           transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
@@ -162,21 +188,29 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
         }
       }
 
+      console.log('Texto transcrito:', transcriptionText);
+
       if (transcriptionText) {
         await sendMessage(transcriptionText);
         clearAudio();
+        toast({
+          title: 'Sucesso',
+          description: 'Áudio transcrito e enviado',
+        });
       } else {
         throw new Error('Transcrição vazia');
       }
     } catch (error) {
-      console.error('Error processing audio:', error);
+      console.error('=== ERRO NO PROCESSAMENTO DE ÁUDIO ===');
+      console.error('Erro completo:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível processar o áudio. Verifique a URL de transcrição e o formato esperado (campo "data").',
+        description: error instanceof Error ? error.message : 'Erro desconhecido ao processar áudio',
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
+      console.log('=== FIM DO PROCESSAMENTO ===');
     }
   };
 
