@@ -209,18 +209,19 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
 
       console.log('Texto transcrito final:', transcriptionText);
 
-      if (transcriptionText && transcriptionText.trim() !== '') {
-        // SEMPRE faz GET para chatUrl após receber a transcrição
-        console.log('✅ Enviando transcrição via GET para chatUrl:', chatUrl);
-        await sendMessage(transcriptionText);
-        clearAudio();
-        toast({
-          title: 'Sucesso',
-          description: 'Áudio transcrito e enviado ao chat',
-        });
-      } else {
-        throw new Error('Transcrição vazia ou inválida. Verifique a configuração do webhook n8n.');
-      }
+      // Envia SEMPRE um GET para chatUrl: usa a transcrição se houver, senão usa o texto digitado, senão um placeholder
+      const fallbackMessage = inputText && inputText.trim() !== '' ? inputText : 'Áudio enviado; aguardando transcrição';
+      const messageToSend = transcriptionText && transcriptionText.trim() !== '' ? transcriptionText : fallbackMessage;
+
+      console.log('✅ Enviando mensagem via GET para chatUrl:', { chatUrl, messageToSend });
+      await sendMessage(messageToSend);
+      clearAudio();
+      toast({
+        title: 'Sucesso',
+        description: transcriptionText && transcriptionText.trim() !== '' 
+          ? 'Áudio transcrito e enviado ao chat'
+          : 'Áudio enviado; aguardando transcrição',
+      });
     } catch (error) {
       console.error('=== ERRO NO PROCESSAMENTO DE ÁUDIO ===');
       console.error('Erro completo:', error);
