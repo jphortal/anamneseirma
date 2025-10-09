@@ -131,21 +131,12 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
 
     setLoading(true);
     try {
-      const reader = new FileReader();
-      const audioBase64 = await new Promise<string>((resolve) => {
-        reader.onloadend = () => {
-          const base64 = (reader.result as string).split(',')[1];
-          resolve(base64);
-        };
-        reader.readAsDataURL(audioBlob);
-      });
+      const formData = new FormData();
+      formData.append('data', audioBlob, 'audio.webm');
 
       const transcriptionResponse = await fetch(transcriptionUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ audio: audioBase64 }),
+        body: formData,
       });
 
       if (!transcriptionResponse.ok) {
@@ -153,7 +144,7 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       }
 
       const transcriptionData = await transcriptionResponse.json();
-      const transcriptionText = transcriptionData.text || transcriptionData.transcription || '';
+      const transcriptionText = transcriptionData.text || transcriptionData.transcription || transcriptionData.output || '';
 
       if (transcriptionText) {
         await sendMessage(transcriptionText);
