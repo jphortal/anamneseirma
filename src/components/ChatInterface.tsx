@@ -107,7 +107,16 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
 
       // Check if this is the final report
       if (data.isFinalReport || data.isReport || data.report) {
-        onReportGenerated(responseContent);
+        // Try to parse the report as JSON
+        try {
+          const reportData = typeof data.report === 'string' 
+            ? JSON.parse(data.report) 
+            : (data.reportData || data.formData || responseContent);
+          
+          onReportGenerated(JSON.stringify(reportData));
+        } catch {
+          onReportGenerated(responseContent);
+        }
       }
     } catch (error) {
       console.error('Error sending message:', error);

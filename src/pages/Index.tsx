@@ -30,7 +30,39 @@ const Index = () => {
 
   const handleReportGenerated = (report: string) => {
     setGeneratedReport(report);
-    setAppState('report');
+    
+    // Try to parse JSON report and navigate to review with pre-filled data
+    try {
+      const reportData = JSON.parse(report);
+      
+      // Determine exam type based on fields present
+      let examType: 'punho' | 'joelho' | 'abdome' | 'atm' | 'cabeca' | 'coluna' | 'cotovelo' | 'membros' | 'ombro' | 'quadril' | 'tornozelo' | 'mama' = 'punho';
+      
+      if (reportData.joelhoFalseia !== undefined || reportData.joelhoTrava !== undefined) {
+        examType = 'joelho';
+      } else if (reportData.localizacao !== undefined && reportData.ehDigitador !== undefined) {
+        examType = 'punho';
+      } else if (reportData.tipoExame !== undefined || reportData.problemaSaude !== undefined) {
+        examType = 'abdome';
+      }
+      
+      navigate('/revisao-anamnese', {
+        state: {
+          tipo: examType,
+          dados: {
+            ...reportData,
+            nome: selectedPatient?.name || '',
+            paciente: selectedPatient?.name || '',
+            idade: ''
+          },
+          patientId: selectedPatient?.patientId,
+          patientName: selectedPatient?.name
+        }
+      });
+    } catch {
+      // If not JSON, just set the report and go to report step
+      setAppState('report');
+    }
   };
 
   const handleReportSubmitted = () => {
