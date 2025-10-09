@@ -96,6 +96,32 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
         responseContent = JSON.stringify(data);
       }
       
+      // Check if this is the final report
+      const isFinalReport = data.isFinalReport || data.isReport || data.report || 
+                           (responseContent.trim().startsWith('{') && responseContent.includes('"lado"'));
+      
+      if (isFinalReport) {
+        // Try to parse the report as JSON
+        try {
+          let reportData;
+          if (typeof data.report === 'string') {
+            reportData = JSON.parse(data.report);
+          } else if (data.reportData || data.formData) {
+            reportData = data.reportData || data.formData;
+          } else if (responseContent.trim().startsWith('{')) {
+            reportData = JSON.parse(responseContent);
+          }
+          
+          if (reportData) {
+            onReportGenerated(JSON.stringify(reportData));
+            return; // Don't add the report to chat messages
+          }
+        } catch (e) {
+          console.error('Error parsing report:', e);
+        }
+      }
+      
+      // Only add assistant message if it's not a final report
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -104,20 +130,6 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-
-      // Check if this is the final report
-      if (data.isFinalReport || data.isReport || data.report) {
-        // Try to parse the report as JSON
-        try {
-          const reportData = typeof data.report === 'string' 
-            ? JSON.parse(data.report) 
-            : (data.reportData || data.formData || responseContent);
-          
-          onReportGenerated(JSON.stringify(reportData));
-        } catch {
-          onReportGenerated(responseContent);
-        }
-      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
