@@ -169,59 +169,37 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
         throw new Error(`Erro na transcrição (${transcriptionResponse.status}): ${errorText}`);
       }
 
-      // Verifica se a resposta tem conteúdo
-      const contentLength = transcriptionResponse.headers.get('content-length');
-      console.log('Content-Length da resposta:', contentLength);
+      const contentType = transcriptionResponse.headers.get('content-type') || '';
+      console.log('Content-Type da resposta:', contentType);
       
       let transcriptionText = '';
-      
-      // Se a resposta está vazia (content-length: 0), tenta ler como texto vazio
-      if (contentLength === '0') {
-        console.log('⚠️ Resposta vazia do webhook. Verifique se o n8n está configurado para retornar a transcrição.');
-        const responseText = await transcriptionResponse.text();
-        console.log('Texto da resposta vazia:', responseText);
-        
-        // Se mesmo assim não tem conteúdo, lança erro
-        if (!responseText || responseText.trim() === '') {
-          throw new Error('O webhook de transcrição não retornou nenhum texto. Configure o n8n para retornar o campo com a transcrição.');
-        }
-        transcriptionText = responseText;
+      if (contentType.includes('application/json')) {
+        const data = await transcriptionResponse.json();
+        console.log('Resposta JSON:', data);
+        transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
       } else {
-        // Tenta ler a resposta normalmente
-        const contentType = transcriptionResponse.headers.get('content-type') || '';
-        console.log('Content-Type da resposta:', contentType);
-        
-        if (contentType.includes('application/json')) {
-          const data = await transcriptionResponse.json();
-          console.log('Resposta JSON:', data);
+        const text = await transcriptionResponse.text();
+        console.log('Resposta texto:', text);
+        try {
+          const data = JSON.parse(text);
           transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
-        } else {
-          const text = await transcriptionResponse.text();
-          console.log('Resposta texto:', text);
-          try {
-            const data = JSON.parse(text);
-            transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
-          } catch {
-            transcriptionText = text;
-          }
+        } catch {
+          transcriptionText = text;
         }
       }
 
-      console.log('Texto transcrito final:', transcriptionText);
+      console.log('Texto transcrito:', transcriptionText);
 
-      // Envia SEMPRE um GET para chatUrl: usa a transcrição se houver, senão usa o texto digitado, senão um placeholder
-      const fallbackMessage = inputText && inputText.trim() !== '' ? inputText : 'Áudio enviado; aguardando transcrição';
-      const messageToSend = transcriptionText && transcriptionText.trim() !== '' ? transcriptionText : fallbackMessage;
-
-      console.log('✅ Enviando mensagem via GET para chatUrl:', { chatUrl, messageToSend });
-      await sendMessage(messageToSend);
-      clearAudio();
-      toast({
-        title: 'Sucesso',
-        description: transcriptionText && transcriptionText.trim() !== '' 
-          ? 'Áudio transcrito e enviado ao chat'
-          : 'Áudio enviado; aguardando transcrição',
-      });
+      if (transcriptionText) {
+        await sendMessage(transcriptionText);
+        clearAudio();
+        toast({
+          title: 'Sucesso',
+          description: 'Áudio transcrito e enviado',
+        });
+      } else {
+        throw new Error('Transcrição vazia');
+      }
     } catch (error) {
       console.error('=== ERRO NO PROCESSAMENTO DE ÁUDIO ===');
       console.error('Erro completo:', error);
