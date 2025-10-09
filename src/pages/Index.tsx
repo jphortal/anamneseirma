@@ -46,6 +46,7 @@ const Index = () => {
         examType = 'abdome';
       }
       
+      // Navigate to review with pre-filled data
       navigate('/revisao-anamnese', {
         state: {
           tipo: examType,
@@ -59,9 +60,22 @@ const Index = () => {
           patientName: selectedPatient?.name
         }
       });
-    } catch {
-      // If not JSON, just set the report and go to report step
-      setAppState('report');
+    } catch (error) {
+      console.error('Error parsing report:', error);
+      // If not valid JSON, still navigate to review but with basic patient info
+      navigate('/revisao-anamnese', {
+        state: {
+          tipo: 'punho',
+          dados: {
+            nome: selectedPatient?.name || '',
+            paciente: selectedPatient?.name || '',
+            idade: '',
+            observacoes: report
+          },
+          patientId: selectedPatient?.patientId,
+          patientName: selectedPatient?.name
+        }
+      });
     }
   };
 
