@@ -32,16 +32,13 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
   useEffect(() => {
     const sendInitialMessage = async () => {
       const examPrompt = findPromptForExam(patient.modality, patient.procedure);
-      const initialMessage = examPrompt 
-        ? `Iniciar coleta de dados clínicos\n\nSISTEMA: ${examPrompt}`
-        : 'Iniciar coleta de dados clínicos';
-      await sendMessage(initialMessage);
+      await sendMessage('Iniciar coleta de dados clínicos', examPrompt || undefined);
     };
     
     sendInitialMessage();
   }, []); // Empty dependency array ensures this runs only once on mount
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = async (text: string, systemPrompt?: string) => {
     if (!text.trim()) return;
 
     const userMessage: Message = {
@@ -64,6 +61,9 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       url.searchParams.append('modality', patient.modality || '');
       url.searchParams.append('procedure', patient.procedure || '');
       url.searchParams.append('conversationHistory', JSON.stringify(messages));
+      if (systemPrompt) {
+        url.searchParams.append('systemPrompt', systemPrompt);
+      }
 
       const response = await fetch(url.toString(), {
         method: 'GET',
