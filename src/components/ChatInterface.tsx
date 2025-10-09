@@ -7,6 +7,7 @@ import { Message, Patient } from '@/types/medical';
 import { Mic, MicOff, Send, Loader2 } from 'lucide-react';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { findPromptForExam } from '@/utils/examPrompts';
 
 interface ChatInterfaceProps {
   patient: Patient;
@@ -30,7 +31,10 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
   // Send initial message when chat starts
   useEffect(() => {
     const sendInitialMessage = async () => {
-      const initialMessage = 'Iniciar coleta de dados clínicos';
+      const examPrompt = findPromptForExam(patient.modality, patient.procedure);
+      const initialMessage = examPrompt 
+        ? `Iniciar coleta de dados clínicos\n\nSISTEMA: ${examPrompt}`
+        : 'Iniciar coleta de dados clínicos';
       await sendMessage(initialMessage);
     };
     
