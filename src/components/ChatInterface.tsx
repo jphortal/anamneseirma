@@ -130,104 +130,95 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
     }
 
     setLoading(true);
-    console.log('=== INICIANDO ENVIO DE ÁUDIO ===');
-    console.log('URL de transcrição:', transcriptionUrl);
-    console.log('Tamanho do blob:', audioBlob.size, 'bytes');
-    console.log('Tipo do blob:', audioBlob.type);
+    console.log('=== INICIANDO ENVIO DE ÁUDIO + DADOS ===');
+    console.log('URL:', transcriptionUrl);
+    console.log('Tamanho do áudio:', audioBlob.size, 'bytes');
     
     try {
-      // Cria o arquivo com nome e tipo corretos
+      // Cria o arquivo de áudio
       const file = new File([audioBlob], 'audio.webm', { 
         type: audioBlob.type || 'audio/webm' 
       });
-      
-      console.log('Arquivo criado:', {
-        name: file.name,
-        size: file.size,
-        type: file.type
-      });
 
+      // Cria FormData com áudio + todos os dados do paciente
       const formData = new FormData();
       formData.append('data', file);
-      
-      console.log('FormData criado, enviando requisição...');
+      formData.append('patientId', patient.id || patient.patientId || '');
+      formData.append('patientName', patient.name || '');
+      formData.append('patientControl', patient.patientId || '');
+      formData.append('modality', patient.modality || '');
+      formData.append('procedure', patient.procedure || '');
+      formData.append('conversationHistory', JSON.stringify(messages));
 
-      const transcriptionResponse = await fetch(transcriptionUrl, {
+      console.log('Enviando POST com áudio + dados...');
+
+      const response = await fetch(transcriptionUrl, {
         method: 'POST',
         body: formData,
       });
 
-      console.log('Resposta recebida:', {
-        status: transcriptionResponse.status,
-        statusText: transcriptionResponse.statusText,
-        headers: Object.fromEntries(transcriptionResponse.headers.entries())
-      });
+      console.log('Resposta:', response.status, response.statusText);
 
-      if (!transcriptionResponse.ok) {
-        const errorText = await transcriptionResponse.text().catch(() => '');
-        console.error('Erro na resposta:', errorText);
-        throw new Error(`Erro na transcrição (${transcriptionResponse.status}): ${errorText}`);
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        throw new Error(`Erro no POST (${response.status}): ${errorText}`);
       }
 
-      // Verifica se a resposta tem conteúdo
-      const contentLength = transcriptionResponse.headers.get('content-length');
-      console.log('Content-Length da resposta:', contentLength);
+      // Processa a resposta
+      const contentType = response.headers.get('content-type') || '';
+      let responseContent = '';
       
-      let transcriptionText = '';
-      
-      // Se a resposta está vazia (content-length: 0), tenta ler como texto vazio
-      if (contentLength === '0') {
-        console.log('⚠️ Resposta vazia do webhook. Verifique se o n8n está configurado para retornar a transcrição.');
-        const responseText = await transcriptionResponse.text();
-        console.log('Texto da resposta vazia:', responseText);
+      if (contentType.includes('application/json')) {
+        const data = await response.json();
+        console.log('Resposta JSON:', data);
         
-        // Se mesmo assim não tem conteúdo, lança erro
-        if (!responseText || responseText.trim() === '') {
-          throw new Error('O webhook de transcrição não retornou nenhum texto. Configure o n8n para retornar o campo com a transcrição.');
-        }
-        transcriptionText = responseText;
-      } else {
-        // Tenta ler a resposta normalmente
-        const contentType = transcriptionResponse.headers.get('content-type') || '';
-        console.log('Content-Type da resposta:', contentType);
-        
-        if (contentType.includes('application/json')) {
-          const data = await transcriptionResponse.json();
-          console.log('Resposta JSON:', data);
-          transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
+        // Extrai o conteúdo da resposta
+        if (typeof data === 'string') {
+          responseContent = data;
+        } else if (data.output) {
+          responseContent = data.output;
+        } else if (data.response) {
+          responseContent = data.response;
+        } else if (data.message) {
+          responseContent = data.message;
+        } else if (data.text) {
+          responseContent = data.text;
         } else {
-          const text = await transcriptionResponse.text();
-          console.log('Resposta texto:', text);
-          try {
-            const data = JSON.parse(text);
-            transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
-          } catch {
-            transcriptionText = text;
-          }
+          responseContent = JSON.stringify(data);
+        }
+      } else {
+        responseContent = await response.text();
+      }
+
+      console.log('Conteúdo da resposta:', responseContent);
+
+      // Adiciona a mensagem do assistente
+      if (responseContent && responseContent.trim()) {
+        const assistantMessage: Message = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: responseContent,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+
+        // Verifica se é relatório final
+        if (response.headers.get('x-is-final-report') === 'true') {
+          onReportGenerated(responseContent);
         }
       }
 
-      console.log('Texto transcrito final:', transcriptionText);
-
-      // Envia SEMPRE um GET para chatUrl: usa a transcrição se houver, senão usa o texto digitado, senão um placeholder
-      const fallbackMessage = inputText && inputText.trim() !== '' ? inputText : 'Áudio enviado; aguardando transcrição';
-      const messageToSend = transcriptionText && transcriptionText.trim() !== '' ? transcriptionText : fallbackMessage;
-
-      console.log('✅ Enviando mensagem via GET para chatUrl:', { chatUrl, messageToSend });
-      await sendMessage(messageToSend);
       clearAudio();
       toast({
         title: 'Sucesso',
-        description: transcriptionText && transcriptionText.trim() !== '' 
-          ? 'Áudio transcrito e enviado ao chat'
-          : 'Áudio enviado; aguardando transcrição',
+        description: 'Áudio processado com sucesso',
       });
     } catch (error) {
-      console.error('=== ERRO NO PROCESSAMENTO DE ÁUDIO ===');
-      console.error('Erro completo:', error);
+      console.error('=== ERRO NO PROCESSAMENTO ===');
+      console.error(error);
       toast({
         title: 'Erro',
-        description: error instanceof Error ? error.message : 'Erro desconhecido ao processar áudio',
+        description: error instanceof Error ? error.message : 'Erro ao processar áudio',
         variant: 'destructive',
       });
     } finally {
