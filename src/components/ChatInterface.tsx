@@ -80,6 +80,8 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       let responseContent = '';
       if (typeof data === 'string') {
         responseContent = data;
+      } else if (data.output) {
+        responseContent = data.output;
       } else if (data.response) {
         responseContent = data.response;
       } else if (data.message) {
