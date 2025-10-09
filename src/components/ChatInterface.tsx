@@ -169,36 +169,57 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
         throw new Error(`Erro na transcrição (${transcriptionResponse.status}): ${errorText}`);
       }
 
-      const contentType = transcriptionResponse.headers.get('content-type') || '';
-      console.log('Content-Type da resposta:', contentType);
+      // Verifica se a resposta tem conteúdo
+      const contentLength = transcriptionResponse.headers.get('content-length');
+      console.log('Content-Length da resposta:', contentLength);
       
       let transcriptionText = '';
-      if (contentType.includes('application/json')) {
-        const data = await transcriptionResponse.json();
-        console.log('Resposta JSON:', data);
-        transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
+      
+      // Se a resposta está vazia (content-length: 0), tenta ler como texto vazio
+      if (contentLength === '0') {
+        console.log('⚠️ Resposta vazia do webhook. Verifique se o n8n está configurado para retornar a transcrição.');
+        const responseText = await transcriptionResponse.text();
+        console.log('Texto da resposta vazia:', responseText);
+        
+        // Se mesmo assim não tem conteúdo, lança erro
+        if (!responseText || responseText.trim() === '') {
+          throw new Error('O webhook de transcrição não retornou nenhum texto. Configure o n8n para retornar o campo com a transcrição.');
+        }
+        transcriptionText = responseText;
       } else {
-        const text = await transcriptionResponse.text();
-        console.log('Resposta texto:', text);
-        try {
-          const data = JSON.parse(text);
+        // Tenta ler a resposta normalmente
+        const contentType = transcriptionResponse.headers.get('content-type') || '';
+        console.log('Content-Type da resposta:', contentType);
+        
+        if (contentType.includes('application/json')) {
+          const data = await transcriptionResponse.json();
+          console.log('Resposta JSON:', data);
           transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
-        } catch {
-          transcriptionText = text;
+        } else {
+          const text = await transcriptionResponse.text();
+          console.log('Resposta texto:', text);
+          try {
+            const data = JSON.parse(text);
+            transcriptionText = data.text || data.transcription || data.output || data.message || data.result || '';
+          } catch {
+            transcriptionText = text;
+          }
         }
       }
 
-      console.log('Texto transcrito:', transcriptionText);
+      console.log('Texto transcrito final:', transcriptionText);
 
-      if (transcriptionText) {
+      if (transcriptionText && transcriptionText.trim() !== '') {
+        // SEMPRE faz GET para chatUrl após receber a transcrição
+        console.log('✅ Enviando transcrição via GET para chatUrl:', chatUrl);
         await sendMessage(transcriptionText);
         clearAudio();
         toast({
           title: 'Sucesso',
-          description: 'Áudio transcrito e enviado',
+          description: 'Áudio transcrito e enviado ao chat',
         });
       } else {
-        throw new Error('Transcrição vazia');
+        throw new Error('Transcrição vazia ou inválida. Verifique a configuração do webhook n8n.');
       }
     } catch (error) {
       console.error('=== ERRO NO PROCESSAMENTO DE ÁUDIO ===');
