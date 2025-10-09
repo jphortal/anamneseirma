@@ -148,7 +148,7 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       });
 
       const formData = new FormData();
-      formData.append('data', file);
+      formData.append('data00', file);
       formData.append('patientId', patient.id || patient.patientId || '');
       formData.append('patientName', patient.name || '');
       formData.append('patientControl', patient.patientId || '');
