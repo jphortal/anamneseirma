@@ -178,51 +178,42 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       const contentType = transcriptionResponse.headers.get('content-type') || '';
       console.log('Content-Type da resposta:', contentType);
       
-      let transcriptionText = '';
+      let data;
       if (contentType.includes('application/json')) {
-        const data = await transcriptionResponse.json();
-        console.log('Resposta JSON:', data);
-        // Apenas extrai o texto transcrito, sem processar como pergunta da IA
-        transcriptionText = data.text || data.transcription || '';
-        
-        // Se não encontrou nos campos comuns de transcrição, tenta output/message
-        // mas adiciona como mensagem do usuário apenas
-        if (!transcriptionText && (data.output || data.message || data.result)) {
-          transcriptionText = data.output || data.message || data.result || '';
-        }
+        data = await transcriptionResponse.json();
+        console.log('Resposta JSON completa:', data);
       } else {
         const text = await transcriptionResponse.text();
         console.log('Resposta texto:', text);
         try {
-          const data = JSON.parse(text);
-          transcriptionText = data.text || data.transcription || '';
-          if (!transcriptionText && (data.output || data.message || data.result)) {
-            transcriptionText = data.output || data.message || data.result || '';
-          }
+          data = JSON.parse(text);
         } catch {
-          transcriptionText = text;
+          throw new Error('Resposta inválida do servidor');
         }
       }
 
-      console.log('Texto transcrito:', transcriptionText);
+      // O webhook retorna a pergunta da IA no campo 'output'
+      const aiResponse = data.output || data.message || data.response || '';
+      console.log('Resposta da IA extraída:', aiResponse);
 
-      if (transcriptionText) {
-        // Adiciona apenas a mensagem transcrita do usuário
-        const userMessage: Message = {
+      if (aiResponse) {
+        // Adiciona a resposta da IA ao chat
+        const assistantMessage: Message = {
           id: Date.now().toString(),
-          role: 'user',
-          content: transcriptionText,
+          role: 'assistant',
+          content: aiResponse,
           timestamp: new Date(),
         };
-        setMessages(prev => [...prev, userMessage]);
         
+        setMessages(prev => [...prev, assistantMessage]);
         clearAudio();
+        
         toast({
           title: 'Sucesso',
-          description: 'Áudio transcrito com sucesso',
+          description: 'Áudio processado com sucesso',
         });
       } else {
-        throw new Error('Transcrição vazia');
+        throw new Error('Resposta vazia do servidor');
       }
     } catch (error) {
       console.error('=== ERRO NO PROCESSAMENTO DE ÁUDIO ===');
