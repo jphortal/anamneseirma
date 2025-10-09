@@ -149,8 +149,14 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
 
       const formData = new FormData();
       formData.append('data', file);
+      formData.append('patientId', patient.id || patient.patientId || '');
+      formData.append('patientName', patient.name || '');
+      formData.append('patientControl', patient.patientId || '');
+      formData.append('modality', patient.modality || '');
+      formData.append('procedure', patient.procedure || '');
+      formData.append('conversationHistory', JSON.stringify(messages));
       
-      console.log('FormData criado, enviando requisição...');
+      console.log('FormData criado com dados do paciente, enviando requisição...');
 
       const transcriptionResponse = await fetch(transcriptionUrl, {
         method: 'POST',
