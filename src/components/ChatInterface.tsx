@@ -52,22 +52,20 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
     setLoading(true);
 
     try {
-      const payload = {
-        message: text,
-        patientId: patient.id || patient.patientId || '',
-        patientName: patient.name || '',
-        patientControl: patient.patientId || '',
-        modality: patient.modality || '',
-        procedure: patient.procedure || '',
-        conversationHistory: [...messages, userMessage],
-      };
+      const url = new URL(chatUrl);
+      url.searchParams.append('message', text);
+      url.searchParams.append('patientId', patient.id || patient.patientId || '');
+      url.searchParams.append('patientName', patient.name || '');
+      url.searchParams.append('patientControl', patient.patientId || '');
+      url.searchParams.append('modality', patient.modality || '');
+      url.searchParams.append('procedure', patient.procedure || '');
+      url.searchParams.append('conversationHistory', JSON.stringify(messages));
 
-      const response = await fetch(chatUrl, {
-        method: 'POST',
+      const response = await fetch(url.toString(), {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
