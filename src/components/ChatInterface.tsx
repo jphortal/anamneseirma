@@ -36,7 +36,7 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       if (examPrompt) {
         systemPromptRef.current = examPrompt;
       }
-      await sendMessage('Iniciar coleta de dados clínicos', examPrompt || undefined);
+      await sendMessage('Sou a Manuela assistente virtual e vou fazer algumas perguntas para coletar todas informações prévias importantes para realização do seu exame com segurança. Vamos cuidar de você. Fique à vontade para me responder em texto ou em áudio.', examPrompt || undefined);
     };
     
     sendInitialMessage();
