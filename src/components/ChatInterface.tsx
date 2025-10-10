@@ -137,13 +137,19 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
         const finalReportKeywords = [
           'relatório final',
           'relatorio final',
+          'resumo final',
           'resumo da avaliação médica',
           'resumo da avaliacao medica',
           'resumo das informações coletadas',
           'resumo das informacoes coletadas',
           'resumo do atendimento',
           'resumo médico',
-          'resumo medico'
+          'resumo medico',
+          'resumo das suas respostas',
+          'resumo das respostas',
+          'para finalizar',
+          'aqui está um resumo',
+          'aqui esta um resumo'
         ];
         
         const hasFinalReportKeyword = finalReportKeywords.some(keyword => 
@@ -314,13 +320,19 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
           const finalReportKeywords = [
             'relatório final',
             'relatorio final',
+            'resumo final',
             'resumo da avaliação médica',
             'resumo da avaliacao medica',
             'resumo das informações coletadas',
             'resumo das informacoes coletadas',
             'resumo do atendimento',
             'resumo médico',
-            'resumo medico'
+            'resumo medico',
+            'resumo das suas respostas',
+            'resumo das respostas',
+            'para finalizar',
+            'aqui está um resumo',
+            'aqui esta um resumo'
           ];
           
           if (finalReportKeywords.some(keyword => lowerContent.includes(keyword))) {
