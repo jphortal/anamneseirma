@@ -36,24 +36,38 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       if (examPrompt) {
         systemPromptRef.current = examPrompt;
       }
-      await sendMessage('Sou a Manuela assistente virtual e vou fazer algumas perguntas para coletar todas informações prévias importantes para realização do seu exame com segurança. Vamos cuidar de você. Fique à vontade para me responder em texto ou em áudio.', examPrompt || undefined);
+      
+      // Add friendly message to UI
+      const friendlyMessage: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: 'Sou a Manuela assistente virtual e vou fazer algumas perguntas para coletar todas informações prévias importantes para realização do seu exame com segurança. Vamos cuidar de você. Fique à vontade para me responder em texto ou em áudio.',
+        timestamp: new Date(),
+      };
+      setMessages([friendlyMessage]);
+      
+      // Send technical message to backend
+      await sendMessage('Iniciar coleta de dados clínicos', examPrompt || undefined, true);
     };
     
     sendInitialMessage();
   }, []); // Empty dependency array ensures this runs only once on mount
 
-  const sendMessage = async (text: string, systemPrompt?: string) => {
+  const sendMessage = async (text: string, systemPrompt?: string, skipAddingToUI?: boolean) => {
     if (!text.trim()) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: text,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInputText('');
+    // Only add to UI if not skipped (for initial technical message)
+    if (!skipAddingToUI) {
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: text,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, userMessage]);
+      setInputText('');
+    }
+    
     setLoading(true);
 
     try {
