@@ -35,15 +35,30 @@ const Index = () => {
     try {
       const reportData = JSON.parse(report);
       
-      // Determine exam type based on fields present
+      // Determine exam type based on patient modality/procedure or JSON fields
       let examType: 'punho' | 'joelho' | 'abdome' | 'atm' | 'cabeca' | 'coluna' | 'cotovelo' | 'membros' | 'ombro' | 'quadril' | 'tornozelo' | 'mama' = 'punho';
       
-      if (reportData.joelhoFalseia !== undefined || reportData.joelhoTrava !== undefined) {
-        examType = 'joelho';
-      } else if (reportData.localizacao !== undefined && reportData.ehDigitador !== undefined) {
-        examType = 'punho';
-      } else if (reportData.tipoExame !== undefined || reportData.problemaSaude !== undefined) {
-        examType = 'abdome';
+      // Check if reportData has explicit tipo field
+      if (reportData.tipo) {
+        examType = reportData.tipo;
+      }
+      // Check patient modality and procedure for abdome/torax exams
+      else if (selectedPatient) {
+        const modality = selectedPatient.modality?.toUpperCase() || '';
+        const procedure = selectedPatient.procedure?.toUpperCase() || '';
+        
+        if ((modality.includes('RESSONANCIA') || modality.includes('TOMOGRAFIA')) && 
+            (procedure.includes('ABDOME') || procedure.includes('TORAX'))) {
+          examType = 'abdome';
+        }
+      }
+      // Fallback: check JSON fields to determine type
+      if (examType === 'punho') {
+        if (reportData.joelhoFalseia !== undefined || reportData.joelhoTrava !== undefined) {
+          examType = 'joelho';
+        } else if (reportData.tipoExame !== undefined || reportData.problemaSaude !== undefined) {
+          examType = 'abdome';
+        }
       }
       
       // Navigate to review with pre-filled data
