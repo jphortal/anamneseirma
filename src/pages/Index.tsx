@@ -85,11 +85,41 @@ const Index = () => {
       
       console.log('Navegando para revisão de anamnese...');
     } catch (error) {
-      console.error('Erro ao fazer parse do relatório:', error);
-      // If not valid JSON, still navigate to review but with basic patient info
+      console.error('Erro ao fazer parse do relatório (não é JSON):', error);
+      console.log('Processando como texto markdown...');
+      
+      // If not valid JSON (markdown text), determine type from patient data
+      let examType: 'punho' | 'joelho' | 'abdome' | 'atm' | 'cabeca' | 'coluna' | 'cotovelo' | 'membros' | 'ombro' | 'quadril' | 'tornozelo' | 'mama' = 'abdome';
+      
+      if (selectedPatient) {
+        const modality = selectedPatient.modality?.toUpperCase() || '';
+        const procedure = selectedPatient.procedure?.toUpperCase() || '';
+        
+        // Check for abdome/torax exams
+        if ((modality.includes('RESSONANCIA') || modality.includes('TOMOGRAFIA')) && 
+            (procedure.includes('ABDOME') || procedure.includes('TORAX'))) {
+          examType = 'abdome';
+        }
+        // Check for joint exams
+        else if (procedure.includes('JOELHO')) {
+          examType = 'joelho';
+        } else if (procedure.includes('PUNHO')) {
+          examType = 'punho';
+        } else if (procedure.includes('OMBRO')) {
+          examType = 'ombro';
+        } else if (procedure.includes('TORNOZELO')) {
+          examType = 'tornozelo';
+        } else if (procedure.includes('QUADRIL')) {
+          examType = 'quadril';
+        }
+      }
+      
+      console.log('Tipo de exame determinado (markdown):', examType);
+      
+      // Navigate to review with markdown text in observacoes
       navigate('/revisao-anamnese', {
         state: {
-          tipo: 'punho',
+          tipo: examType,
           dados: {
             nome: selectedPatient?.name || '',
             paciente: selectedPatient?.name || '',
@@ -100,6 +130,8 @@ const Index = () => {
           patientName: selectedPatient?.name
         }
       });
+      
+      console.log('Navegando para revisão de anamnese com markdown...');
     }
   };
 

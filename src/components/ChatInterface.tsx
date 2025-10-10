@@ -98,8 +98,12 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       
       // Robust final report detection
       const detectFinalReport = (content: string, dataObj: any): string | null => {
+        console.log('=== DETECTANDO RELATÓRIO FINAL ===');
+        console.log('Conteúdo:', content.substring(0, 200) + '...');
+        
         // 1. Check explicit flags
         if (dataObj.isFinalReport || dataObj.isReport || dataObj.report) {
+          console.log('Flag explícita detectada');
           if (typeof dataObj.report === 'string') {
             return dataObj.report;
           }
@@ -111,15 +115,21 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
         // 2. Check for "Relatório Final" text
         const lowerContent = content.toLowerCase();
         if (lowerContent.includes('relatório final') || lowerContent.includes('relatorio final')) {
+          console.log('Texto "Relatório Final" detectado');
           // Try to extract JSON from markdown code blocks
           const jsonMatch = content.match(/```json\s*\n?([\s\S]*?)\n?```/);
           if (jsonMatch) {
+            console.log('JSON em markdown detectado');
             return jsonMatch[1].trim();
           }
           // If content itself is JSON
           if (content.trim().startsWith('{')) {
+            console.log('Conteúdo é JSON direto');
             return content.trim();
           }
+          // Return markdown text as-is (will be processed by Index)
+          console.log('Retornando texto markdown completo');
+          return content;
         }
         
         // 3. Check if content is JSON with medical fields
@@ -131,6 +141,7 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
                                      parsed.localizacao || parsed.joelhoFalseia ||
                                      parsed.lado || parsed.tipoExame;
             if (hasMedicalFields) {
+              console.log('JSON com campos médicos detectado');
               return content.trim();
             }
           } catch (e) {
@@ -138,6 +149,7 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
           }
         }
         
+        console.log('Nenhum relatório final detectado');
         return null;
       };
       
@@ -252,6 +264,7 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       if (aiResponse) {
         // Check if audio response is a final report
         const detectFinalReport = (content: string, dataObj: any): string | null => {
+          console.log('=== DETECTANDO RELATÓRIO FINAL (AUDIO) ===');
           if (dataObj.isFinalReport || dataObj.isReport || dataObj.report) {
             if (typeof dataObj.report === 'string') return dataObj.report;
             if (dataObj.reportData || dataObj.formData) return JSON.stringify(dataObj.reportData || dataObj.formData);
@@ -259,9 +272,12 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
           
           const lowerContent = content.toLowerCase();
           if (lowerContent.includes('relatório final') || lowerContent.includes('relatorio final')) {
+            console.log('Texto "Relatório Final" detectado no áudio');
             const jsonMatch = content.match(/```json\s*\n?([\s\S]*?)\n?```/);
             if (jsonMatch) return jsonMatch[1].trim();
             if (content.trim().startsWith('{')) return content.trim();
+            // Return markdown text as-is
+            return content;
           }
           
           if (content.trim().startsWith('{')) {
