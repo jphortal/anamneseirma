@@ -31,13 +31,13 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
 
   // Send initial message when chat starts
   useEffect(() => {
-    const sendInitialMessage = async () => {
+    const initializeChat = () => {
       const examPrompt = findPromptForExam(patient.modality, patient.procedure);
       if (examPrompt) {
         systemPromptRef.current = examPrompt;
       }
       
-      // Add friendly message to UI
+      // Add friendly message to UI only
       const friendlyMessage: Message = {
         id: Date.now().toString(),
         role: 'assistant',
@@ -45,12 +45,9 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
         timestamp: new Date(),
       };
       setMessages([friendlyMessage]);
-      
-      // Send technical message to backend
-      await sendMessage('Iniciar coleta de dados clínicos', examPrompt || undefined, true);
     };
     
-    sendInitialMessage();
+    initializeChat();
   }, []); // Empty dependency array ensures this runs only once on mount
 
   const sendMessage = async (text: string, systemPrompt?: string, skipAddingToUI?: boolean) => {
