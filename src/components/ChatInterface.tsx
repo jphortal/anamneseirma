@@ -118,10 +118,26 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
           }
         }
         
-        // 2. Check for "Relatório Final" text
+        // 2. Check for final report keywords
         const lowerContent = content.toLowerCase();
-        if (lowerContent.includes('relatório final') || lowerContent.includes('relatorio final')) {
-          console.log('Texto "Relatório Final" detectado');
+        const finalReportKeywords = [
+          'relatório final',
+          'relatorio final',
+          'resumo da avaliação médica',
+          'resumo da avaliacao medica',
+          'resumo das informações coletadas',
+          'resumo das informacoes coletadas',
+          'resumo do atendimento',
+          'resumo médico',
+          'resumo medico'
+        ];
+        
+        const hasFinalReportKeyword = finalReportKeywords.some(keyword => 
+          lowerContent.includes(keyword)
+        );
+        
+        if (hasFinalReportKeyword) {
+          console.log('Palavra-chave de relatório final detectada');
           // Try to extract JSON from markdown code blocks
           const jsonMatch = content.match(/```json\s*\n?([\s\S]*?)\n?```/);
           if (jsonMatch) {
@@ -281,8 +297,20 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
           }
           
           const lowerContent = content.toLowerCase();
-          if (lowerContent.includes('relatório final') || lowerContent.includes('relatorio final')) {
-            console.log('Texto "Relatório Final" detectado no áudio');
+          const finalReportKeywords = [
+            'relatório final',
+            'relatorio final',
+            'resumo da avaliação médica',
+            'resumo da avaliacao medica',
+            'resumo das informações coletadas',
+            'resumo das informacoes coletadas',
+            'resumo do atendimento',
+            'resumo médico',
+            'resumo medico'
+          ];
+          
+          if (finalReportKeywords.some(keyword => lowerContent.includes(keyword))) {
+            console.log('Palavra-chave de relatório final detectada no áudio');
             const jsonMatch = content.match(/```json\s*\n?([\s\S]*?)\n?```/);
             if (jsonMatch) return jsonMatch[1].trim();
             if (content.trim().startsWith('{')) return content.trim();
