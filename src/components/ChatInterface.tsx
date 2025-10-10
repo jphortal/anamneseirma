@@ -96,29 +96,57 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
         responseContent = JSON.stringify(data);
       }
       
-      // Check if this is the final report
-      const isFinalReport = data.isFinalReport || data.isReport || data.report || 
-                           (responseContent.trim().startsWith('{') && responseContent.includes('"lado"'));
-      
-      if (isFinalReport) {
-        // Try to parse the report as JSON
-        try {
-          let reportData;
-          if (typeof data.report === 'string') {
-            reportData = JSON.parse(data.report);
-          } else if (data.reportData || data.formData) {
-            reportData = data.reportData || data.formData;
-          } else if (responseContent.trim().startsWith('{')) {
-            reportData = JSON.parse(responseContent);
+      // Robust final report detection
+      const detectFinalReport = (content: string, dataObj: any): string | null => {
+        // 1. Check explicit flags
+        if (dataObj.isFinalReport || dataObj.isReport || dataObj.report) {
+          if (typeof dataObj.report === 'string') {
+            return dataObj.report;
           }
-          
-          if (reportData) {
-            onReportGenerated(JSON.stringify(reportData));
-            return; // Don't add the report to chat messages
+          if (dataObj.reportData || dataObj.formData) {
+            return JSON.stringify(dataObj.reportData || dataObj.formData);
           }
-        } catch (e) {
-          console.error('Error parsing report:', e);
         }
+        
+        // 2. Check for "Relatório Final" text
+        const lowerContent = content.toLowerCase();
+        if (lowerContent.includes('relatório final') || lowerContent.includes('relatorio final')) {
+          // Try to extract JSON from markdown code blocks
+          const jsonMatch = content.match(/```json\s*\n?([\s\S]*?)\n?```/);
+          if (jsonMatch) {
+            return jsonMatch[1].trim();
+          }
+          // If content itself is JSON
+          if (content.trim().startsWith('{')) {
+            return content.trim();
+          }
+        }
+        
+        // 3. Check if content is JSON with medical fields
+        if (content.trim().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(content);
+            // Check for common medical form fields
+            const hasMedicalFields = parsed.motivoExame || parsed.problemaSaude || 
+                                     parsed.localizacao || parsed.joelhoFalseia ||
+                                     parsed.lado || parsed.tipoExame;
+            if (hasMedicalFields) {
+              return content.trim();
+            }
+          } catch (e) {
+            // Not valid JSON
+          }
+        }
+        
+        return null;
+      };
+      
+      const finalReport = detectFinalReport(responseContent, data);
+      
+      if (finalReport) {
+        console.log('Final report detected, triggering navigation');
+        onReportGenerated(finalReport);
+        return; // Don't add the report to chat messages
       }
       
       // Only add assistant message if it's not a final report
@@ -222,6 +250,42 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       console.log('Resposta da IA extraída:', aiResponse);
 
       if (aiResponse) {
+        // Check if audio response is a final report
+        const detectFinalReport = (content: string, dataObj: any): string | null => {
+          if (dataObj.isFinalReport || dataObj.isReport || dataObj.report) {
+            if (typeof dataObj.report === 'string') return dataObj.report;
+            if (dataObj.reportData || dataObj.formData) return JSON.stringify(dataObj.reportData || dataObj.formData);
+          }
+          
+          const lowerContent = content.toLowerCase();
+          if (lowerContent.includes('relatório final') || lowerContent.includes('relatorio final')) {
+            const jsonMatch = content.match(/```json\s*\n?([\s\S]*?)\n?```/);
+            if (jsonMatch) return jsonMatch[1].trim();
+            if (content.trim().startsWith('{')) return content.trim();
+          }
+          
+          if (content.trim().startsWith('{')) {
+            try {
+              const parsed = JSON.parse(content);
+              const hasMedicalFields = parsed.motivoExame || parsed.problemaSaude || 
+                                       parsed.localizacao || parsed.joelhoFalseia ||
+                                       parsed.lado || parsed.tipoExame;
+              if (hasMedicalFields) return content.trim();
+            } catch (e) {}
+          }
+          
+          return null;
+        };
+        
+        const finalReport = detectFinalReport(aiResponse, data);
+        
+        if (finalReport) {
+          console.log('Final report detected from audio, triggering navigation');
+          clearAudio();
+          onReportGenerated(finalReport);
+          return;
+        }
+        
         // Adiciona a resposta da IA ao chat
         const assistantMessage: Message = {
           id: Date.now().toString(),

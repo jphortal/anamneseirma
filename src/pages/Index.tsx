@@ -29,11 +29,16 @@ const Index = () => {
   };
 
   const handleReportGenerated = (report: string) => {
+    console.log('=== RELATÓRIO FINAL RECEBIDO ===');
+    console.log('Conteúdo:', report);
+    console.log('Paciente:', selectedPatient);
+    
     setGeneratedReport(report);
     
     // Try to parse JSON report and navigate to review with pre-filled data
     try {
       const reportData = JSON.parse(report);
+      console.log('JSON parseado com sucesso:', reportData);
       
       // Determine exam type based on patient modality/procedure or JSON fields
       let examType: 'punho' | 'joelho' | 'abdome' | 'atm' | 'cabeca' | 'coluna' | 'cotovelo' | 'membros' | 'ombro' | 'quadril' | 'tornozelo' | 'mama' = 'punho';
@@ -61,6 +66,8 @@ const Index = () => {
         }
       }
       
+      console.log('Tipo de exame determinado:', examType);
+      
       // Navigate to review with pre-filled data
       navigate('/revisao-anamnese', {
         state: {
@@ -75,8 +82,10 @@ const Index = () => {
           patientName: selectedPatient?.name
         }
       });
+      
+      console.log('Navegando para revisão de anamnese...');
     } catch (error) {
-      console.error('Error parsing report:', error);
+      console.error('Erro ao fazer parse do relatório:', error);
       // If not valid JSON, still navigate to review but with basic patient info
       navigate('/revisao-anamnese', {
         state: {
