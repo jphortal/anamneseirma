@@ -293,7 +293,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
             />
             {(dados as any).jaFoiOperado === 'Sim' && (
               <CampoEditavel
-                label="Quais cirurgias?"
+                label="Quais cirurgias e quando?"
                 value={(dados as any).cirurgias || ''}
                 onChange={(v) => onChange('cirurgias', v as string)}
                 tipo="textarea"
@@ -333,6 +333,46 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
               </>
             )}
             <CampoEditavel
+              label="Número de gestações (mulheres)"
+              value={(dados as any).numeroGestacoes || ''}
+              onChange={(v) => onChange('numeroGestacoes', v as string)}
+            />
+            <CampoEditavel
+              label="Número de cesáreas (mulheres)"
+              value={(dados as any).numeroCesareas || ''}
+              onChange={(v) => onChange('numeroCesareas', v as string)}
+            />
+            <CampoEditavel
+              label="Aborto com curetagem? (mulheres)"
+              value={(dados as any).abortoComCuretagem || ''}
+              onChange={(v) => onChange('abortoComCuretagem', v as string)}
+            />
+            <CampoEditavel
+              label="Data da última menstruação (mulheres)"
+              value={(dados as any).dataUltimaMenstruacao || ''}
+              onChange={(v) => onChange('dataUltimaMenstruacao', v as string)}
+            />
+            <CampoEditavel
+              label="Faz reposição hormonal? (mulheres)"
+              value={(dados as any).reposicaoHormonal || ''}
+              onChange={(v) => onChange('reposicaoHormonal', v as string)}
+            />
+            <CampoEditavel
+              label="Já fez biópsia de próstata? (homens)"
+              value={(dados as any).jaFezBiopsia || ''}
+              onChange={(v) => onChange('jaFezBiopsia', v as string)}
+            />
+            <CampoEditavel
+              label="Resultado Gleason (homens)"
+              value={(dados as any).gleason || ''}
+              onChange={(v) => onChange('gleason', v as string)}
+            />
+            <CampoEditavel
+              label="Valor do PSA (homens)"
+              value={(dados as any).valorPSA || ''}
+              onChange={(v) => onChange('valorPSA', v as string)}
+            />
+            <CampoEditavel
               label="Fuma?"
               value={(dados as any).fuma || 'Não'}
               onChange={(v) => onChange('fuma', v as string)}
@@ -350,6 +390,32 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
               value={(dados as any).estaPerdendoPeso || 'Não'}
               onChange={(v) => onChange('estaPerdendoPeso', v as string)}
               tipo="simNao"
+            />
+            {(dados as any).estaPerdendoPeso === 'Sim' && (
+              <CampoEditavel
+                label="Há quanto tempo está perdendo peso?"
+                value={(dados as any).tempoPerdendoPeso || ''}
+                onChange={(v) => onChange('tempoPerdendoPeso', v as string)}
+              />
+            )}
+            <CampoEditavel
+              label="Já fez ressonância ou tomografia?"
+              value={(dados as any).jaFezRMouTC || 'Não'}
+              onChange={(v) => onChange('jaFezRMouTC', v as string)}
+              tipo="simNao"
+            />
+            {(dados as any).jaFezRMouTC === 'Sim' && (
+              <CampoEditavel
+                label="Em qual serviço?"
+                value={(dados as any).ondeRealizou || ''}
+                onChange={(v) => onChange('ondeRealizou', v as string)}
+              />
+            )}
+            <CampoEditavel
+              label="Observações"
+              value={(dados as any).observacoes || ''}
+              onChange={(v) => onChange('observacoes', v as string)}
+              tipo="textarea"
             />
           </>
         );

@@ -35,20 +35,144 @@ const Index = () => {
     
     setGeneratedReport(report);
     
-    // Try to parse JSON report and navigate to review with pre-filled data
+    // Parser para extrair informações do relatório markdown
+    const parseMarkdownReport = (markdown: string) => {
+      const dados: any = {
+        nome: selectedPatient?.name || '',
+        idade: '',
+        trabalho: '',
+        motivoExame: '',
+        problemaSaude: '',
+        jaFoiOperado: 'Não',
+        cirurgias: '',
+        quimioterapia: 'Não',
+        quandoQuimio: '',
+        radioterapia: 'Não',
+        quandoRadio: '',
+        regiaoRadio: '',
+        fuma: 'Não',
+        tempoFumando: '',
+        estaPerdendoPeso: 'Não',
+        tempoPerdendoPeso: '',
+        jaFezRMouTC: 'Não',
+        ondeRealizou: '',
+        observacoes: markdown
+      };
+
+      // Extrair queixa principal / motivo
+      const queixaMatch = markdown.match(/\*\*Queixa Principal:\*\*\s*[-\s]*(.+?)(?=\n\n|\*\*)/s);
+      if (queixaMatch) {
+        dados.motivoExame = queixaMatch[1].trim().replace(/^-\s*/, '');
+      }
+
+      // Extrair histórico da queixa
+      const historiaMatch = markdown.match(/\*\*História da Queixa:\*\*\s*(.+?)(?=\n\n|\*\*)/s);
+      if (historiaMatch) {
+        const historia = historiaMatch[1];
+        dados.motivoExame += (dados.motivoExame ? '\n\n' : '') + 'História: ' + historia.trim();
+      }
+
+      // Extrair histórico médico / problemas
+      const historicoMatch = markdown.match(/\*\*Histórico Médico:\*\*\s*(.+?)(?=\n\n|\*\*)/s);
+      if (historicoMatch) {
+        const historico = historicoMatch[1];
+        dados.problemaSaude = historico.trim();
+
+        // Verificar cirurgias
+        if (historico.toLowerCase().includes('cirurgia') || historico.toLowerCase().includes('operado')) {
+          const semRegex = /sem.*?cirurgia|não.*?operado/i;
+          if (!semRegex.test(historico)) {
+            dados.jaFoiOperado = 'Sim';
+            const cirurgiaMatch = historico.match(/cirurgia[s]?[:\s]+(.+?)(?=\.|$)/i);
+            if (cirurgiaMatch) dados.cirurgias = cirurgiaMatch[1].trim();
+          }
+        }
+
+        // Verificar gravidez
+        if (historico.toLowerCase().includes('grávida') || historico.toLowerCase().includes('gravida')) {
+          const naoGravidaRegex = /não\s+está\s+grávida|não\s+grávida/i;
+          dados.estaGravida = naoGravidaRegex.test(historico) ? 'Não' : 'Sim';
+        }
+
+        // Verificar alergias
+        const alergiaMatch = historico.match(/alergia[s]?[:\s]*(.+?)(?=\.|$)/i);
+        if (alergiaMatch) {
+          const alergiaText = alergiaMatch[1].toLowerCase();
+          dados.temAlergia = alergiaText.includes('sem') || alergiaText.includes('não') || alergiaText.includes('nenhuma') ? 'Não' : 'Sim';
+          if (dados.temAlergia === 'Sim') {
+            dados.quaisAlergias = alergiaMatch[1].trim();
+          }
+        }
+      }
+
+      // Extrair exames anteriores
+      const examesMatch = markdown.match(/\*\*Exames Anteriores:\*\*\s*(.+?)(?=\n\n|\*\*)/s);
+      if (examesMatch) {
+        const exames = examesMatch[1];
+        const naoRealizouRegex = /não\s+realizou|sem\s+exames/i;
+        
+        if (!naoRealizouRegex.test(exames)) {
+          dados.jaFezRMouTC = 'Sim';
+          const ondeMatch = exames.match(/(?:em|no|na)\s+([^\n.]+)/i);
+          if (ondeMatch) dados.ondeRealizou = ondeMatch[1].trim();
+        } else {
+          dados.jaFezRMouTC = 'Não';
+        }
+      }
+
+      // Extrair condições de saúde / doenças crônicas
+      const condicoesMatch = markdown.match(/\*\*Condições de saúde:\*\*\s*(.+?)(?=\n\n|\*\*|$)/s);
+      if (condicoesMatch) {
+        const condicoes = condicoesMatch[1].trim();
+        if (dados.problemaSaude) {
+          dados.problemaSaude += '\n\nCondições crônicas: ' + condicoes;
+        } else {
+          dados.problemaSaude = condicoes;
+        }
+      }
+
+      // Extrair tabagismo
+      const secaoCompleta = markdown.toLowerCase();
+      if (secaoCompleta.includes('fuma')) {
+        const fumaMatch = markdown.match(/fuma[r]?[:\s?]*([^\n.]+)/i);
+        if (fumaMatch) {
+          const fumaText = fumaMatch[1].toLowerCase();
+          dados.fuma = fumaText.includes('não') || fumaText.includes('nao') || fumaText.includes('não fuma') ? 'Não' : 'Sim';
+          
+          if (dados.fuma === 'Sim') {
+            const tempoMatch = fumaText.match(/(\d+\s*(?:ano|mes|dia)s?)/i);
+            if (tempoMatch) dados.tempoFumando = tempoMatch[1];
+          }
+        }
+      }
+
+      // Extrair perda de peso
+      if (secaoCompleta.includes('peso')) {
+        const pesoMatch = markdown.match(/(?:perdendo|perda\s+de)\s*peso[:\s?]*([^\n.]+)/i);
+        if (pesoMatch) {
+          const pesoText = pesoMatch[1].toLowerCase();
+          dados.estaPerdendoPeso = pesoText.includes('não') || pesoText.includes('nao') ? 'Não' : 'Sim';
+          
+          if (dados.estaPerdendoPeso === 'Sim') {
+            const tempoMatch = pesoText.match(/(\d+\s*(?:ano|mes|dia|semana)s?)/i);
+            if (tempoMatch) dados.tempoPerdendoPeso = tempoMatch[1];
+          }
+        }
+      }
+
+      return dados;
+    };
+    
+    // Try to parse JSON report first
     try {
       const reportData = JSON.parse(report);
       console.log('JSON parseado com sucesso:', reportData);
       
-      // Determine exam type based on patient modality/procedure or JSON fields
-      let examType: 'punho' | 'joelho' | 'abdome' | 'atm' | 'cabeca' | 'coluna' | 'cotovelo' | 'membros' | 'ombro' | 'quadril' | 'tornozelo' | 'mama' = 'punho';
+      let examType: 'punho' | 'joelho' | 'abdome' | 'atm' | 'cabeca' | 'coluna' | 'cotovelo' | 'membros' | 'ombro' | 'quadril' | 'tornozelo' | 'mama' = 'abdome';
       
-      // Check if reportData has explicit tipo field
       if (reportData.tipo) {
         examType = reportData.tipo;
-      }
-      // Check patient modality and procedure for abdome/torax exams
-      else if (selectedPatient) {
+      } else if (selectedPatient) {
         const modality = selectedPatient.modality?.toUpperCase() || '';
         const procedure = selectedPatient.procedure?.toUpperCase() || '';
         
@@ -57,51 +181,36 @@ const Index = () => {
           examType = 'abdome';
         }
       }
-      // Fallback: check JSON fields to determine type
-      if (examType === 'punho') {
-        if (reportData.joelhoFalseia !== undefined || reportData.joelhoTrava !== undefined) {
-          examType = 'joelho';
-        } else if (reportData.tipoExame !== undefined || reportData.problemaSaude !== undefined) {
-          examType = 'abdome';
-        }
-      }
       
-      console.log('Tipo de exame determinado:', examType);
-      
-      // Navigate to review with pre-filled data
       navigate('/revisao-anamnese', {
         state: {
           tipo: examType,
           dados: {
             ...reportData,
             nome: selectedPatient?.name || '',
-            paciente: selectedPatient?.name || '',
-            idade: ''
+            paciente: selectedPatient?.name || ''
           },
           patientId: selectedPatient?.patientId,
           patientName: selectedPatient?.name
         }
       });
       
-      console.log('Navegando para revisão de anamnese...');
     } catch (error) {
-      console.error('Erro ao fazer parse do relatório (não é JSON):', error);
-      console.log('Processando como texto markdown...');
+      console.log('Não é JSON, fazendo parse do markdown...');
       
-      // If not valid JSON (markdown text), determine type from patient data
+      // Parse markdown and extract data
+      const dadosParsed = parseMarkdownReport(report);
+      
       let examType: 'punho' | 'joelho' | 'abdome' | 'atm' | 'cabeca' | 'coluna' | 'cotovelo' | 'membros' | 'ombro' | 'quadril' | 'tornozelo' | 'mama' = 'abdome';
       
       if (selectedPatient) {
         const modality = selectedPatient.modality?.toUpperCase() || '';
         const procedure = selectedPatient.procedure?.toUpperCase() || '';
         
-        // Check for abdome/torax exams
         if ((modality.includes('RESSONANCIA') || modality.includes('TOMOGRAFIA')) && 
             (procedure.includes('ABDOME') || procedure.includes('TORAX'))) {
           examType = 'abdome';
-        }
-        // Check for joint exams
-        else if (procedure.includes('JOELHO')) {
+        } else if (procedure.includes('JOELHO')) {
           examType = 'joelho';
         } else if (procedure.includes('PUNHO')) {
           examType = 'punho';
@@ -114,24 +223,16 @@ const Index = () => {
         }
       }
       
-      console.log('Tipo de exame determinado (markdown):', examType);
+      console.log('Dados extraídos do markdown:', dadosParsed);
       
-      // Navigate to review with markdown text in observacoes
       navigate('/revisao-anamnese', {
         state: {
           tipo: examType,
-          dados: {
-            nome: selectedPatient?.name || '',
-            paciente: selectedPatient?.name || '',
-            idade: '',
-            observacoes: report
-          },
+          dados: dadosParsed,
           patientId: selectedPatient?.patientId,
           patientName: selectedPatient?.name
         }
       });
-      
-      console.log('Navegando para revisão de anamnese com markdown...');
     }
   };
 
