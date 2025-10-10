@@ -23,6 +23,7 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
   const { isRecording, audioBlob, startRecording, stopRecording, clearAudio } = useAudioRecorder();
+  const systemPromptRef = useRef<string>('');
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -32,6 +33,9 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
   useEffect(() => {
     const sendInitialMessage = async () => {
       const examPrompt = findPromptForExam(patient.modality, patient.procedure);
+      if (examPrompt) {
+        systemPromptRef.current = examPrompt;
+      }
       await sendMessage('Iniciar coleta de dados clínicos', examPrompt || undefined);
     };
     
@@ -61,8 +65,10 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       url.searchParams.append('modality', patient.modality || '');
       url.searchParams.append('procedure', patient.procedure || '');
       url.searchParams.append('conversationHistory', JSON.stringify(messages));
-      if (systemPrompt) {
-        url.searchParams.append('systemPrompt', systemPrompt);
+      // Always include systemPrompt if available
+      const promptToSend = systemPrompt || systemPromptRef.current;
+      if (promptToSend) {
+        url.searchParams.append('systemPrompt', promptToSend);
       }
 
       const response = await fetch(url.toString(), {
@@ -220,6 +226,10 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
       formData.append('modality', patient.modality || '');
       formData.append('procedure', patient.procedure || '');
       formData.append('conversationHistory', JSON.stringify(messages));
+      // Always include systemPrompt
+      if (systemPromptRef.current) {
+        formData.append('systemPrompt', systemPromptRef.current);
+      }
       
       console.log('FormData criado com dados do paciente, enviando requisição...');
 
@@ -377,14 +387,14 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  sendMessage(inputText);
+                  sendMessage(inputText, systemPromptRef.current);
                 }
               }}
               disabled={loading}
             />
             <div className="flex flex-col gap-2">
               <Button
-                onClick={() => sendMessage(inputText)}
+                onClick={() => sendMessage(inputText, systemPromptRef.current)}
                 disabled={loading || !inputText.trim()}
                 size="icon"
               >
