@@ -59,35 +59,39 @@ export const CampoEditavel = ({
     setTranscrevendo(true);
 
     try {
-      const reader = new FileReader();
-      reader.readAsDataURL(audioBlob);
-      
-      reader.onloadend = async () => {
-        const base64Audio = reader.result?.toString().split(',')[1];
-        
-        const response = await fetch(config.transcriptionUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ audio: base64Audio }),
-        });
+      // Envia o áudio como arquivo (multipart/form-data)
+      const file = new File([audioBlob], 'audio.webm', { type: audioBlob.type || 'audio/webm' });
+      const formData = new FormData();
+      // Usamos a mesma chave que o chat usa para compatibilidade com o webhook
+      formData.append('data00', file);
 
-        if (!response.ok) {
-          throw new Error('Erro ao transcrever áudio');
-        }
+      const response = await fetch(config.transcriptionUrl, {
+        method: 'POST',
+        body: formData,
+      });
 
-        const data = await response.json();
-        const textoTranscrito = data.text || data.output || '';
-        
-        setValorTemp(textoTranscrito);
-        clearAudio();
-        
-        toast({
-          title: 'Áudio transcrito',
-          description: 'O texto foi adicionado ao campo',
-        });
-      };
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        throw new Error(`Erro ao transcrever áudio (${response.status}): ${errorText}`);
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      let data: any;
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        try { data = JSON.parse(text); } catch { data = { text }; }
+      }
+
+      const textoTranscrito = data.text || data.output || data.message || data.response || '';
+      setValorTemp(textoTranscrito);
+      clearAudio();
+
+      toast({
+        title: 'Áudio transcrito',
+        description: 'O texto foi adicionado ao campo',
+      });
     } catch (error) {
       console.error('Erro na transcrição:', error);
       toast({
