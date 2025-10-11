@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { Edit2, Check, X } from 'lucide-react';
+import { Edit2, Check, X, Mic, Square } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useAudioRecorder } from '@/hooks/useAudioRecorder';
+import { useToast } from '@/hooks/use-toast';
+import { useN8nConfig } from '@/hooks/useN8nConfig';
 
 interface CampoEditavelProps {
   label: string;
@@ -25,6 +28,10 @@ export const CampoEditavel = ({
 }: CampoEditavelProps) => {
   const [editando, setEditando] = useState(false);
   const [valorTemp, setValorTemp] = useState(value);
+  const [transcrevendo, setTranscrevendo] = useState(false);
+  const { isRecording, audioBlob, startRecording, stopRecording, clearAudio } = useAudioRecorder();
+  const { toast } = useToast();
+  const { config } = useN8nConfig();
 
   const handleSalvar = () => {
     onChange(valorTemp);
@@ -34,6 +41,70 @@ export const CampoEditavel = ({
   const handleCancelar = () => {
     setValorTemp(value);
     setEditando(false);
+    clearAudio();
+  };
+
+  const handleAudioTranscription = async () => {
+    if (!audioBlob) return;
+
+    if (!config.transcriptionUrl) {
+      toast({
+        title: 'URL não configurada',
+        description: 'Configure a URL de transcrição nas configurações',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setTranscrevendo(true);
+
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      
+      reader.onloadend = async () => {
+        const base64Audio = reader.result?.toString().split(',')[1];
+        
+        const response = await fetch(
+          `${config.transcriptionUrl}?audio=${encodeURIComponent(base64Audio || '')}`,
+          {
+            method: 'GET',
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('Erro ao transcrever áudio');
+        }
+
+        const data = await response.json();
+        const textoTranscrito = data.text || data.output || '';
+        
+        setValorTemp(textoTranscrito);
+        clearAudio();
+        
+        toast({
+          title: 'Áudio transcrito',
+          description: 'O texto foi adicionado ao campo',
+        });
+      };
+    } catch (error) {
+      console.error('Erro na transcrição:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível transcrever o áudio',
+        variant: 'destructive',
+      });
+    } finally {
+      setTranscrevendo(false);
+    }
+  };
+
+  const handleMicClick = async () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      await startRecording();
+    }
   };
 
   const renderCampo = () => {
@@ -67,20 +138,55 @@ export const CampoEditavel = ({
 
         <div className="mt-2 space-y-2">
           {tipo === 'text' && (
-            <Input
-              value={valorTemp as string}
-              onChange={(e) => setValorTemp(e.target.value)}
-              className="w-full"
-            />
+            <div className="flex gap-2">
+              <Input
+                value={valorTemp as string}
+                onChange={(e) => setValorTemp(e.target.value)}
+                className="w-full"
+              />
+              <Button
+                type="button"
+                size="icon"
+                variant={isRecording ? 'destructive' : 'outline'}
+                onClick={handleMicClick}
+                disabled={transcrevendo}
+              >
+                {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </Button>
+            </div>
           )}
 
           {tipo === 'textarea' && (
-            <Textarea
-              value={valorTemp as string}
-              onChange={(e) => setValorTemp(e.target.value)}
-              rows={3}
-              className="w-full"
-            />
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Textarea
+                  value={valorTemp as string}
+                  onChange={(e) => setValorTemp(e.target.value)}
+                  rows={3}
+                  className="w-full"
+                />
+                <Button
+                  type="button"
+                  size="icon"
+                  variant={isRecording ? 'destructive' : 'outline'}
+                  onClick={handleMicClick}
+                  disabled={transcrevendo}
+                >
+                  {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                </Button>
+              </div>
+              {audioBlob && !isRecording && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleAudioTranscription}
+                  disabled={transcrevendo}
+                  className="w-full"
+                >
+                  {transcrevendo ? 'Transcrevendo...' : 'Transcrever Áudio'}
+                </Button>
+              )}
+            </div>
           )}
 
           {tipo === 'simNao' && (
@@ -137,6 +243,18 @@ export const CampoEditavel = ({
                 </div>
               ))}
             </RadioGroup>
+          )}
+
+          {audioBlob && !isRecording && tipo === 'text' && (
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleAudioTranscription}
+              disabled={transcrevendo}
+              className="w-full"
+            >
+              {transcrevendo ? 'Transcrevendo...' : 'Transcrever Áudio'}
+            </Button>
           )}
 
           <div className="flex gap-2 mt-3">
