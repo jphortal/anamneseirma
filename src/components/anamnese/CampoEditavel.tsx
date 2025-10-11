@@ -65,12 +65,13 @@ export const CampoEditavel = ({
       reader.onloadend = async () => {
         const base64Audio = reader.result?.toString().split(',')[1];
         
-        const response = await fetch(
-          `${config.transcriptionUrl}?audio=${encodeURIComponent(base64Audio || '')}`,
-          {
-            method: 'GET',
-          }
-        );
+        const response = await fetch(config.transcriptionUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ audio: base64Audio }),
+        });
 
         if (!response.ok) {
           throw new Error('Erro ao transcrever áudio');
