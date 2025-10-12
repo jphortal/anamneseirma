@@ -14,123 +14,415 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
         return (
           <>
             <CampoEditavel
-              label="Nome do Paciente"
-              value={(dados as any).paciente || ''}
-              onChange={(v) => onChange('paciente', v as string)}
-              obrigatorio
-            />
-            <CampoEditavel
-              label="Idade"
-              value={(dados as any).idade || ''}
-              onChange={(v) => onChange('idade', v as string)}
-              obrigatorio
-            />
-            <CampoEditavel
-              label="Contraste"
-              value={(dados as any).contraste || 'Não'}
-              onChange={(v) => onChange('contraste', v as string)}
-              tipo="simNao"
-            />
-            <CampoEditavel
-              label="Lado"
-              value={(dados as any).lado || 'Direito'}
+              label="Qual o lado afetado?"
+              value={(dados as any).lado || ''}
               onChange={(v) => onChange('lado', v as string)}
               tipo="radio"
               opcoes={['Direito', 'Esquerdo']}
             />
             <CampoEditavel
-              label="Tempo com dor"
+              label="Há quanto tempo sente dor?"
               value={(dados as any).tempoComDor || ''}
               onChange={(v) => onChange('tempoComDor', v as string)}
             />
             <CampoEditavel
-              label="Localização da dor"
+              label="Onde exatamente sente a dor?"
               value={(dados as any).localizacao || ''}
               onChange={(v) => onChange('localizacao', v as string)}
-              tipo="textarea"
             />
             <CampoEditavel
-              label="Pratica esporte?"
+              label="Pratica esportes?"
               value={(dados as any).praticaEsporte || 'Não'}
               onChange={(v) => onChange('praticaEsporte', v as string)}
               tipo="simNao"
             />
-            {(dados as any).praticaEsporte === 'Sim' && (
-              <CampoEditavel
-                label="Qual esporte?"
-                value={(dados as any).qualEsporte || ''}
-                onChange={(v) => onChange('qualEsporte', v as string)}
-              />
-            )}
             <CampoEditavel
-              label="É digitador?"
+              label="Trabalha digitando com frequência?"
               value={(dados as any).ehDigitador || 'Não'}
               onChange={(v) => onChange('ehDigitador', v as string)}
               tipo="simNao"
             />
             <CampoEditavel
-              label="Limitação de movimento?"
+              label="Possui limitação de movimento?"
               value={(dados as any).limitacaoMovimento || 'Não'}
               onChange={(v) => onChange('limitacaoMovimento', v as string)}
               tipo="simNao"
             />
             <CampoEditavel
-              label="Teve derrame articular?"
+              label="Já teve derrame?"
               value={(dados as any).teveDerrame || 'Não'}
               onChange={(v) => onChange('teveDerrame', v as string)}
               tipo="simNao"
             />
-            {(dados as any).teveDerrame === 'Sim' && (
-              <CampoEditavel
-                label="Quando teve derrame?"
-                value={(dados as any).quandoDerrame || ''}
-                onChange={(v) => onChange('quandoDerrame', v as string)}
-              />
-            )}
             <CampoEditavel
-              label="Alteração de sensibilidade?"
+              label="Nota alteração de sensibilidade?"
               value={(dados as any).alteracaoSensibilidade || 'Não'}
               onChange={(v) => onChange('alteracaoSensibilidade', v as string)}
               tipo="simNao"
             />
             <CampoEditavel
-              label="Doença reumática?"
+              label="Possui doença reumática?"
               value={(dados as any).doencaReumatica || 'Não'}
               onChange={(v) => onChange('doencaReumatica', v as string)}
               tipo="simNao"
             />
             <CampoEditavel
-              label="História de trauma?"
+              label="Já teve algum trauma?"
               value={(dados as any).historiaTrauma || 'Não'}
               onChange={(v) => onChange('historiaTrauma', v as string)}
               tipo="simNao"
             />
-            {(dados as any).historiaTrauma === 'Sim' && (
-              <CampoEditavel
-                label="Quando foi o trauma?"
-                value={(dados as any).quandoTrauma || ''}
-                onChange={(v) => onChange('quandoTrauma', v as string)}
-              />
-            )}
             <CampoEditavel
-              label="Já foi operado?"
+              label="Já foi operado(a) dessa região?"
               value={(dados as any).jaFoiOperado || 'Não'}
               onChange={(v) => onChange('jaFoiOperado', v as string)}
               tipo="simNao"
             />
-            {(dados as any).jaFoiOperado === 'Sim' && (
-              <CampoEditavel
-                label="O que foi feito na cirurgia?"
-                value={(dados as any).oqueFeitoCircurgia || ''}
-                onChange={(v) => onChange('oqueFeitoCircurgia', v as string)}
-                tipo="textarea"
-              />
-            )}
             <CampoEditavel
-              label="Observações"
+              label="Sabe o que foi feito na cirurgia?"
+              value={(dados as any).oqueFeitoCircurgia || ''}
+              onChange={(v) => onChange('oqueFeitoCircurgia', v as string)}
+            />
+            <CampoEditavel
+              label="Deseja acrescentar alguma observação?"
               value={(dados as any).observacoes || ''}
               onChange={(v) => onChange('observacoes', v as string)}
               tipo="textarea"
+            />
+          </>
+        );
+
+      case 'abdome':
+        return (
+          <>
+            <CampoEditavel
+              label="Qual é o seu trabalho e função?"
+              value={(dados as any).trabalho || ''}
+              onChange={(v) => onChange('trabalho', v as string)}
+            />
+            <CampoEditavel
+              label="Qual o motivo principal deste exame? (Resuma a queixa principal)"
+              value={(dados as any).motivoExame || ''}
+              onChange={(v) => onChange('motivoExame', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Possui outros problemas de saúde conhecidos?"
+              value={(dados as any).problemaSaude || ''}
+              onChange={(v) => onChange('problemaSaude', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Já foi operado(a)? Quais cirurgias e há quanto tempo?"
+              value={(dados as any).cirurgias || ''}
+              onChange={(v) => onChange('cirurgias', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Já fez quimioterapia ou radioterapia? Quando e em qual região?"
+              value={(dados as any).quimioRadio || ''}
+              onChange={(v) => onChange('quimioRadio', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="(Mulheres) Quantas gestações e cesáreas teve? Teve abortos com curetagem? Data da última menstruação? Faz reposição hormonal?"
+              value={(dados as any).historicoMulheres || ''}
+              onChange={(v) => onChange('historicoMulheres', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="(Homens) Já fez biópsia de próstata? Quando? Qual o resultado (Gleason)? Qual o valor atual e anterior do PSA?"
+              value={(dados as any).historicoHomens || ''}
+              onChange={(v) => onChange('historicoHomens', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Fuma? Há quanto tempo?"
+              value={(dados as any).fuma || ''}
+              onChange={(v) => onChange('fuma', v as string)}
+            />
+            <CampoEditavel
+              label="Está perdendo peso? Há quanto tempo?"
+              value={(dados as any).perdendoPeso || ''}
+              onChange={(v) => onChange('perdendoPeso', v as string)}
+            />
+            <CampoEditavel
+              label="Já fez ressonância ou tomografia? Em qual serviço?"
+              value={(dados as any).examesAnteriores || ''}
+              onChange={(v) => onChange('examesAnteriores', v as string)}
+            />
+          </>
+        );
+
+      case 'atm':
+        return (
+          <>
+            <CampoEditavel
+              label="Qual o seu trabalho e função?"
+              value={(dados as any).trabalho || ''}
+              onChange={(v) => onChange('trabalho', v as string)}
+            />
+            <CampoEditavel
+              label="Qual o motivo principal do exame e a queixa principal?"
+              value={(dados as any).motivoExame || ''}
+              onChange={(v) => onChange('motivoExame', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Já foi operado(a)? Quais cirurgias e há quanto tempo?"
+              value={(dados as any).cirurgias || ''}
+              onChange={(v) => onChange('cirurgias', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Já fez quimioterapia ou radioterapia? Quando e em qual região?"
+              value={(dados as any).quimioRadio || ''}
+              onChange={(v) => onChange('quimioRadio', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Tem ou teve algum problema de saúde importante?"
+              value={(dados as any).problemaSaude || ''}
+              onChange={(v) => onChange('problemaSaude', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Já fez biópsia? Quando?"
+              value={(dados as any).biopsia || ''}
+              onChange={(v) => onChange('biopsia', v as string)}
+            />
+            <CampoEditavel
+              label="Fuma? Há quanto tempo?"
+              value={(dados as any).fuma || ''}
+              onChange={(v) => onChange('fuma', v as string)}
+            />
+            <CampoEditavel
+              label="Está perdendo peso? Há quanto tempo?"
+              value={(dados as any).perdendoPeso || ''}
+              onChange={(v) => onChange('perdendoPeso', v as string)}
+            />
+            <CampoEditavel
+              label="Data da última menstruação (se aplicável)"
+              value={(dados as any).ultimaMenstruacao || ''}
+              onChange={(v) => onChange('ultimaMenstruacao', v as string)}
+            />
+            <CampoEditavel
+              label="Já fez tomografia ou ressonância? Onde?"
+              value={(dados as any).examesAnteriores || ''}
+              onChange={(v) => onChange('examesAnteriores', v as string)}
+            />
+          </>
+        );
+
+      case 'cabeca':
+        return (
+          <>
+            <CampoEditavel
+              label="Qual o seu trabalho e função?"
+              value={(dados as any).trabalho || ''}
+              onChange={(v) => onChange('trabalho', v as string)}
+            />
+            <CampoEditavel
+              label="Qual o motivo do exame e quando começaram os sintomas?"
+              value={(dados as any).motivoSintomas || ''}
+              onChange={(v) => onChange('motivoSintomas', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Se houver cefaleia: onde dói, qual o tipo e duração da dor?"
+              value={(dados as any).cefaleia || ''}
+              onChange={(v) => onChange('cefaleia', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Se há convulsões: como percebe que vai ter crise? Alguém presenciou? Quantas crises no último mês? Houve aumento da frequência?"
+              value={(dados as any).convulsoes || ''}
+              onChange={(v) => onChange('convulsoes', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Trouxe EEG?"
+              value={(dados as any).trouxeEEG || 'Não'}
+              onChange={(v) => onChange('trouxeEEG', v as string)}
+              tipo="simNao"
+            />
+            <CampoEditavel
+              label="Tem algum dos seguintes sintomas: tontura, desmaio, náuseas, perda de força, confusão mental, etc.?"
+              value={(dados as any).outrosSintomas || ''}
+              onChange={(v) => onChange('outrosSintomas', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Usa medicamentos? Quais?"
+              value={(dados as any).medicamentos || ''}
+              onChange={(v) => onChange('medicamentos', v as string)}
+            />
+            <CampoEditavel
+              label="Já fez cirurgia na cabeça? Quando?"
+              value={(dados as any).cirurgias || ''}
+              onChange={(v) => onChange('cirurgias', v as string)}
+            />
+            <CampoEditavel
+              label="Já fez radio ou quimioterapia? Quando e onde?"
+              value={(dados as any).quimioRadio || ''}
+              onChange={(v) => onChange('quimioRadio', v as string)}
+            />
+            <CampoEditavel
+              label="Fuma? Há quanto tempo?"
+              value={(dados as any).fuma || ''}
+              onChange={(v) => onChange('fuma', v as string)}
+            />
+            <CampoEditavel
+              label="Está perdendo peso? Há quanto tempo?"
+              value={(dados as any).perdendoPeso || ''}
+              onChange={(v) => onChange('perdendoPeso', v as string)}
+            />
+            <CampoEditavel
+              label="(Crianças) A gestação foi normal? Houve atraso no desenvolvimento?"
+              value={(dados as any).historicoInfantil || ''}
+              onChange={(v) => onChange('historicoInfantil', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Já fez tomografia ou ressonância? Onde?"
+              value={(dados as any).examesAnteriores || ''}
+              onChange={(v) => onChange('examesAnteriores', v as string)}
+            />
+          </>
+        );
+
+      case 'coluna':
+        return (
+          <>
+            <CampoEditavel
+              label="Quando começaram os sintomas?"
+              value={(dados as any).inicioSintomas || ''}
+              onChange={(v) => onChange('inicioSintomas', v as string)}
+            />
+            <CampoEditavel
+              label="Qual seu trabalho e função?"
+              value={(dados as any).trabalho || ''}
+              onChange={(v) => onChange('trabalho', v as string)}
+            />
+            <CampoEditavel
+              label="Tipo de dor (peso, queimação, latejante, lancinante)?"
+              value={(dados as any).tipoDor || ''}
+              onChange={(v) => onChange('tipoDor', v as string)}
+            />
+            <CampoEditavel
+              label="Há sintomas associados (formigamento, perda de força, tontura, impotência)?"
+              value={(dados as any).sintomasAssociados || ''}
+              onChange={(v) => onChange('sintomasAssociados', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="O que melhora e o que piora a dor?"
+              value={(dados as any).fatoresDor || ''}
+              onChange={(v) => onChange('fatoresDor', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Já fez cirurgia da coluna? Quando?"
+              value={(dados as any).cirurgias || ''}
+              onChange={(v) => onChange('cirurgias', v as string)}
+            />
+            <CampoEditavel
+              label="Já teve trauma? Quando?"
+              value={(dados as any).trauma || ''}
+              onChange={(v) => onChange('trauma', v as string)}
+            />
+            <CampoEditavel
+              label="Fez quimioterapia ou radioterapia? Quando?"
+              value={(dados as any).quimioRadio || ''}
+              onChange={(v) => onChange('quimioRadio', v as string)}
+            />
+            <CampoEditavel
+              label="Há perda ou aumento de sensibilidade?"
+              value={(dados as any).alteracaoSensibilidade || ''}
+              onChange={(v) => onChange('alteracaoSensibilidade', v as string)}
+            />
+            <CampoEditavel
+              label="Fuma? Há quanto tempo?"
+              value={(dados as any).fuma || ''}
+              onChange={(v) => onChange('fuma', v as string)}
+            />
+            <CampoEditavel
+              label="Está perdendo peso? Há quanto tempo?"
+              value={(dados as any).perdendoPeso || ''}
+              onChange={(v) => onChange('perdendoPeso', v as string)}
+            />
+            <CampoEditavel
+              label="Data da última menstruação"
+              value={(dados as any).ultimaMenstruacao || ''}
+              onChange={(v) => onChange('ultimaMenstruacao', v as string)}
+            />
+            <CampoEditavel
+              label="Já fez tomografia ou ressonância?"
+              value={(dados as any).examesAnteriores || ''}
+              onChange={(v) => onChange('examesAnteriores', v as string)}
+            />
+          </>
+        );
+
+      case 'cotovelo':
+        return (
+          <>
+            <CampoEditavel
+              label="Qual o seu trabalho e função?"
+              value={(dados as any).trabalho || ''}
+              onChange={(v) => onChange('trabalho', v as string)}
+            />
+            <CampoEditavel
+              label="Há quanto tempo sente dor?"
+              value={(dados as any).tempoComDor || ''}
+              onChange={(v) => onChange('tempoComDor', v as string)}
+            />
+            <CampoEditavel
+              label="Onde é a dor (interna ou externa)?"
+              value={(dados as any).localizacaoDor || ''}
+              onChange={(v) => onChange('localizacaoDor', v as string)}
+            />
+            <CampoEditavel
+              label="Pratica esportes? Quais?"
+              value={(dados as any).esportes || ''}
+              onChange={(v) => onChange('esportes', v as string)}
+            />
+            <CampoEditavel
+              label="Tem limitação de movimento?"
+              value={(dados as any).limitacaoMovimento || 'Não'}
+              onChange={(v) => onChange('limitacaoMovimento', v as string)}
+              tipo="simNao"
+            />
+            <CampoEditavel
+              label="Já teve derrame?"
+              value={(dados as any).derrame || ''}
+              onChange={(v) => onChange('derrame', v as string)}
+            />
+            <CampoEditavel
+              label="Já teve trauma? Quando?"
+              value={(dados as any).trauma || ''}
+              onChange={(v) => onChange('trauma', v as string)}
+            />
+            <CampoEditavel
+              label="Já foi operado do cotovelo?"
+              value={(dados as any).jaFoiOperado || 'Não'}
+              onChange={(v) => onChange('jaFoiOperado', v as string)}
+              tipo="simNao"
+            />
+            <CampoEditavel
+              label="Sabe o que foi feito na cirurgia?"
+              value={(dados as any).oqueFeitoCircurgia || ''}
+              onChange={(v) => onChange('oqueFeitoCircurgia', v as string)}
+            />
+            <CampoEditavel
+              label="Data da última menstruação (se aplicável)"
+              value={(dados as any).ultimaMenstruacao || ''}
+              onChange={(v) => onChange('ultimaMenstruacao', v as string)}
+            />
+            <CampoEditavel
+              label="Já fez RM ou TC? Onde?"
+              value={(dados as any).examesAnteriores || ''}
+              onChange={(v) => onChange('examesAnteriores', v as string)}
             />
           </>
         );
@@ -139,280 +431,434 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
         return (
           <>
             <CampoEditavel
-              label="Nome do Paciente"
-              value={(dados as any).nome || ''}
-              onChange={(v) => onChange('nome', v as string)}
-              obrigatorio
-            />
-            <CampoEditavel
-              label="Idade"
-              value={(dados as any).idade || ''}
-              onChange={(v) => onChange('idade', v as string)}
-              obrigatorio
-            />
-            <CampoEditavel
-              label="Lado"
-              value={(dados as any).lado || 'Direito'}
-              onChange={(v) => onChange('lado', v as string)}
-              tipo="radio"
-              opcoes={['Direito', 'Esquerdo']}
-            />
-            <CampoEditavel
-              label="Trabalho/Profissão"
+              label="Qual o seu trabalho e função?"
               value={(dados as any).trabalho || ''}
               onChange={(v) => onChange('trabalho', v as string)}
             />
             <CampoEditavel
-              label="Há quanto tempo tem dor?"
+              label="Há quanto tempo sente dor?"
               value={(dados as any).tempoComDor || ''}
               onChange={(v) => onChange('tempoComDor', v as string)}
             />
             <CampoEditavel
-              label="Localização da dor"
+              label="Onde é a dor (interna, externa, anterior, posterior)?"
               value={(dados as any).localizacaoDor || ''}
               onChange={(v) => onChange('localizacaoDor', v as string)}
-              tipo="textarea"
             />
             <CampoEditavel
-              label="Dói ao subir escada?"
+              label="Dói ao subir escadas?"
               value={(dados as any).doiSubirEscada || 'Não'}
               onChange={(v) => onChange('doiSubirEscada', v as string)}
               tipo="simNao"
             />
             <CampoEditavel
-              label="Dói após tempo sentado?"
+              label="Dói quando fica muito tempo sentado?"
               value={(dados as any).doiTempoSentado || 'Não'}
               onChange={(v) => onChange('doiTempoSentado', v as string)}
               tipo="simNao"
             />
             <CampoEditavel
-              label="Teve derrame?"
-              value={(dados as any).teveDerrame || 'Não'}
-              onChange={(v) => onChange('teveDerrame', v as string)}
-              tipo="simNao"
+              label="Já teve derrame articular?"
+              value={(dados as any).derrameArticular || ''}
+              onChange={(v) => onChange('derrameArticular', v as string)}
             />
             <CampoEditavel
-              label="Joelho falseia?"
-              value={(dados as any).joelhoFalseia || 'Não'}
-              onChange={(v) => onChange('joelhoFalseia', v as string)}
-              tipo="simNao"
+              label="O joelho falseia ou trava?"
+              value={(dados as any).falseiaTrava || ''}
+              onChange={(v) => onChange('falseiaTrava', v as string)}
             />
             <CampoEditavel
-              label="Joelho trava?"
-              value={(dados as any).joelhoTrava || 'Não'}
-              onChange={(v) => onChange('joelhoTrava', v as string)}
-              tipo="simNao"
+              label="Já teve trauma? Quando?"
+              value={(dados as any).trauma || ''}
+              onChange={(v) => onChange('trauma', v as string)}
             />
             <CampoEditavel
-              label="História de trauma?"
-              value={(dados as any).historiaTrauma || 'Não'}
-              onChange={(v) => onChange('historiaTrauma', v as string)}
-              tipo="simNao"
+              label="Já foi operado ou fez artroscopia? Sabe o que foi feito?"
+              value={(dados as any).cirurgias || ''}
+              onChange={(v) => onChange('cirurgias', v as string)}
+              tipo="textarea"
             />
-            {(dados as any).historiaTrauma === 'Sim' && (
-              <CampoEditavel
-                label="Quando foi o trauma?"
-                value={(dados as any).quandoTrauma || ''}
-                onChange={(v) => onChange('quandoTrauma', v as string)}
-              />
-            )}
             <CampoEditavel
-              label="Já foi operado?"
-              value={(dados as any).jaFoiOperado || 'Não'}
-              onChange={(v) => onChange('jaFoiOperado', v as string)}
-              tipo="simNao"
+              label="Já fez infiltração? Quando?"
+              value={(dados as any).infiltracao || ''}
+              onChange={(v) => onChange('infiltracao', v as string)}
             />
-            {(dados as any).jaFoiOperado === 'Sim' && (
-              <CampoEditavel
-                label="O que foi feito?"
-                value={(dados as any).oqueFeitoCircurgia || ''}
-                onChange={(v) => onChange('oqueFeitoCircurgia', v as string)}
-                tipo="textarea"
-              />
-            )}
             <CampoEditavel
-              label="Fez infiltração?"
-              value={(dados as any).fezInfiltracao || 'Não'}
-              onChange={(v) => onChange('fezInfiltracao', v as string)}
-              tipo="simNao"
+              label="Data da última menstruação"
+              value={(dados as any).ultimaMenstruacao || ''}
+              onChange={(v) => onChange('ultimaMenstruacao', v as string)}
             />
-            {(dados as any).fezInfiltracao === 'Sim' && (
-              <CampoEditavel
-                label="Quando fez infiltração?"
-                value={(dados as any).quandoInfiltracao || ''}
-                onChange={(v) => onChange('quandoInfiltracao', v as string)}
-              />
-            )}
+            <CampoEditavel
+              label="Já fez TC ou RM? Onde?"
+              value={(dados as any).examesAnteriores || ''}
+              onChange={(v) => onChange('examesAnteriores', v as string)}
+            />
           </>
         );
 
-      case 'abdome':
+      case 'membros':
         return (
           <>
             <CampoEditavel
-              label="Nome do Paciente"
-              value={(dados as any).nome || ''}
-              onChange={(v) => onChange('nome', v as string)}
-              obrigatorio
+              label="Qual o segmento corporal afetado (braço, antebraço, coxa, perna)?"
+              value={(dados as any).segmento || ''}
+              onChange={(v) => onChange('segmento', v as string)}
             />
             <CampoEditavel
-              label="Idade"
-              value={(dados as any).idade || ''}
-              onChange={(v) => onChange('idade', v as string)}
-              obrigatorio
-            />
-            <CampoEditavel
-              label="Tipo de Exame"
-              value={(dados as any).tipoExame || []}
-              onChange={(v) => onChange('tipoExame', v)}
-              tipo="checkbox"
-              opcoes={['Abdome Superior', 'Próstata', 'Pelve', 'Tórax', 'Angio', 'Outros']}
-            />
-            <CampoEditavel
-              label="Trabalho/Profissão"
+              label="Qual o seu trabalho e função?"
               value={(dados as any).trabalho || ''}
               onChange={(v) => onChange('trabalho', v as string)}
             />
             <CampoEditavel
-              label="Motivo do exame"
+              label="Qual o motivo do exame e principal queixa?"
+              value={(dados as any).motivoQueixa || ''}
+              onChange={(v) => onChange('motivoQueixa', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Já foi operado(a)? Quais cirurgias e há quanto tempo?"
+              value={(dados as any).cirurgias || ''}
+              onChange={(v) => onChange('cirurgias', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Já fez quimio ou radioterapia? Quando e onde?"
+              value={(dados as any).quimioRadio || ''}
+              onChange={(v) => onChange('quimioRadio', v as string)}
+            />
+            <CampoEditavel
+              label="Já teve trauma? Quando?"
+              value={(dados as any).trauma || ''}
+              onChange={(v) => onChange('trauma', v as string)}
+            />
+            <CampoEditavel
+              label="Possui diabetes ou infecção recente?"
+              value={(dados as any).diabetesInfeccao || ''}
+              onChange={(v) => onChange('diabetesInfeccao', v as string)}
+            />
+            <CampoEditavel
+              label="Está perdendo peso? Há quanto tempo?"
+              value={(dados as any).perdendoPeso || ''}
+              onChange={(v) => onChange('perdendoPeso', v as string)}
+            />
+            <CampoEditavel
+              label="Pratica esportes? Quais?"
+              value={(dados as any).esportes || ''}
+              onChange={(v) => onChange('esportes', v as string)}
+            />
+            <CampoEditavel
+              label="Tem lesões cutâneas visíveis? Onde?"
+              value={(dados as any).lesoesCutaneas || ''}
+              onChange={(v) => onChange('lesoesCutaneas', v as string)}
+            />
+            <CampoEditavel
+              label="Já fez TC ou RM? Onde?"
+              value={(dados as any).examesAnteriores || ''}
+              onChange={(v) => onChange('examesAnteriores', v as string)}
+            />
+            <CampoEditavel
+              label="Data da última menstruação"
+              value={(dados as any).ultimaMenstruacao || ''}
+              onChange={(v) => onChange('ultimaMenstruacao', v as string)}
+            />
+          </>
+        );
+
+      case 'ombro':
+        return (
+          <>
+            <CampoEditavel
+              label="Qual o lado do ombro afetado?"
+              value={(dados as any).lado || ''}
+              onChange={(v) => onChange('lado', v as string)}
+              tipo="radio"
+              opcoes={['Direito', 'Esquerdo']}
+            />
+            <CampoEditavel
+              label="Qual o seu trabalho e função?"
+              value={(dados as any).trabalho || ''}
+              onChange={(v) => onChange('trabalho', v as string)}
+            />
+            <CampoEditavel
+              label="Há quanto tempo sente dor?"
+              value={(dados as any).tempoComDor || ''}
+              onChange={(v) => onChange('tempoComDor', v as string)}
+            />
+            <CampoEditavel
+              label="Tem dor à noite?"
+              value={(dados as any).dorNoite || 'Não'}
+              onChange={(v) => onChange('dorNoite', v as string)}
+              tipo="simNao"
+            />
+            <CampoEditavel
+              label="Pratica esportes? Quais?"
+              value={(dados as any).esportes || ''}
+              onChange={(v) => onChange('esportes', v as string)}
+            />
+            <CampoEditavel
+              label="Já teve luxação? Quando foi a última?"
+              value={(dados as any).luxacao || ''}
+              onChange={(v) => onChange('luxacao', v as string)}
+            />
+            <CampoEditavel
+              label="Teve derrame?"
+              value={(dados as any).derrame || ''}
+              onChange={(v) => onChange('derrame', v as string)}
+            />
+            <CampoEditavel
+              label="Tem dificuldade para colocar a mão na cabeça, nas costas ou no outro ombro?"
+              value={(dados as any).dificuldadeMovimento || ''}
+              onChange={(v) => onChange('dificuldadeMovimento', v as string)}
+            />
+            <CampoEditavel
+              label="Já teve trauma? Quando?"
+              value={(dados as any).trauma || ''}
+              onChange={(v) => onChange('trauma', v as string)}
+            />
+            <CampoEditavel
+              label="Já foi operado ou fez artroscopia? Sabe o que foi feito?"
+              value={(dados as any).cirurgias || ''}
+              onChange={(v) => onChange('cirurgias', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Já fez infiltração? Quando?"
+              value={(dados as any).infiltracao || ''}
+              onChange={(v) => onChange('infiltracao', v as string)}
+            />
+          </>
+        );
+
+      case 'quadril':
+        return (
+          <>
+            <CampoEditavel
+              label="Qual o lado afetado?"
+              value={(dados as any).lado || ''}
+              onChange={(v) => onChange('lado', v as string)}
+              tipo="radio"
+              opcoes={['Direito', 'Esquerdo']}
+            />
+            <CampoEditavel
+              label="Qual o seu trabalho e função?"
+              value={(dados as any).trabalho || ''}
+              onChange={(v) => onChange('trabalho', v as string)}
+            />
+            <CampoEditavel
+              label="Há quanto tempo e onde sente dor?"
+              value={(dados as any).tempoDor || ''}
+              onChange={(v) => onChange('tempoDor', v as string)}
+            />
+            <CampoEditavel
+              label="Dói com as pernas cruzadas, ao deitar ou ao apertar a lateral do quadril?"
+              value={(dados as any).situacoesDor || ''}
+              onChange={(v) => onChange('situacoesDor', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Pratica esportes? Quais?"
+              value={(dados as any).esportes || ''}
+              onChange={(v) => onChange('esportes', v as string)}
+            />
+            <CampoEditavel
+              label="Teve doença no quadril na infância?"
+              value={(dados as any).doencaInfancia || ''}
+              onChange={(v) => onChange('doencaInfancia', v as string)}
+            />
+            <CampoEditavel
+              label="Possui alguma doença de base?"
+              value={(dados as any).doencaBase || ''}
+              onChange={(v) => onChange('doencaBase', v as string)}
+            />
+            <CampoEditavel
+              label="Já teve trauma? Quando?"
+              value={(dados as any).trauma || ''}
+              onChange={(v) => onChange('trauma', v as string)}
+            />
+            <CampoEditavel
+              label="Já foi operado? Sabe o que foi feito?"
+              value={(dados as any).cirurgias || ''}
+              onChange={(v) => onChange('cirurgias', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Já fez quimio ou radioterapia? Onde?"
+              value={(dados as any).quimioRadio || ''}
+              onChange={(v) => onChange('quimioRadio', v as string)}
+            />
+            <CampoEditavel
+              label="Já fez TC ou RM? Onde?"
+              value={(dados as any).examesAnteriores || ''}
+              onChange={(v) => onChange('examesAnteriores', v as string)}
+            />
+            <CampoEditavel
+              label="Data da última menstruação"
+              value={(dados as any).ultimaMenstruacao || ''}
+              onChange={(v) => onChange('ultimaMenstruacao', v as string)}
+            />
+          </>
+        );
+
+      case 'tornozelo':
+        return (
+          <>
+            <CampoEditavel
+              label="Qual o lado afetado?"
+              value={(dados as any).lado || ''}
+              onChange={(v) => onChange('lado', v as string)}
+              tipo="radio"
+              opcoes={['Direito', 'Esquerdo', 'Ambos']}
+            />
+            <CampoEditavel
+              label="Qual o seu trabalho e função?"
+              value={(dados as any).trabalho || ''}
+              onChange={(v) => onChange('trabalho', v as string)}
+            />
+            <CampoEditavel
+              label="Há quanto tempo sente dor?"
+              value={(dados as any).tempoComDor || ''}
+              onChange={(v) => onChange('tempoComDor', v as string)}
+            />
+            <CampoEditavel
+              label="Você tem diabetes?"
+              value={(dados as any).diabetes || 'Não'}
+              onChange={(v) => onChange('diabetes', v as string)}
+              tipo="simNao"
+            />
+            <CampoEditavel
+              label="Possui outros problemas de saúde?"
+              value={(dados as any).outrosProblemas || ''}
+              onChange={(v) => onChange('outrosProblemas', v as string)}
+            />
+            <CampoEditavel
+              label="Onde exatamente localiza a dor?"
+              value={(dados as any).localizacaoDor || ''}
+              onChange={(v) => onChange('localizacaoDor', v as string)}
+            />
+            <CampoEditavel
+              label="Já teve entorse? Quando foi e quantas vezes?"
+              value={(dados as any).entorse || ''}
+              onChange={(v) => onChange('entorse', v as string)}
+            />
+            <CampoEditavel
+              label="Sente dor ao caminhar?"
+              value={(dados as any).dorCaminhar || 'Não'}
+              onChange={(v) => onChange('dorCaminhar', v as string)}
+              tipo="simNao"
+            />
+            <CampoEditavel
+              label="Já teve fratura nessa região?"
+              value={(dados as any).fratura || ''}
+              onChange={(v) => onChange('fratura', v as string)}
+            />
+            <CampoEditavel
+              label="O tornozelo costuma falsear (ficar instável)?"
+              value={(dados as any).instabilidade || ''}
+              onChange={(v) => onChange('instabilidade', v as string)}
+            />
+            <CampoEditavel
+              label="Sente dor entre os dedos?"
+              value={(dados as any).dorDedos || ''}
+              onChange={(v) => onChange('dorDedos', v as string)}
+            />
+            <CampoEditavel
+              label="Já teve algum trauma? Quando ocorreu?"
+              value={(dados as any).trauma || ''}
+              onChange={(v) => onChange('trauma', v as string)}
+            />
+            <CampoEditavel
+              label="Já foi operado(a)? Sabe o que foi feito na cirurgia?"
+              value={(dados as any).cirurgias || ''}
+              onChange={(v) => onChange('cirurgias', v as string)}
+              tipo="textarea"
+            />
+            <CampoEditavel
+              label="Data da última menstruação (se aplicável)"
+              value={(dados as any).ultimaMenstruacao || ''}
+              onChange={(v) => onChange('ultimaMenstruacao', v as string)}
+            />
+            <CampoEditavel
+              label="Já fez tomografia ou ressonância magnética? Em qual serviço?"
+              value={(dados as any).examesAnteriores || ''}
+              onChange={(v) => onChange('examesAnteriores', v as string)}
+            />
+          </>
+        );
+
+      case 'mama':
+        return (
+          <>
+            <CampoEditavel
+              label="Por que está realizando este exame?"
               value={(dados as any).motivoExame || ''}
               onChange={(v) => onChange('motivoExame', v as string)}
               tipo="textarea"
             />
             <CampoEditavel
-              label="Problemas de saúde"
-              value={(dados as any).problemaSaude || ''}
-              onChange={(v) => onChange('problemaSaude', v as string)}
+              label="Qual o lado afetado?"
+              value={(dados as any).lado || ''}
+              onChange={(v) => onChange('lado', v as string)}
+              tipo="radio"
+              opcoes={['Direito', 'Esquerdo', 'Ambos']}
+            />
+            <CampoEditavel
+              label="Já fez mamografia antes?"
+              value={(dados as any).jaFezMamografia || 'Não'}
+              onChange={(v) => onChange('jaFezMamografia', v as string)}
+              tipo="simNao"
+            />
+            <CampoEditavel
+              label="Trouxe exames anteriores?"
+              value={(dados as any).trouxeExames || 'Não'}
+              onChange={(v) => onChange('trouxeExames', v as string)}
+              tipo="simNao"
+            />
+            <CampoEditavel
+              label="Tem filhos? Se sim, com quantos anos teve o primeiro filho?"
+              value={(dados as any).filhos || ''}
+              onChange={(v) => onChange('filhos', v as string)}
+            />
+            <CampoEditavel
+              label="Qual a data da última menstruação? (Se não menstrua mais, há quanto tempo?)"
+              value={(dados as any).ultimaMenstruacao || ''}
+              onChange={(v) => onChange('ultimaMenstruacao', v as string)}
+            />
+            <CampoEditavel
+              label="Faz reposição hormonal para menopausa?"
+              value={(dados as any).reposicaoHormonal || 'Não'}
+              onChange={(v) => onChange('reposicaoHormonal', v as string)}
+              tipo="simNao"
+            />
+            <CampoEditavel
+              label="Há casos de câncer de mama ou ovário na família? Quem teve e com que idade?"
+              value={(dados as any).historiaFamiliar || ''}
+              onChange={(v) => onChange('historiaFamiliar', v as string)}
               tipo="textarea"
             />
             <CampoEditavel
-              label="Já foi operado?"
-              value={(dados as any).jaFoiOperado || 'Não'}
-              onChange={(v) => onChange('jaFoiOperado', v as string)}
-              tipo="simNao"
+              label="Já operou a mama? Qual o motivo e há quanto tempo?"
+              value={(dados as any).cirurgiaMama || ''}
+              onChange={(v) => onChange('cirurgiaMama', v as string)}
+              tipo="textarea"
             />
-            {(dados as any).jaFoiOperado === 'Sim' && (
-              <CampoEditavel
-                label="Quais cirurgias e quando?"
-                value={(dados as any).cirurgias || ''}
-                onChange={(v) => onChange('cirurgias', v as string)}
-                tipo="textarea"
-              />
-            )}
             <CampoEditavel
-              label="Fez quimioterapia?"
-              value={(dados as any).quimioterapia || 'Não'}
-              onChange={(v) => onChange('quimioterapia', v as string)}
-              tipo="simNao"
+              label="Já fez biópsia da mama? Em qual lado e qual foi o resultado?"
+              value={(dados as any).biopsia || ''}
+              onChange={(v) => onChange('biopsia', v as string)}
+              tipo="textarea"
             />
-            {(dados as any).quimioterapia === 'Sim' && (
-              <CampoEditavel
-                label="Quando fez quimioterapia?"
-                value={(dados as any).quandoQuimio || ''}
-                onChange={(v) => onChange('quandoQuimio', v as string)}
-              />
-            )}
             <CampoEditavel
-              label="Fez radioterapia?"
-              value={(dados as any).radioterapia || 'Não'}
+              label="Já fez radioterapia da mama? Quando e em qual lado?"
+              value={(dados as any).radioterapia || ''}
               onChange={(v) => onChange('radioterapia', v as string)}
-              tipo="simNao"
-            />
-            {(dados as any).radioterapia === 'Sim' && (
-              <>
-                <CampoEditavel
-                  label="Quando fez radioterapia?"
-                  value={(dados as any).quandoRadio || ''}
-                  onChange={(v) => onChange('quandoRadio', v as string)}
-                />
-                <CampoEditavel
-                  label="Região da radioterapia"
-                  value={(dados as any).regiaoRadio || ''}
-                  onChange={(v) => onChange('regiaoRadio', v as string)}
-                />
-              </>
-            )}
-            <CampoEditavel
-              label="Número de gestações (mulheres)"
-              value={(dados as any).numeroGestacoes || ''}
-              onChange={(v) => onChange('numeroGestacoes', v as string)}
             />
             <CampoEditavel
-              label="Número de cesáreas (mulheres)"
-              value={(dados as any).numeroCesareas || ''}
-              onChange={(v) => onChange('numeroCesareas', v as string)}
+              label="Tem algum outro problema de saúde? Qual?"
+              value={(dados as any).outrosProblemas || ''}
+              onChange={(v) => onChange('outrosProblemas', v as string)}
             />
             <CampoEditavel
-              label="Aborto com curetagem? (mulheres)"
-              value={(dados as any).abortoComCuretagem || ''}
-              onChange={(v) => onChange('abortoComCuretagem', v as string)}
-            />
-            <CampoEditavel
-              label="Data da última menstruação (mulheres)"
-              value={(dados as any).dataUltimaMenstruacao || ''}
-              onChange={(v) => onChange('dataUltimaMenstruacao', v as string)}
-            />
-            <CampoEditavel
-              label="Faz reposição hormonal? (mulheres)"
-              value={(dados as any).reposicaoHormonal || ''}
-              onChange={(v) => onChange('reposicaoHormonal', v as string)}
-            />
-            <CampoEditavel
-              label="Já fez biópsia de próstata? (homens)"
-              value={(dados as any).jaFezBiopsia || ''}
-              onChange={(v) => onChange('jaFezBiopsia', v as string)}
-            />
-            <CampoEditavel
-              label="Resultado Gleason (homens)"
-              value={(dados as any).gleason || ''}
-              onChange={(v) => onChange('gleason', v as string)}
-            />
-            <CampoEditavel
-              label="Valor do PSA (homens)"
-              value={(dados as any).valorPSA || ''}
-              onChange={(v) => onChange('valorPSA', v as string)}
-            />
-            <CampoEditavel
-              label="Fuma?"
-              value={(dados as any).fuma || 'Não'}
-              onChange={(v) => onChange('fuma', v as string)}
-              tipo="simNao"
-            />
-            {(dados as any).fuma === 'Sim' && (
-              <CampoEditavel
-                label="Há quanto tempo fuma?"
-                value={(dados as any).tempoFumando || ''}
-                onChange={(v) => onChange('tempoFumando', v as string)}
-              />
-            )}
-            <CampoEditavel
-              label="Está perdendo peso?"
-              value={(dados as any).estaPerdendoPeso || 'Não'}
-              onChange={(v) => onChange('estaPerdendoPeso', v as string)}
-              tipo="simNao"
-            />
-            {(dados as any).estaPerdendoPeso === 'Sim' && (
-              <CampoEditavel
-                label="Há quanto tempo está perdendo peso?"
-                value={(dados as any).tempoPerdendoPeso || ''}
-                onChange={(v) => onChange('tempoPerdendoPeso', v as string)}
-              />
-            )}
-            <CampoEditavel
-              label="Já fez ressonância ou tomografia?"
-              value={(dados as any).jaFezRMouTC || 'Não'}
-              onChange={(v) => onChange('jaFezRMouTC', v as string)}
-              tipo="simNao"
-            />
-            {(dados as any).jaFezRMouTC === 'Sim' && (
-              <CampoEditavel
-                label="Em qual serviço?"
-                value={(dados as any).ondeRealizou || ''}
-                onChange={(v) => onChange('ondeRealizou', v as string)}
-              />
-            )}
-            <CampoEditavel
-              label="Observações"
+              label="Deseja acrescentar alguma observação?"
               value={(dados as any).observacoes || ''}
               onChange={(v) => onChange('observacoes', v as string)}
               tipo="textarea"
@@ -420,7 +866,6 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
           </>
         );
 
-      // Formulário simplificado para outros tipos
       default:
         return (
           <>
