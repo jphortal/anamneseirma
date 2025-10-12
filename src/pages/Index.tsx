@@ -374,6 +374,8 @@ const Index = () => {
           examType = 'atm';
         } else if (procedure.includes('MAMA') || procedure.includes('MAMOGRAFIA')) {
           examType = 'mama';
+        } else if (procedure.includes('BRACO') || procedure.includes('BRAÇO') || procedure.includes('ANTEBRACO') || procedure.includes('ANTEBRAÇO') || procedure.includes('COXA') || procedure.includes('PERNA') || procedure.includes('FEMUR') || procedure.includes('FÊMUR') || procedure.includes('TIBIA') || procedure.includes('FIBULA') || procedure.includes('FÍBULA')) {
+          examType = 'membros';
         } else if ((modality.includes('RESSONANCIA') || modality.includes('TOMOGRAFIA')) && (procedure.includes('ABDOME') || procedure.includes('TORAX') || procedure.includes('TÓRAX'))) {
           examType = 'abdome';
         }
