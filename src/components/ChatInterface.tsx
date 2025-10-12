@@ -303,8 +303,8 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
         }
       }
 
-      // O webhook retorna a pergunta da IA no campo 'output'
-      const aiResponse = data.output || data.message || data.response || '';
+      // O webhook retorna a pergunta da IA no campo 'output' ou 'text'
+      const aiResponse = data.output || data.message || data.response || data.text || '';
       console.log('Resposta da IA extraída:', aiResponse);
 
       if (aiResponse) {
