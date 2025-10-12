@@ -419,13 +419,22 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
         throw new Error(`Erro ao transcrever áudio (${response.status}): ${errorText}`);
       }
 
-      const contentType = response.headers.get('content-type') || '';
+      // Primeiro obtém o texto da resposta
+      const responseText = await response.text();
+      
+      // Verifica se a resposta não está vazia
+      if (!responseText || responseText.trim() === '') {
+        throw new Error('Resposta vazia do servidor de transcrição');
+      }
+
+      // Tenta fazer parse do JSON
       let data: any;
-      if (contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        try { data = JSON.parse(text); } catch { data = { text }; }
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Erro ao fazer parse do JSON:', parseError);
+        console.log('Resposta recebida:', responseText);
+        throw new Error('Resposta inválida do servidor de transcrição');
       }
 
       const textoTranscrito = data.text || data.output || data.message || data.response || '';
