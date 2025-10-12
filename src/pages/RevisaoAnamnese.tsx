@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Save, FileText, X, ArrowLeft } from 'lucide-react';
+import { Save, FileText, X, ArrowLeft, Sparkles } from 'lucide-react';
 import { TipoFormulario, FormData, AnamneseData } from '@/types/anamnese';
 import { FormularioDinamico } from '@/components/anamnese/FormularioDinamico';
 import { CanvasMarcacao } from '@/components/anamnese/CanvasMarcacao';
@@ -24,6 +24,8 @@ const RevisaoAnamnese = () => {
   );
   const [imagemMarcada, setImagemMarcada] = useState<string>('');
   const [salvando, setSalvando] = useState(false);
+  const [iaInsights, setIaInsights] = useState<string>('');
+  const [carregandoIA, setCarregandoIA] = useState(false);
 
   const handleCampoChange = (campo: string, valor: string | string[]) => {
     setFormData((prev) => ({
@@ -129,6 +131,55 @@ const RevisaoAnamnese = () => {
     }
   };
 
+  const handleGerarInsights = async () => {
+    setCarregandoIA(true);
+    setIaInsights('');
+
+    try {
+      // Coletar todo o texto do formulário
+      const textoCompleto = Object.entries(formData)
+        .filter(([_, valor]) => valor)
+        .map(([campo, valor]) => {
+          const label = campo.charAt(0).toUpperCase() + campo.slice(1).replace(/([A-Z])/g, ' $1');
+          return `${label}: ${Array.isArray(valor) ? valor.join(', ') : valor}`;
+        })
+        .join('\n');
+
+      const payload = {
+        tipo: tipoFormulario,
+        dados: textoCompleto,
+        timestamp: new Date().toISOString(),
+      };
+
+      const response = await fetch('https://jphortal.app.n8n.cloud/webhook-test/c314a3bb-6d2c-48d0-94a2-1287a5ecf858', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao obter insights da IA');
+      }
+
+      const data = await response.json();
+      setIaInsights(data.insights || data.message || JSON.stringify(data));
+
+      toast({
+        title: 'Insights gerados',
+        description: 'Hipóteses diagnósticas obtidas com sucesso!',
+      });
+    } catch (error) {
+      console.error('Erro ao gerar insights:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível gerar os insights da IA',
+        variant: 'destructive',
+      });
+    } finally {
+      setCarregandoIA(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -196,12 +247,40 @@ const RevisaoAnamnese = () => {
             </Card>
           </div>
 
-          {/* Coluna Direita - Canvas */}
-          <div className="lg:col-span-2">
+          {/* Coluna Direita - Canvas e IA Insights */}
+          <div className="lg:col-span-2 space-y-6">
             <CanvasMarcacao
               tipo={tipoFormulario}
               onImagemChange={setImagemMarcada}
             />
+            
+            {/* Botão de IA Insights */}
+            <Button
+              onClick={handleGerarInsights}
+              disabled={carregandoIA}
+              className="w-full"
+              variant="outline"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              {carregandoIA ? 'Gerando Insights...' : 'Gerar Hipóteses Diagnósticas (IA)'}
+            </Button>
+
+            {/* Exibição dos Insights */}
+            {iaInsights && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5" />
+                    IA Insights
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm whitespace-pre-wrap text-muted-foreground">
+                    {iaInsights}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
 
