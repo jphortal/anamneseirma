@@ -1,5 +1,7 @@
 import { TipoFormulario, FormData } from '@/types/anamnese';
 import { CampoEditavel } from './CampoEditavel';
+import { useEffect, useState } from 'react';
+import { Card } from '@/components/ui/card';
 
 interface FormularioDinamicoProps {
   tipo: TipoFormulario;
@@ -8,11 +10,81 @@ interface FormularioDinamicoProps {
 }
 
 export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamicoProps) => {
+  const [clearanceCreatinina, setClearanceCreatinina] = useState<string>('');
+
+  // Cálculo automático do clearance de creatinina usando Cockcroft-Gault
+  useEffect(() => {
+    const idade = parseFloat((dados as any).idade || '0');
+    const peso = parseFloat((dados as any).peso || '0');
+    const creatinina = parseFloat((dados as any).creatinina || '0');
+    const sexo = (dados as any).sexo || '';
+
+    if (idade > 0 && peso > 0 && creatinina > 0 && sexo) {
+      let clcr = ((140 - idade) * peso) / (72 * creatinina);
+      
+      // Ajuste para sexo feminino
+      if (sexo === 'Feminino') {
+        clcr = clcr * 0.85;
+      }
+
+      setClearanceCreatinina(clcr.toFixed(1));
+    } else {
+      setClearanceCreatinina('');
+    }
+  }, [(dados as any).idade, (dados as any).peso, (dados as any).creatinina, (dados as any).sexo]);
+
+  // Componente para os campos clínicos que aparecerão em todos os templates
+  const CamposClinicosComuns = () => (
+    <Card className="p-4 mb-6 bg-primary/5 border-primary/20">
+      <h3 className="text-lg font-semibold mb-4 text-primary">Dados Clínicos do Paciente</h3>
+      <div className="space-y-4">
+        <CampoEditavel
+          label="Nome completo"
+          value={(dados as any).nomeCompleto || ''}
+          onChange={(v) => onChange('nomeCompleto', v as string)}
+        />
+        <CampoEditavel
+          label="Idade (anos)"
+          value={(dados as any).idade || ''}
+          onChange={(v) => onChange('idade', v as string)}
+          tipo="text"
+        />
+        <CampoEditavel
+          label="Sexo ao nascimento"
+          value={(dados as any).sexo || ''}
+          onChange={(v) => onChange('sexo', v as string)}
+          tipo="radio"
+          opcoes={['Masculino', 'Feminino']}
+        />
+        <CampoEditavel
+          label="Peso corporal (kg)"
+          value={(dados as any).peso || ''}
+          onChange={(v) => onChange('peso', v as string)}
+          tipo="text"
+        />
+        <CampoEditavel
+          label="Creatinina sérica (mg/dL)"
+          value={(dados as any).creatinina || ''}
+          onChange={(v) => onChange('creatinina', v as string)}
+          tipo="text"
+        />
+        {clearanceCreatinina && (
+          <div className="p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+            <p className="text-sm font-medium text-green-900 dark:text-green-100">
+              Clearance de creatinina estimado (Cockcroft-Gault): <span className="text-lg font-bold">{clearanceCreatinina} mL/min</span>
+            </p>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+
   const renderFormulario = () => {
     switch (tipo) {
       case 'punho':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o lado afetado?"
               value={(dados as any).lado || ''}
@@ -95,6 +167,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'abdome':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual é o seu trabalho e função?"
               value={(dados as any).trabalho || ''}
@@ -157,6 +230,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'atm':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o seu trabalho e função?"
               value={(dados as any).trabalho || ''}
@@ -217,6 +291,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'cabeca':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o seu trabalho e função?"
               value={(dados as any).trabalho || ''}
@@ -294,6 +369,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'coluna':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Quando começaram os sintomas?"
               value={(dados as any).inicioSintomas || ''}
@@ -367,6 +443,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'cotovelo':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o seu trabalho e função?"
               value={(dados as any).trabalho || ''}
@@ -430,6 +507,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'joelho':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o seu trabalho e função?"
               value={(dados as any).trabalho || ''}
@@ -499,6 +577,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'membros':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o segmento corporal afetado (braço, antebraço, coxa, perna)?"
               value={(dados as any).segmento || ''}
@@ -567,6 +646,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'ombro':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o lado do ombro afetado?"
               value={(dados as any).lado || ''}
@@ -632,6 +712,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'quadril':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o lado afetado?"
               value={(dados as any).lado || ''}
@@ -702,6 +783,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'tornozelo':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o lado afetado?"
               value={(dados as any).lado || ''}
@@ -788,6 +870,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'mama':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Por que está realizando este exame?"
               value={(dados as any).motivoExame || ''}
