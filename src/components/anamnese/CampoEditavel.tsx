@@ -142,15 +142,19 @@ export const CampoEditavel = ({
       return (
         <div className="space-y-2">
           <Label className="text-sm font-medium">{label}</Label>
-          <div 
-            className="cursor-pointer group"
-            onClick={() => setEditando(true)}
-          >
+          <div className="flex gap-2">
             <Input
               value={Array.isArray(value) ? value.join(', ') : value || ''}
               disabled
-              className="flex-1 cursor-pointer transition-colors group-hover:border-primary/50"
+              className="flex-1"
             />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setEditando(true)}
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       );
