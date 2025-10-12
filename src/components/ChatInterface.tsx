@@ -227,18 +227,9 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
   const handleAudioSubmit = async () => {
     if (!audioBlob) return;
 
-    if (!transcriptionUrl) {
-      toast({
-        title: 'Configuração Necessária',
-        description: 'Configure a URL de transcrição nas configurações (ícone ⚙️)',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     setLoading(true);
-    console.log('=== INICIANDO ENVIO DE ÁUDIO ===');
-    console.log('URL de transcrição:', transcriptionUrl);
+    console.log('=== INICIANDO ENVIO DE ÁUDIO DO CHAT ===');
+    console.log('URL do chat:', chatUrl);
     console.log('Tamanho do blob:', audioBlob.size, 'bytes');
     console.log('Tipo do blob:', audioBlob.type);
     
@@ -267,9 +258,9 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
         formData.append('systemPrompt', systemPromptRef.current);
       }
       
-      console.log('FormData criado com dados do paciente, enviando requisição...');
+      console.log('FormData criado com dados do paciente, enviando requisição ao chat...');
 
-      const transcriptionResponse = await fetch(transcriptionUrl, {
+      const transcriptionResponse = await fetch(chatUrl, {
         method: 'POST',
         body: formData,
       });
