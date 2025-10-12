@@ -16,7 +16,7 @@ export const N8nConfigForm = ({ onSave }: N8nConfigFormProps) => {
   const [worklistUrl, setWorklistUrl] = useState(config?.worklistUrl || 'https://jphortal.app.n8n.cloud/webhook/19316184-4be8-4ef7-b0c0-0891d6a97919');
   const [chatUrl, setChatUrl] = useState(config?.chatUrl || 'https://jphortal.app.n8n.cloud/webhook/7ce83803-a02b-4ce9-9732-a07adb3b0127');
   const [reportUrl, setReportUrl] = useState(config?.reportUrl || '');
-  const [transcriptionUrl, setTranscriptionUrl] = useState(config?.transcriptionUrl || 'https://jphortal.app.n8n.cloud/webhook-test/37db0dd4-30eb-4b69-9caa-8ab2ccd254b7');
+  const [transcriptionUrl, setTranscriptionUrl] = useState(config?.transcriptionUrl || 'https://jphortal.app.n8n.cloud/webhook/37db0dd4-30eb-4b69-9caa-8ab2ccd254b7');
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
