@@ -85,7 +85,9 @@ export const CampoEditavel = ({
       }
 
       const textoTranscrito = data.text || data.output || data.message || data.response || '';
-      setValorTemp(textoTranscrito);
+      const valorAtual = typeof valorTemp === 'string' ? valorTemp : '';
+      const novoValor = valorAtual ? `${valorAtual} ${textoTranscrito}` : textoTranscrito;
+      setValorTemp(novoValor);
       clearAudio();
 
       toast({
