@@ -325,13 +325,8 @@ const Index = () => {
         dados.historicoHomens = historicoHomensTexto;
       }
 
-      // Adicionar o markdown completo como observações apenas se não tiver muitas informações extraídas
-      const camposPreenchidos = Object.keys(dados).filter(k => dados[k] && dados[k] !== '').length;
-      if (camposPreenchidos < 5) {
-        dados.observacoes = markdown;
-      } else {
-        dados.observacoes = '';
-      }
+      // Sempre preservar o relatório completo nas observações para garantir que nenhuma informação seja perdida
+      dados.observacoes = markdown;
 
       return dados;
     };
