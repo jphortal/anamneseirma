@@ -35,48 +35,45 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
 
   // Componente para os campos clínicos que aparecerão em todos os templates
   const CamposClinicosComuns = () => (
-    <Card className="p-4 mb-6 bg-primary/5 border-primary/20">
-      <h3 className="text-lg font-semibold mb-4 text-primary">Dados Clínicos do Paciente</h3>
-      <div className="space-y-4">
-        <CampoEditavel
-          label="Nome completo"
-          value={(dados as any).nomeCompleto || ''}
-          onChange={(v) => onChange('nomeCompleto', v as string)}
-        />
-        <CampoEditavel
-          label="Idade (anos)"
-          value={(dados as any).idade || ''}
-          onChange={(v) => onChange('idade', v as string)}
-          tipo="text"
-        />
-        <CampoEditavel
-          label="Sexo ao nascimento"
-          value={(dados as any).sexo || ''}
-          onChange={(v) => onChange('sexo', v as string)}
-          tipo="radio"
-          opcoes={['Masculino', 'Feminino']}
-        />
-        <CampoEditavel
-          label="Peso corporal (kg)"
-          value={(dados as any).peso || ''}
-          onChange={(v) => onChange('peso', v as string)}
-          tipo="text"
-        />
-        <CampoEditavel
-          label="Creatinina sérica (mg/dL)"
-          value={(dados as any).creatinina || ''}
-          onChange={(v) => onChange('creatinina', v as string)}
-          tipo="text"
-        />
-        {clearanceCreatinina && (
-          <div className="p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
-            <p className="text-sm font-medium text-green-900 dark:text-green-100">
-              Clearance de creatinina estimado (Cockcroft-Gault): <span className="text-lg font-bold">{clearanceCreatinina} mL/min</span>
-            </p>
-          </div>
-        )}
-      </div>
-    </Card>
+    <>
+      <CampoEditavel
+        label="Nome completo"
+        value={(dados as any).nomeCompleto || ''}
+        onChange={(v) => onChange('nomeCompleto', v as string)}
+      />
+      <CampoEditavel
+        label="Idade (anos)"
+        value={(dados as any).idade || ''}
+        onChange={(v) => onChange('idade', v as string)}
+        tipo="text"
+      />
+      <CampoEditavel
+        label="Sexo ao nascimento"
+        value={(dados as any).sexo || ''}
+        onChange={(v) => onChange('sexo', v as string)}
+        tipo="radio"
+        opcoes={['Masculino', 'Feminino']}
+      />
+      <CampoEditavel
+        label="Peso corporal (kg)"
+        value={(dados as any).peso || ''}
+        onChange={(v) => onChange('peso', v as string)}
+        tipo="text"
+      />
+      <CampoEditavel
+        label="Creatinina sérica (mg/dL)"
+        value={(dados as any).creatinina || ''}
+        onChange={(v) => onChange('creatinina', v as string)}
+        tipo="text"
+      />
+      {clearanceCreatinina && (
+        <div className="p-3 bg-success/10 border border-success/20 rounded-lg">
+          <p className="text-sm font-medium">
+            Clearance de creatinina estimado (Cockcroft-Gault): <span className="text-lg font-bold">{clearanceCreatinina} mL/min</span>
+          </p>
+        </div>
+      )}
+    </>
   );
 
   const renderFormulario = () => {
