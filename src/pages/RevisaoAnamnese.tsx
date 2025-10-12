@@ -239,7 +239,7 @@ const RevisaoAnamnese = () => {
         timestamp: new Date().toISOString(),
       });
 
-      const response = await fetch(`https://jphortal.app.n8n.cloud/webhook-test/c314a3bb-6d2c-48d0-94a2-1287a5ecf858?${params.toString()}`);
+      const response = await fetch(`https://jphortal.app.n8n.cloud/webhook/c314a3bb-6d2c-48d0-94a2-1287a5ecf858?${params.toString()}`);
 
       if (!response.ok) {
         const errorText = await response.text();
