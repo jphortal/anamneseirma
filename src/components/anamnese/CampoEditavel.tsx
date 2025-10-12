@@ -139,19 +139,32 @@ export const CampoEditavel = ({
 
   const renderCampo = () => {
     if (!editando) {
+      const displayValue = Array.isArray(value) ? value.join(', ') : value || '';
+      const isLongText = displayValue.length > 50;
+      
       return (
         <div className="space-y-2">
           <Label className="text-sm font-medium">{label}</Label>
           <div className="flex gap-2">
-            <Input
-              value={Array.isArray(value) ? value.join(', ') : value || ''}
-              disabled
-              className="flex-1"
-            />
+            {isLongText ? (
+              <Textarea
+                value={displayValue}
+                disabled
+                className="flex-1 min-h-[60px] resize-none"
+                rows={Math.min(Math.ceil(displayValue.length / 50), 10)}
+              />
+            ) : (
+              <Input
+                value={displayValue}
+                disabled
+                className="flex-1"
+              />
+            )}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setEditando(true)}
+              className="self-start"
             >
               <Edit2 className="h-4 w-4" />
             </Button>
