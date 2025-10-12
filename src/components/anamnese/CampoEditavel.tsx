@@ -117,21 +117,22 @@ export const CampoEditavel = ({
   const renderCampo = () => {
     if (!editando) {
       return (
-        <div className="flex items-center justify-between p-3 bg-muted rounded-lg border border-border">
-          <div className="flex-1">
-            <Label className="text-sm text-muted-foreground">{label}</Label>
-            <p className="text-foreground mt-1">
-              {Array.isArray(value) ? value.join(', ') : value || '—'}
-            </p>
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">{label}</Label>
+          <div className="flex gap-2">
+            <Input
+              value={Array.isArray(value) ? value.join(', ') : value || ''}
+              disabled
+              className="flex-1"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setEditando(true)}
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setEditando(true)}
-            className="ml-2"
-          >
-            <Edit2 className="h-4 w-4" />
-          </Button>
         </div>
       );
     }
