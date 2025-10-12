@@ -84,6 +84,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'punho':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o lado afetado?"
               value={(dados as any).lado || ''}
@@ -166,6 +167,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'abdome':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual é o seu trabalho e função?"
               value={(dados as any).trabalho || ''}
@@ -228,6 +230,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'atm':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o seu trabalho e função?"
               value={(dados as any).trabalho || ''}
@@ -288,6 +291,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'cabeca':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o seu trabalho e função?"
               value={(dados as any).trabalho || ''}
@@ -365,6 +369,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'coluna':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Quando começaram os sintomas?"
               value={(dados as any).inicioSintomas || ''}
@@ -438,6 +443,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'cotovelo':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o seu trabalho e função?"
               value={(dados as any).trabalho || ''}
@@ -501,6 +507,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'joelho':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o seu trabalho e função?"
               value={(dados as any).trabalho || ''}
@@ -570,6 +577,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'membros':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o segmento corporal afetado (braço, antebraço, coxa, perna)?"
               value={(dados as any).segmento || ''}
@@ -638,6 +646,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'ombro':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o lado do ombro afetado?"
               value={(dados as any).lado || ''}
@@ -703,6 +712,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'quadril':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o lado afetado?"
               value={(dados as any).lado || ''}
@@ -773,6 +783,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'tornozelo':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o lado afetado?"
               value={(dados as any).lado || ''}
@@ -859,6 +870,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'mama':
         return (
           <>
+            <CamposClinicosComuns />
             <CampoEditavel
               label="Por que está realizando este exame?"
               value={(dados as any).motivoExame || ''}
