@@ -376,4 +376,5 @@ export interface AnamneseData {
   contrasteRetal?: boolean;
   gelEndovaginal?: boolean;
   tecnicoResponsavel?: string;
+  relatorioFinal?: string;
 }
