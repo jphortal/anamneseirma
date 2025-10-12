@@ -155,11 +155,37 @@ const RevisaoAnamnese = () => {
       const response = await fetch(`https://jphortal.app.n8n.cloud/webhook-test/c314a3bb-6d2c-48d0-94a2-1287a5ecf858?${params.toString()}`);
 
       if (!response.ok) {
-        throw new Error('Erro ao obter insights da IA');
+        const errorText = await response.text();
+        console.error('Erro da API:', response.status, errorText);
+        throw new Error(`Erro ao obter insights da IA: ${response.status}`);
       }
 
-      const data = await response.json();
-      setIaInsights(data.output || data.insights || data.message || JSON.stringify(data));
+      const responseText = await response.text();
+      console.log('Resposta recebida:', responseText);
+      
+      let insights = '';
+      try {
+        const data = JSON.parse(responseText);
+        // Extrair o conteúdo do objeto de resposta
+        if (typeof data === 'string') {
+          insights = data;
+        } else if (data.content) {
+          insights = typeof data.content === 'string' ? data.content : JSON.stringify(data.content);
+        } else if (data.output) {
+          insights = typeof data.output === 'string' ? data.output : JSON.stringify(data.output);
+        } else if (data.insights) {
+          insights = typeof data.insights === 'string' ? data.insights : JSON.stringify(data.insights);
+        } else if (data.message) {
+          insights = typeof data.message === 'string' ? data.message : JSON.stringify(data.message);
+        } else {
+          insights = JSON.stringify(data, null, 2);
+        }
+      } catch (parseError) {
+        // Se não for JSON válido, usar o texto bruto
+        insights = responseText;
+      }
+      
+      setIaInsights(insights);
 
       toast({
         title: 'Insights gerados',
