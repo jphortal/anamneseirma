@@ -37,7 +37,8 @@ const Index = () => {
     const parseMarkdownReport = (markdown: string) => {
       const dados: any = {
         nome: selectedPatient?.name || '',
-        paciente: selectedPatient?.name || ''
+        paciente: selectedPatient?.name || '',
+        nomeCompleto: selectedPatient?.name || ''
       };
 
       // Função auxiliar para extrair respostas de perguntas numeradas ou com bullet points
@@ -337,6 +338,7 @@ const Index = () => {
             ...reportData,
             nome: selectedPatient?.name || '',
             paciente: selectedPatient?.name || '',
+            nomeCompleto: selectedPatient?.name || '',
             exame: `${selectedPatient?.modality || ''} - ${selectedPatient?.procedure || ''}`.trim()
           },
           patientId: selectedPatient?.patientId,
@@ -372,6 +374,7 @@ const Index = () => {
           tipo: examType,
           dados: {
             ...dadosParsed,
+            nomeCompleto: selectedPatient?.name || dadosParsed.nome || dadosParsed.paciente || '',
             exame: `${selectedPatient?.modality || ''} - ${selectedPatient?.procedure || ''}`.trim()
           },
           patientId: selectedPatient?.patientId,
