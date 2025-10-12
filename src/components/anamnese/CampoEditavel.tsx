@@ -16,6 +16,7 @@ interface CampoEditavelProps {
   tipo?: 'text' | 'textarea' | 'simNao' | 'radio' | 'checkbox';
   opcoes?: string[];
   obrigatorio?: boolean;
+  permiteTextoAdicional?: boolean;
 }
 
 export const CampoEditavel = ({
@@ -25,21 +26,34 @@ export const CampoEditavel = ({
   tipo = 'text',
   opcoes = [],
   obrigatorio = false,
+  permiteTextoAdicional = true,
 }: CampoEditavelProps) => {
   const [editando, setEditando] = useState(false);
   const [valorTemp, setValorTemp] = useState(value);
+  const [textoAdicional, setTextoAdicional] = useState('');
   const [transcrevendo, setTranscrevendo] = useState(false);
   const { isRecording, audioBlob, startRecording, stopRecording, clearAudio } = useAudioRecorder();
   const { toast } = useToast();
   const { config } = useN8nConfig();
 
   const handleSalvar = () => {
-    onChange(valorTemp);
+    // Se houver texto adicional, concatena com a resposta principal
+    let valorFinal = valorTemp;
+    if (textoAdicional.trim() && tipo !== 'text' && tipo !== 'textarea') {
+      if (typeof valorTemp === 'string') {
+        valorFinal = `${valorTemp} - ${textoAdicional}`;
+      } else if (Array.isArray(valorTemp)) {
+        valorFinal = [...valorTemp, `Obs: ${textoAdicional}`];
+      }
+    }
+    onChange(valorFinal);
     setEditando(false);
+    setTextoAdicional('');
   };
 
   const handleCancelar = () => {
     setValorTemp(value);
+    setTextoAdicional('');
     setEditando(false);
     clearAudio();
   };
@@ -85,9 +99,18 @@ export const CampoEditavel = ({
       }
 
       const textoTranscrito = data.text || data.output || data.message || data.response || '';
-      const valorAtual = typeof valorTemp === 'string' ? valorTemp : '';
-      const novoValor = valorAtual ? `${valorAtual} ${textoTranscrito}` : textoTranscrito;
-      setValorTemp(novoValor);
+      
+      // Adiciona ao campo principal se for text/textarea, ou ao campo adicional para outros tipos
+      if (tipo === 'text' || tipo === 'textarea') {
+        const valorAtual = typeof valorTemp === 'string' ? valorTemp : '';
+        const novoValor = valorAtual ? `${valorAtual} ${textoTranscrito}` : textoTranscrito;
+        setValorTemp(novoValor);
+      } else {
+        const valorAdicionalAtual = textoAdicional;
+        const novoValorAdicional = valorAdicionalAtual ? `${valorAdicionalAtual} ${textoTranscrito}` : textoTranscrito;
+        setTextoAdicional(novoValorAdicional);
+      }
+      
       clearAudio();
 
       toast({
@@ -198,59 +221,167 @@ export const CampoEditavel = ({
           )}
 
           {tipo === 'simNao' && (
-            <RadioGroup
-              value={valorTemp as string}
-              onValueChange={(val) => setValorTemp(val)}
-            >
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Sim" id={`${label}-sim`} />
-                  <Label htmlFor={`${label}-sim`}>Sim</Label>
+            <>
+              <RadioGroup
+                value={valorTemp as string}
+                onValueChange={(val) => setValorTemp(val)}
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Sim" id={`${label}-sim`} />
+                    <Label htmlFor={`${label}-sim`}>Sim</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Não" id={`${label}-nao`} />
+                    <Label htmlFor={`${label}-nao`}>Não</Label>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Não" id={`${label}-nao`} />
-                  <Label htmlFor={`${label}-nao`}>Não</Label>
+              </RadioGroup>
+              {permiteTextoAdicional && (
+                <div className="mt-2 space-y-2">
+                  <Label className="text-xs text-muted-foreground">Observações adicionais</Label>
+                  <div className="flex gap-2">
+                    <Textarea
+                      value={textoAdicional}
+                      onChange={(e) => setTextoAdicional(e.target.value)}
+                      rows={2}
+                      className="w-full"
+                      placeholder="Adicione detalhes se necessário..."
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant={isRecording ? 'destructive' : 'outline'}
+                      onClick={handleMicClick}
+                      disabled={transcrevendo}
+                    >
+                      {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {audioBlob && !isRecording && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleAudioTranscription}
+                      disabled={transcrevendo}
+                      className="w-full"
+                    >
+                      {transcrevendo ? 'Transcrevendo...' : 'Transcrever Áudio'}
+                    </Button>
+                  )}
                 </div>
-              </div>
-            </RadioGroup>
+              )}
+            </>
           )}
 
           {tipo === 'checkbox' && (
-            <div className="space-y-2">
-              {opcoes.map((opcao) => (
-                <div key={opcao} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id={`${label}-${opcao}`}
-                    checked={(valorTemp as string[]).includes(opcao)}
-                    onChange={(e) => {
-                      const arr = valorTemp as string[];
-                      if (e.target.checked) {
-                        setValorTemp([...arr, opcao]);
-                      } else {
-                        setValorTemp(arr.filter((v) => v !== opcao));
-                      }
-                    }}
-                    className="rounded border-input"
-                  />
-                  <Label htmlFor={`${label}-${opcao}`}>{opcao}</Label>
+            <>
+              <div className="space-y-2">
+                {opcoes.map((opcao) => (
+                  <div key={opcao} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`${label}-${opcao}`}
+                      checked={(valorTemp as string[]).includes(opcao)}
+                      onChange={(e) => {
+                        const arr = valorTemp as string[];
+                        if (e.target.checked) {
+                          setValorTemp([...arr, opcao]);
+                        } else {
+                          setValorTemp(arr.filter((v) => v !== opcao));
+                        }
+                      }}
+                      className="rounded border-input"
+                    />
+                    <Label htmlFor={`${label}-${opcao}`}>{opcao}</Label>
+                  </div>
+                ))}
+              </div>
+              {permiteTextoAdicional && (
+                <div className="mt-2 space-y-2">
+                  <Label className="text-xs text-muted-foreground">Observações adicionais</Label>
+                  <div className="flex gap-2">
+                    <Textarea
+                      value={textoAdicional}
+                      onChange={(e) => setTextoAdicional(e.target.value)}
+                      rows={2}
+                      className="w-full"
+                      placeholder="Adicione detalhes se necessário..."
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant={isRecording ? 'destructive' : 'outline'}
+                      onClick={handleMicClick}
+                      disabled={transcrevendo}
+                    >
+                      {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {audioBlob && !isRecording && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleAudioTranscription}
+                      disabled={transcrevendo}
+                      className="w-full"
+                    >
+                      {transcrevendo ? 'Transcrevendo...' : 'Transcrever Áudio'}
+                    </Button>
+                  )}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
 
           {tipo === 'radio' && (
-            <RadioGroup
-              value={valorTemp as string}
-              onValueChange={(val) => setValorTemp(val)}
-            >
-              {opcoes.map((opcao) => (
-                <div key={opcao} className="flex items-center space-x-2">
-                  <RadioGroupItem value={opcao} id={`${label}-${opcao}`} />
-                  <Label htmlFor={`${label}-${opcao}`}>{opcao}</Label>
+            <>
+              <RadioGroup
+                value={valorTemp as string}
+                onValueChange={(val) => setValorTemp(val)}
+              >
+                {opcoes.map((opcao) => (
+                  <div key={opcao} className="flex items-center space-x-2">
+                    <RadioGroupItem value={opcao} id={`${label}-${opcao}`} />
+                    <Label htmlFor={`${label}-${opcao}`}>{opcao}</Label>
+                  </div>
+                ))}
+              </RadioGroup>
+              {permiteTextoAdicional && (
+                <div className="mt-2 space-y-2">
+                  <Label className="text-xs text-muted-foreground">Observações adicionais</Label>
+                  <div className="flex gap-2">
+                    <Textarea
+                      value={textoAdicional}
+                      onChange={(e) => setTextoAdicional(e.target.value)}
+                      rows={2}
+                      className="w-full"
+                      placeholder="Adicione detalhes se necessário..."
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant={isRecording ? 'destructive' : 'outline'}
+                      onClick={handleMicClick}
+                      disabled={transcrevendo}
+                    >
+                      {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {audioBlob && !isRecording && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleAudioTranscription}
+                      disabled={transcrevendo}
+                      className="w-full"
+                    >
+                      {transcrevendo ? 'Transcrevendo...' : 'Transcrever Áudio'}
+                    </Button>
+                  )}
                 </div>
-              ))}
-            </RadioGroup>
+              )}
+            </>
           )}
 
           {audioBlob && !isRecording && tipo === 'text' && (
