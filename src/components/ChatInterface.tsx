@@ -450,7 +450,7 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto h-[600px] flex flex-col">
+    <Card className="w-full max-w-4xl mx-auto h-[600px] flex flex-col bg-card/50 backdrop-blur-sm border-border/50">
       <CardHeader className="border-b">
         <CardTitle className="text-lg">
           Atendimento: {patient.name} (ID: {patient.patientId})
