@@ -354,18 +354,28 @@ const Index = () => {
       if (selectedPatient) {
         const modality = selectedPatient.modality?.toUpperCase() || '';
         const procedure = selectedPatient.procedure?.toUpperCase() || '';
-        if ((modality.includes('RESSONANCIA') || modality.includes('TOMOGRAFIA')) && (procedure.includes('ABDOME') || procedure.includes('TORAX'))) {
-          examType = 'abdome';
+        if (procedure.includes('CRANIO') || procedure.includes('CRÂNIO') || procedure.includes('CABECA') || procedure.includes('CABEÇA') || procedure.includes('ENCEFALO') || procedure.includes('CÉREBRO') || procedure.includes('CEREBRO')) {
+          examType = 'cabeca';
+        } else if (procedure.includes('COLUNA') || procedure.includes('CERVICAL') || procedure.includes('TORACICA') || procedure.includes('LOMBAR') || procedure.includes('SACRAL')) {
+          examType = 'coluna';
         } else if (procedure.includes('JOELHO')) {
           examType = 'joelho';
-        } else if (procedure.includes('PUNHO')) {
+        } else if (procedure.includes('PUNHO') || procedure.includes('MÃO') || procedure.includes('MAO')) {
           examType = 'punho';
         } else if (procedure.includes('OMBRO')) {
           examType = 'ombro';
-        } else if (procedure.includes('TORNOZELO')) {
+        } else if (procedure.includes('TORNOZELO') || procedure.includes('PÉ') || procedure.includes('PE')) {
           examType = 'tornozelo';
-        } else if (procedure.includes('QUADRIL')) {
+        } else if (procedure.includes('QUADRIL') || procedure.includes('BACIA')) {
           examType = 'quadril';
+        } else if (procedure.includes('COTOVELO')) {
+          examType = 'cotovelo';
+        } else if (procedure.includes('ATM') || procedure.includes('PESCOÇO') || procedure.includes('PESCOCO') || procedure.includes('MANDIBULA')) {
+          examType = 'atm';
+        } else if (procedure.includes('MAMA') || procedure.includes('MAMOGRAFIA')) {
+          examType = 'mama';
+        } else if ((modality.includes('RESSONANCIA') || modality.includes('TOMOGRAFIA')) && (procedure.includes('ABDOME') || procedure.includes('TORAX') || procedure.includes('TÓRAX'))) {
+          examType = 'abdome';
         }
       }
       console.log('Dados extraídos do markdown:', dadosParsed);
