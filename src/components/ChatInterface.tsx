@@ -20,6 +20,7 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
   const { isRecording, audioBlob, startRecording, stopRecording, clearAudio } = useAudioRecorder();
@@ -389,6 +390,65 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
     }
   };
 
+  const handleAudioTranscription = async () => {
+    if (!audioBlob) return;
+
+    if (!transcriptionUrl) {
+      toast({
+        title: 'URL não configurada',
+        description: 'Configure a URL de transcrição nas configurações',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setTranscribing(true);
+
+    try {
+      const file = new File([audioBlob], 'audio.webm', { type: audioBlob.type || 'audio/webm' });
+      const formData = new FormData();
+      formData.append('data00', file);
+
+      const response = await fetch(transcriptionUrl, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        throw new Error(`Erro ao transcrever áudio (${response.status}): ${errorText}`);
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      let data: any;
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        try { data = JSON.parse(text); } catch { data = { text }; }
+      }
+
+      const textoTranscrito = data.text || data.output || data.message || data.response || '';
+      const novoTexto = inputText ? `${inputText} ${textoTranscrito}` : textoTranscrito;
+      setInputText(novoTexto);
+      clearAudio();
+
+      toast({
+        title: 'Áudio transcrito',
+        description: 'O texto foi adicionado ao campo de mensagem',
+      });
+    } catch (error) {
+      console.error('Erro na transcrição:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível transcrever o áudio',
+        variant: 'destructive',
+      });
+    } finally {
+      setTranscribing(false);
+    }
+  };
+
   return (
     <Card className="w-full max-w-4xl mx-auto h-[600px] flex flex-col">
       <CardHeader className="border-b">
@@ -457,14 +517,29 @@ export const ChatInterface = ({ patient, chatUrl, transcriptionUrl, onReportGene
           </div>
 
           {audioBlob && (
-            <div className="flex gap-2 items-center p-2 bg-muted rounded-lg">
-              <audio src={URL.createObjectURL(audioBlob)} controls className="flex-1" />
-              <Button onClick={handleAudioSubmit} disabled={loading}>
-                Enviar Áudio
-              </Button>
-              <Button variant="ghost" onClick={clearAudio}>
-                Cancelar
-              </Button>
+            <div className="flex flex-col gap-2 p-2 bg-muted rounded-lg">
+              <audio src={URL.createObjectURL(audioBlob)} controls className="w-full" />
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleAudioTranscription} 
+                  disabled={loading || transcribing}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  {transcribing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  Transcrever para Texto
+                </Button>
+                <Button 
+                  onClick={handleAudioSubmit} 
+                  disabled={loading || transcribing}
+                  className="flex-1"
+                >
+                  Enviar Áudio
+                </Button>
+                <Button variant="ghost" onClick={clearAudio} disabled={loading || transcribing}>
+                  Cancelar
+                </Button>
+              </div>
             </div>
           )}
         </div>
