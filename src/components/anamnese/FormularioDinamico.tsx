@@ -33,6 +33,16 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
     }
   }, [(dados as any).idade, (dados as any).peso, (dados as any).creatinina, (dados as any).sexo]);
 
+  // Componente para o campo de exame que aparecerá em todos os templates
+  const CampoExame = () => (
+    <CampoEditavel
+      label="Exame"
+      value={(dados as any).exame || ''}
+      onChange={(v) => onChange('exame', v as string)}
+      tipo="textarea"
+    />
+  );
+
   // Componente para os campos clínicos que aparecerão em todos os templates
   const CamposClinicosComuns = () => (
     <>
@@ -81,6 +91,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'punho':
         return (
           <>
+            <CampoExame />
             <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o lado afetado?"
@@ -164,6 +175,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'abdome':
         return (
           <>
+            <CampoExame />
             <CamposClinicosComuns />
             <CampoEditavel
               label="Qual é o seu trabalho e função?"
@@ -227,6 +239,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'atm':
         return (
           <>
+            <CampoExame />
             <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o seu trabalho e função?"
@@ -288,6 +301,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'cabeca':
         return (
           <>
+            <CampoExame />
             <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o seu trabalho e função?"
@@ -366,6 +380,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'coluna':
         return (
           <>
+            <CampoExame />
             <CamposClinicosComuns />
             <CampoEditavel
               label="Quando começaram os sintomas?"
@@ -440,6 +455,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'cotovelo':
         return (
           <>
+            <CampoExame />
             <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o seu trabalho e função?"
@@ -504,6 +520,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'joelho':
         return (
           <>
+            <CampoExame />
             <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o seu trabalho e função?"
@@ -574,6 +591,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'membros':
         return (
           <>
+            <CampoExame />
             <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o segmento corporal afetado (braço, antebraço, coxa, perna)?"
@@ -643,6 +661,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'ombro':
         return (
           <>
+            <CampoExame />
             <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o lado do ombro afetado?"
@@ -709,6 +728,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'quadril':
         return (
           <>
+            <CampoExame />
             <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o lado afetado?"
@@ -780,6 +800,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'tornozelo':
         return (
           <>
+            <CampoExame />
             <CamposClinicosComuns />
             <CampoEditavel
               label="Qual o lado afetado?"
@@ -867,6 +888,7 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
       case 'mama':
         return (
           <>
+            <CampoExame />
             <CamposClinicosComuns />
             <CampoEditavel
               label="Por que está realizando este exame?"

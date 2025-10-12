@@ -336,7 +336,8 @@ const Index = () => {
           dados: {
             ...reportData,
             nome: selectedPatient?.name || '',
-            paciente: selectedPatient?.name || ''
+            paciente: selectedPatient?.name || '',
+            exame: `${selectedPatient?.modality || ''} - ${selectedPatient?.procedure || ''}`.trim()
           },
           patientId: selectedPatient?.patientId,
           patientName: selectedPatient?.name
@@ -369,7 +370,10 @@ const Index = () => {
       navigate('/revisao-anamnese', {
         state: {
           tipo: examType,
-          dados: dadosParsed,
+          dados: {
+            ...dadosParsed,
+            exame: `${selectedPatient?.modality || ''} - ${selectedPatient?.procedure || ''}`.trim()
+          },
           patientId: selectedPatient?.patientId,
           patientName: selectedPatient?.name
         }

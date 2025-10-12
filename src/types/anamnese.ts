@@ -16,6 +16,7 @@ export type TipoFormulario =
 
 // Formulário de Punho/Mão
 export interface FormPunho {
+  exame: string;
   paciente: string;
   idade: string;
   contraste: "Sim" | "Não";
@@ -39,6 +40,7 @@ export interface FormPunho {
 
 // Formulário de Abdome
 export interface FormAbdome {
+  exame: string;
   nome: string;
   idade: string;
   tipoExame: string[];
@@ -70,6 +72,7 @@ export interface FormAbdome {
 
 // Formulário de ATM/Pescoço
 export interface FormATM {
+  exame: string;
   nome: string;
   idade: string;
   tipoExame: string;
@@ -96,6 +99,7 @@ export interface FormATM {
 
 // Formulário de Cabeça
 export interface FormCabeca {
+  exame: string;
   paciente: string;
   idade: string;
   contraste: "Sim" | "Não";
@@ -132,6 +136,7 @@ export interface FormCabeca {
 
 // Formulário de Coluna
 export interface FormColuna {
+  exame: string;
   paciente: string;
   idade: string;
   contraste: "Sim" | "Não";
@@ -161,6 +166,7 @@ export interface FormColuna {
 
 // Formulário de Cotovelo
 export interface FormCotovelo {
+  exame: string;
   nome: string;
   idade: string;
   lado: "Direito" | "Esquerdo";
@@ -182,6 +188,7 @@ export interface FormCotovelo {
 
 // Formulário de Joelho
 export interface FormJoelho {
+  exame: string;
   nome: string;
   idade: string;
   lado: "Direito" | "Esquerdo";
@@ -206,6 +213,7 @@ export interface FormJoelho {
 
 // Formulário de Membros
 export interface FormMembros {
+  exame: string;
   regiao: string[];
   lado: string[];
   trabalho: string;
@@ -232,6 +240,7 @@ export interface FormMembros {
 
 // Formulário de Ombro
 export interface FormOmbro {
+  exame: string;
   paciente: string;
   idade: string;
   contraste: "Sim" | "Não";
@@ -257,6 +266,7 @@ export interface FormOmbro {
 
 // Formulário de Quadril
 export interface FormQuadril {
+  exame: string;
   nome: string;
   idade: string;
   lado: "Direito" | "Esquerdo";
@@ -282,6 +292,7 @@ export interface FormQuadril {
 
 // Formulário de Tornozelo
 export interface FormTornozelo {
+  exame: string;
   nome: string;
   idade: string;
   lado: "Direito" | "Esquerdo";
@@ -307,6 +318,7 @@ export interface FormTornozelo {
 
 // Formulário de Mamografia
 export interface FormMama {
+  exame: string;
   motivoExame: string[];
   ladoSintoma: string;
   outrosMotivos: string;
