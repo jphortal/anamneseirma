@@ -8,38 +8,36 @@ import { PatientSelector } from '@/components/PatientSelector';
 import { ChatInterface } from '@/components/ChatInterface';
 import { ReportEditor } from '@/components/ReportEditor';
 import { Patient } from '@/types/medical';
-
 type AppState = 'config' | 'patient-selection' | 'chat' | 'report';
-
 const Index = () => {
   const navigate = useNavigate();
-  const { config, saveConfig, hasConfig } = useN8nConfig();
+  const {
+    config,
+    saveConfig,
+    hasConfig
+  } = useN8nConfig();
   const [appState, setAppState] = useState<AppState>(hasConfig ? 'patient-selection' : 'config');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [generatedReport, setGeneratedReport] = useState<string>('');
-
   const handleConfigSave = (newConfig: typeof config) => {
     saveConfig(newConfig!);
     setAppState('patient-selection');
   };
-
   const handlePatientSelect = (patient: Patient) => {
     setSelectedPatient(patient);
     setAppState('chat');
   };
-
   const handleReportGenerated = (report: string) => {
     console.log('=== RELATÓRIO FINAL RECEBIDO ===');
     console.log('Conteúdo:', report);
     console.log('Paciente:', selectedPatient);
-    
     setGeneratedReport(report);
-    
+
     // Parser inteligente para extrair informações do relatório markdown
     const parseMarkdownReport = (markdown: string) => {
       const dados: any = {
         nome: selectedPatient?.name || '',
-        paciente: selectedPatient?.name || '',
+        paciente: selectedPatient?.name || ''
       };
 
       // Função auxiliar para extrair respostas de perguntas numeradas ou com bullet points
@@ -92,8 +90,7 @@ const Index = () => {
       const ladoResp = extrairResposta(/(?:qual lado|lado)[:?\s]*([^\n]+)/i);
       if (ladoResp) {
         const ladoLower = ladoResp.toLowerCase();
-        if (ladoLower.includes('direito')) dados.lado = 'Direito';
-        else if (ladoLower.includes('esquerdo')) dados.lado = 'Esquerdo';
+        if (ladoLower.includes('direito')) dados.lado = 'Direito';else if (ladoLower.includes('esquerdo')) dados.lado = 'Esquerdo';
       }
 
       // Extrair problemas de saúde / histórico médico
@@ -112,7 +109,6 @@ const Index = () => {
           // Tentar extrair detalhes da cirurgia
           const detalhesMatch = markdown.match(/(?:qual|que tipo|o que foi feito|quais).*?cirurgia[:?\s]*([^\n]+)/i);
           const quandoMatch = markdown.match(/(?:quando|há quanto tempo).*?(?:cirurgia|operado)[:?\s]*([^\n]+)/i);
-          
           let textoCircurgias = '';
           if (detalhesMatch) {
             textoCircurgias = detalhesMatch[1].trim();
@@ -121,11 +117,9 @@ const Index = () => {
           } else {
             textoCircurgias = 'Sim';
           }
-          
           if (quandoMatch) {
             textoCircurgias += ` (há ${quandoMatch[1].trim()})`;
           }
-          
           dados.cirurgias = textoCircurgias;
           dados.oqueFeitoCircurgia = textoCircurgias; // Para templates de articulações
         } else {
@@ -136,7 +130,6 @@ const Index = () => {
       // Extrair quimioterapia e radioterapia (combinar para quimioRadio)
       const quimioResp = extrairResposta(/(?:quimioterapia|quimio)[:?\s]*([^\n]+)/i);
       const radioResp = extrairResposta(/(?:radioterapia|radio)[:?\s]*([^\n]+)/i);
-      
       let quimioRadioTexto = '';
       if (quimioResp) {
         const simNao = detectarSimNao(quimioResp);
@@ -150,7 +143,6 @@ const Index = () => {
           quimioRadioTexto += 'Quimioterapia: Não';
         }
       }
-      
       if (radioResp) {
         const simNao = detectarSimNao(radioResp);
         if (quimioRadioTexto) quimioRadioTexto += '. ';
@@ -164,7 +156,6 @@ const Index = () => {
           quimioRadioTexto += 'Radioterapia: Não';
         }
       }
-      
       if (quimioRadioTexto) {
         dados.quimioRadio = quimioRadioTexto;
       }
@@ -243,13 +234,10 @@ const Index = () => {
       // Extrair informações específicas de joelho
       const subirEscadaResp = extrairResposta(/(?:dói.*?subir|subir.*?escada)[:?\s]*([^\n]+)/i);
       if (subirEscadaResp) dados.doiSubirEscada = detectarSimNao(subirEscadaResp);
-
       const tempoSentadoResp = extrairResposta(/(?:dói.*?sentado|tempo sentado)[:?\s]*([^\n]+)/i);
       if (tempoSentadoResp) dados.doiTempoSentado = detectarSimNao(tempoSentadoResp);
-
       const falsearResp = extrairResposta(/(?:falseia|instável)[:?\s]*([^\n]+)/i);
       if (falsearResp) dados.joelhoFalseia = detectarSimNao(falsearResp);
-
       const travaResp = extrairResposta(/(?:trava|bloqueia)[:?\s]*([^\n]+)/i);
       if (travaResp) dados.joelhoTrava = detectarSimNao(travaResp);
 
@@ -279,7 +267,6 @@ const Index = () => {
       const cesareasResp = extrairResposta(/(?:cesáreas|cesareas)[:?\s]*([^\n]+)/i);
       const curetagemsResp = extrairResposta(/(?:abortos|curetagem)[:?\s]*([^\n]+)/i);
       const reposicaoResp = extrairResposta(/(?:reposição hormonal|hormônio)[:?\s]*([^\n]+)/i);
-      
       let historicoMulheresTexto = '';
       if (gestacoesResp) {
         historicoMulheresTexto += `Gestações: ${gestacoesResp}`;
@@ -308,7 +295,6 @@ const Index = () => {
       const biopsiaResp = extrairResposta(/(?:biópsia.*?próstata|biopsia.*?prostata)[:?\s]*([^\n]+)/i);
       const gleasonResp = extrairResposta(/(?:gleason)[:?\s]*([^\n]+)/i);
       const psaResp = extrairResposta(/(?:PSA)[:?\s]*([^\n]+)/i);
-      
       let historicoHomensTexto = '';
       if (biopsiaResp) {
         historicoHomensTexto += `Biópsia: ${biopsiaResp}`;
@@ -327,29 +313,23 @@ const Index = () => {
 
       // Sempre preservar o relatório completo nas observações para garantir que nenhuma informação seja perdida
       dados.observacoes = markdown;
-
       return dados;
     };
-    
+
     // Try to parse JSON report first
     try {
       const reportData = JSON.parse(report);
       console.log('JSON parseado com sucesso:', reportData);
-      
       let examType: 'punho' | 'joelho' | 'abdome' | 'atm' | 'cabeca' | 'coluna' | 'cotovelo' | 'membros' | 'ombro' | 'quadril' | 'tornozelo' | 'mama' = 'abdome';
-      
       if (reportData.tipo) {
         examType = reportData.tipo;
       } else if (selectedPatient) {
         const modality = selectedPatient.modality?.toUpperCase() || '';
         const procedure = selectedPatient.procedure?.toUpperCase() || '';
-        
-        if ((modality.includes('RESSONANCIA') || modality.includes('TOMOGRAFIA')) && 
-            (procedure.includes('ABDOME') || procedure.includes('TORAX'))) {
+        if ((modality.includes('RESSONANCIA') || modality.includes('TOMOGRAFIA')) && (procedure.includes('ABDOME') || procedure.includes('TORAX'))) {
           examType = 'abdome';
         }
       }
-      
       navigate('/revisao-anamnese', {
         state: {
           tipo: examType,
@@ -362,21 +342,16 @@ const Index = () => {
           patientName: selectedPatient?.name
         }
       });
-      
     } catch (error) {
       console.log('Não é JSON, fazendo parse do markdown...');
-      
+
       // Parse markdown and extract data
       const dadosParsed = parseMarkdownReport(report);
-      
       let examType: 'punho' | 'joelho' | 'abdome' | 'atm' | 'cabeca' | 'coluna' | 'cotovelo' | 'membros' | 'ombro' | 'quadril' | 'tornozelo' | 'mama' = 'abdome';
-      
       if (selectedPatient) {
         const modality = selectedPatient.modality?.toUpperCase() || '';
         const procedure = selectedPatient.procedure?.toUpperCase() || '';
-        
-        if ((modality.includes('RESSONANCIA') || modality.includes('TOMOGRAFIA')) && 
-            (procedure.includes('ABDOME') || procedure.includes('TORAX'))) {
+        if ((modality.includes('RESSONANCIA') || modality.includes('TOMOGRAFIA')) && (procedure.includes('ABDOME') || procedure.includes('TORAX'))) {
           examType = 'abdome';
         } else if (procedure.includes('JOELHO')) {
           examType = 'joelho';
@@ -390,9 +365,7 @@ const Index = () => {
           examType = 'quadril';
         }
       }
-      
       console.log('Dados extraídos do markdown:', dadosParsed);
-      
       navigate('/revisao-anamnese', {
         state: {
           tipo: examType,
@@ -403,89 +376,49 @@ const Index = () => {
       });
     }
   };
-
   const handleReportSubmitted = () => {
     setSelectedPatient(null);
     setGeneratedReport('');
     setAppState('patient-selection');
   };
-
   const handleBackToPatientSelection = () => {
     setSelectedPatient(null);
     setGeneratedReport('');
     setAppState('patient-selection');
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background p-4 md:p-8">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background p-4 md:p-8 bg-green-600">
       <div className="mx-auto max-w-7xl">
         <header className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Sistema de Laudos Médicos</h1>
+            <h1 className="text-3xl font-bold text-foreground">Instituto de Radiologia Manoel de Abreu - IRMA</h1>
             <p className="text-muted-foreground">Interface conversacional com IA</p>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/revisao-anamnese')}
-            >
+            <Button variant="outline" onClick={() => navigate('/revisao-anamnese')}>
               <ClipboardList className="h-5 w-5 mr-2" />
               Revisão de Anamnese
             </Button>
-            {hasConfig && appState !== 'config' && (
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setAppState('config')}
-              >
+            {hasConfig && appState !== 'config' && <Button variant="outline" size="icon" onClick={() => setAppState('config')}>
                 <Settings className="h-5 w-5" />
-              </Button>
-            )}
+              </Button>}
           </div>
         </header>
 
         <main>
-          {appState === 'config' && (
-            <N8nConfigForm onSave={handleConfigSave} />
-          )}
+          {appState === 'config' && <N8nConfigForm onSave={handleConfigSave} />}
 
-          {appState === 'patient-selection' && config && (
-            <PatientSelector
-              worklistUrl={config.worklistUrl}
-              onSelectPatient={handlePatientSelect}
-            />
-          )}
+          {appState === 'patient-selection' && config && <PatientSelector worklistUrl={config.worklistUrl} onSelectPatient={handlePatientSelect} />}
 
-          {appState === 'chat' && selectedPatient && config && (
-            <div className="space-y-4">
-              <Button
-                variant="outline"
-                onClick={handleBackToPatientSelection}
-              >
+          {appState === 'chat' && selectedPatient && config && <div className="space-y-4">
+              <Button variant="outline" onClick={handleBackToPatientSelection}>
                 ← Voltar para Seleção
               </Button>
-              <ChatInterface
-                patient={selectedPatient}
-                chatUrl={config.chatUrl}
-                transcriptionUrl={config.transcriptionUrl}
-                onReportGenerated={handleReportGenerated}
-              />
-            </div>
-          )}
+              <ChatInterface patient={selectedPatient} chatUrl={config.chatUrl} transcriptionUrl={config.transcriptionUrl} onReportGenerated={handleReportGenerated} />
+            </div>}
 
-          {appState === 'report' && selectedPatient && config && (
-            <ReportEditor
-              patient={selectedPatient}
-              initialReport={generatedReport}
-              reportUrl={config.reportUrl}
-              onSubmitted={handleReportSubmitted}
-              onCancel={() => setAppState('chat')}
-            />
-          )}
+          {appState === 'report' && selectedPatient && config && <ReportEditor patient={selectedPatient} initialReport={generatedReport} reportUrl={config.reportUrl} onSubmitted={handleReportSubmitted} onCancel={() => setAppState('chat')} />}
         </main>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
