@@ -103,73 +103,117 @@ const Index = () => {
       }
       if (problemaSaude) dados.problemaSaude = problemaSaude;
 
-      // Extrair cirurgias
+      // Extrair cirurgias (campo: cirurgias)
       const cirurgiaResp = extrairResposta(/(?:já foi operado|cirurgia|operação|operacao)[:?\s]*([^\n]+)/i);
       if (cirurgiaResp) {
-        dados.jaFoiOperado = detectarSimNao(cirurgiaResp);
-        if (dados.jaFoiOperado === 'Sim') {
+        const simNao = detectarSimNao(cirurgiaResp);
+        dados.jaFoiOperado = simNao; // Mantém para compatibilidade com outros templates
+        if (simNao === 'Sim') {
           // Tentar extrair detalhes da cirurgia
-          const detalhesMatch = markdown.match(/(?:qual|que tipo|o que foi feito).*?cirurgia[:?\s]*([^\n]+)/i);
+          const detalhesMatch = markdown.match(/(?:qual|que tipo|o que foi feito|quais).*?cirurgia[:?\s]*([^\n]+)/i);
+          const quandoMatch = markdown.match(/(?:quando|há quanto tempo).*?(?:cirurgia|operado)[:?\s]*([^\n]+)/i);
+          
+          let textoCircurgias = '';
           if (detalhesMatch) {
-            dados.cirurgias = detalhesMatch[1].trim();
-            dados.oqueFeitoCircurgia = detalhesMatch[1].trim();
+            textoCircurgias = detalhesMatch[1].trim();
           } else if (!cirurgiaResp.toLowerCase().match(/^(sim|yes)$/)) {
-            dados.cirurgias = cirurgiaResp;
-            dados.oqueFeitoCircurgia = cirurgiaResp;
+            textoCircurgias = cirurgiaResp;
+          } else {
+            textoCircurgias = 'Sim';
           }
+          
+          if (quandoMatch) {
+            textoCircurgias += ` (há ${quandoMatch[1].trim()})`;
+          }
+          
+          dados.cirurgias = textoCircurgias;
+          dados.oqueFeitoCircurgia = textoCircurgias; // Para templates de articulações
+        } else {
+          dados.cirurgias = 'Não';
         }
       }
 
-      // Extrair quimioterapia
+      // Extrair quimioterapia e radioterapia (combinar para quimioRadio)
       const quimioResp = extrairResposta(/(?:quimioterapia|quimio)[:?\s]*([^\n]+)/i);
-      if (quimioResp) {
-        dados.quimioterapia = detectarSimNao(quimioResp);
-        if (dados.quimioterapia === 'Sim') {
-          const quandoMatch = markdown.match(/quando.*?quimio[:?\s]*([^\n]+)/i);
-          if (quandoMatch) dados.quandoQuimio = quandoMatch[1].trim();
-        }
-      }
-
-      // Extrair radioterapia
       const radioResp = extrairResposta(/(?:radioterapia|radio)[:?\s]*([^\n]+)/i);
-      if (radioResp) {
-        dados.radioterapia = detectarSimNao(radioResp);
-        if (dados.radioterapia === 'Sim') {
-          const quandoMatch = markdown.match(/quando.*?radio[:?\s]*([^\n]+)/i);
-          if (quandoMatch) dados.quandoRadio = quandoMatch[1].trim();
-          const regiaoMatch = markdown.match(/(?:região|regiao|local).*?radio[:?\s]*([^\n]+)/i);
-          if (regiaoMatch) dados.regiaoRadio = regiaoMatch[1].trim();
+      
+      let quimioRadioTexto = '';
+      if (quimioResp) {
+        const simNao = detectarSimNao(quimioResp);
+        if (simNao === 'Sim') {
+          const quandoMatch = markdown.match(/quando.*?quimio[:?\s]*([^\n]+)/i);
+          const regiaoMatch = markdown.match(/(?:região|regiao).*?quimio[:?\s]*([^\n]+)/i);
+          quimioRadioTexto += 'Quimioterapia: Sim';
+          if (quandoMatch) quimioRadioTexto += ` (quando: ${quandoMatch[1].trim()})`;
+          if (regiaoMatch) quimioRadioTexto += ` (região: ${regiaoMatch[1].trim()})`;
+        } else {
+          quimioRadioTexto += 'Quimioterapia: Não';
         }
       }
+      
+      if (radioResp) {
+        const simNao = detectarSimNao(radioResp);
+        if (quimioRadioTexto) quimioRadioTexto += '. ';
+        if (simNao === 'Sim') {
+          const quandoMatch = markdown.match(/quando.*?radio[:?\s]*([^\n]+)/i);
+          const regiaoMatch = markdown.match(/(?:região|regiao|local).*?radio[:?\s]*([^\n]+)/i);
+          quimioRadioTexto += 'Radioterapia: Sim';
+          if (quandoMatch) quimioRadioTexto += ` (quando: ${quandoMatch[1].trim()})`;
+          if (regiaoMatch) quimioRadioTexto += ` (região: ${regiaoMatch[1].trim()})`;
+        } else {
+          quimioRadioTexto += 'Radioterapia: Não';
+        }
+      }
+      
+      if (quimioRadioTexto) {
+        dados.quimioRadio = quimioRadioTexto;
+      }
 
-      // Extrair tabagismo
+      // Extrair tabagismo (campo: fuma)
       const fumaResp = extrairResposta(/(?:fuma|cigarro|tabaco)[:?\s]*([^\n]+)/i);
       if (fumaResp) {
-        dados.fuma = detectarSimNao(fumaResp);
-        if (dados.fuma === 'Sim') {
+        const simNao = detectarSimNao(fumaResp);
+        if (simNao === 'Sim') {
           const tempoMatch = markdown.match(/(?:quanto tempo|há quanto tempo).*?fum[:?\s]*([^\n]+)/i);
-          if (tempoMatch) dados.tempoFumando = tempoMatch[1].trim();
+          if (tempoMatch) {
+            dados.fuma = `Sim, há ${tempoMatch[1].trim()}`;
+          } else {
+            dados.fuma = fumaResp;
+          }
+        } else {
+          dados.fuma = 'Não';
         }
       }
 
-      // Extrair perda de peso
+      // Extrair perda de peso (campo: perdendoPeso)
       const pesoResp = extrairResposta(/(?:perd.*?peso|emagre)[:?\s]*([^\n]+)/i);
       if (pesoResp) {
-        dados.estaPerdendoPeso = detectarSimNao(pesoResp);
-        if (dados.estaPerdendoPeso === 'Sim') {
+        const simNao = detectarSimNao(pesoResp);
+        if (simNao === 'Sim') {
           const tempoMatch = markdown.match(/(?:quanto tempo|há quanto).*?peso[:?\s]*([^\n]+)/i);
-          if (tempoMatch) dados.tempoPerdendoPeso = tempoMatch[1].trim();
+          if (tempoMatch) {
+            dados.perdendoPeso = `Sim, há ${tempoMatch[1].trim()}`;
+          } else {
+            dados.perdendoPeso = pesoResp;
+          }
+        } else {
+          dados.perdendoPeso = 'Não';
         }
       }
 
-      // Extrair exames anteriores
+      // Extrair exames anteriores (campo: examesAnteriores)
       const examesResp = extrairResposta(/(?:já fez.*?(?:ressonância|tomografia|exame)|exames anteriores)[:?\s]*([^\n]+)/i);
       if (examesResp) {
-        dados.jaFezRMouTC = detectarSimNao(examesResp);
-        dados.jaFezTCouRM = detectarSimNao(examesResp);
-        if (dados.jaFezRMouTC === 'Sim') {
+        const simNao = detectarSimNao(examesResp);
+        if (simNao === 'Sim') {
           const ondeMatch = markdown.match(/(?:onde|qual serviço|em que lugar)[:?\s]*([^\n]+)/i);
-          if (ondeMatch) dados.ondeRealizou = ondeMatch[1].trim();
+          if (ondeMatch) {
+            dados.examesAnteriores = `Sim, em ${ondeMatch[1].trim()}`;
+          } else {
+            dados.examesAnteriores = examesResp;
+          }
+        } else {
+          dados.examesAnteriores = 'Não';
         }
       }
 
@@ -229,25 +273,57 @@ const Index = () => {
         }
       }
 
-      // Informações ginecológicas
-      const menstruacaoResp = extrairResposta(/(?:última menstruação|data.*?menstruação)[:?\s]*([^\n]+)/i);
-      if (menstruacaoResp) dados.dataUltimaMenstruacao = menstruacaoResp;
-
-      const gestacoesResp = extrairResposta(/(?:número.*?gestações|quantas.*?gravidez)[:?\s]*([^\n]+)/i);
-      if (gestacoesResp) dados.numeroGestacoes = gestacoesResp;
-
+      // Informações ginecológicas (combinar em historicoMulheres)
+      const menstruacaoResp = extrairResposta(/(?:última menstruação|data.*?menstruação|DUM)[:?\s]*([^\n]+)/i);
+      const gestacoesResp = extrairResposta(/(?:número.*?gestações|quantas.*?gravidez|gestações)[:?\s]*([^\n]+)/i);
       const cesareasResp = extrairResposta(/(?:cesáreas|cesareas)[:?\s]*([^\n]+)/i);
-      if (cesareasResp) dados.numeroCesareas = cesareasResp;
+      const curetagemsResp = extrairResposta(/(?:abortos|curetagem)[:?\s]*([^\n]+)/i);
+      const reposicaoResp = extrairResposta(/(?:reposição hormonal|hormônio)[:?\s]*([^\n]+)/i);
+      
+      let historicoMulheresTexto = '';
+      if (gestacoesResp) {
+        historicoMulheresTexto += `Gestações: ${gestacoesResp}`;
+      }
+      if (cesareasResp) {
+        if (historicoMulheresTexto) historicoMulheresTexto += '. ';
+        historicoMulheresTexto += `Cesáreas: ${cesareasResp}`;
+      }
+      if (curetagemsResp) {
+        if (historicoMulheresTexto) historicoMulheresTexto += '. ';
+        historicoMulheresTexto += `Abortos/Curetagens: ${curetagemsResp}`;
+      }
+      if (menstruacaoResp) {
+        if (historicoMulheresTexto) historicoMulheresTexto += '. ';
+        historicoMulheresTexto += `DUM: ${menstruacaoResp}`;
+      }
+      if (reposicaoResp) {
+        if (historicoMulheresTexto) historicoMulheresTexto += '. ';
+        historicoMulheresTexto += `Reposição hormonal: ${reposicaoResp}`;
+      }
+      if (historicoMulheresTexto) {
+        dados.historicoMulheres = historicoMulheresTexto;
+      }
 
-      // Informações de próstata
-      const biopsiaResp = extrairResposta(/(?:biópsia|biopsia)[:?\s]*([^\n]+)/i);
-      if (biopsiaResp) dados.jaFezBiopsia = biopsiaResp;
-
+      // Informações de próstata (combinar em historicoHomens)
+      const biopsiaResp = extrairResposta(/(?:biópsia.*?próstata|biopsia.*?prostata)[:?\s]*([^\n]+)/i);
       const gleasonResp = extrairResposta(/(?:gleason)[:?\s]*([^\n]+)/i);
-      if (gleasonResp) dados.gleason = gleasonResp;
-
       const psaResp = extrairResposta(/(?:PSA)[:?\s]*([^\n]+)/i);
-      if (psaResp) dados.valorPSA = psaResp;
+      
+      let historicoHomensTexto = '';
+      if (biopsiaResp) {
+        historicoHomensTexto += `Biópsia: ${biopsiaResp}`;
+      }
+      if (gleasonResp) {
+        if (historicoHomensTexto) historicoHomensTexto += '. ';
+        historicoHomensTexto += `Gleason: ${gleasonResp}`;
+      }
+      if (psaResp) {
+        if (historicoHomensTexto) historicoHomensTexto += '. ';
+        historicoHomensTexto += `PSA: ${psaResp}`;
+      }
+      if (historicoHomensTexto) {
+        dados.historicoHomens = historicoHomensTexto;
+      }
 
       // Adicionar o markdown completo como observações apenas se não tiver muitas informações extraídas
       const camposPreenchidos = Object.keys(dados).filter(k => dados[k] && dados[k] !== '').length;
