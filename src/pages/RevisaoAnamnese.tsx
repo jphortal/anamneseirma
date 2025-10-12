@@ -145,24 +145,21 @@ const RevisaoAnamnese = () => {
         })
         .join('\n');
 
-      const payload = {
+      // Usar GET com query parameters
+      const params = new URLSearchParams({
         tipo: tipoFormulario,
         dados: textoCompleto,
         timestamp: new Date().toISOString(),
-      };
-
-      const response = await fetch('https://jphortal.app.n8n.cloud/webhook-test/c314a3bb-6d2c-48d0-94a2-1287a5ecf858', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
       });
+
+      const response = await fetch(`https://jphortal.app.n8n.cloud/webhook-test/c314a3bb-6d2c-48d0-94a2-1287a5ecf858?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error('Erro ao obter insights da IA');
       }
 
       const data = await response.json();
-      setIaInsights(data.insights || data.message || JSON.stringify(data));
+      setIaInsights(data.output || data.insights || data.message || JSON.stringify(data));
 
       toast({
         title: 'Insights gerados',
