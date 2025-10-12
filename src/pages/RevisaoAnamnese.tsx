@@ -9,7 +9,6 @@ import { FormularioDinamico } from '@/components/anamnese/FormularioDinamico';
 import { CanvasMarcacao } from '@/components/anamnese/CanvasMarcacao';
 import { InfoTecnica } from '@/components/anamnese/InfoTecnica';
 import { Label } from '@/components/ui/label';
-import { useN8nConfig } from '@/hooks/useN8nConfig';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -17,7 +16,6 @@ const RevisaoAnamnese = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { config } = useN8nConfig();
 
   const estadoInicial = location.state || {};
   const contentRef = useRef<HTMLDivElement>(null);
@@ -40,7 +38,6 @@ const RevisaoAnamnese = () => {
   const [contrasteRetal, setContrasteRetal] = useState(false);
   const [gelEndovaginal, setGelEndovaginal] = useState(false);
   const [tecnicoResponsavel, setTecnicoResponsavel] = useState('');
-  const [relatorioFinal, setRelatorioFinal] = useState('');
 
   const handleCampoChange = (campo: string, valor: string | string[]) => {
     setFormData((prev) => ({
@@ -65,9 +62,6 @@ const RevisaoAnamnese = () => {
         break;
       case 'tecnicoResponsavel':
         setTecnicoResponsavel(valor as string);
-        break;
-      case 'relatorioFinal':
-        setRelatorioFinal(valor as string);
         break;
     }
   };
@@ -129,7 +123,6 @@ const RevisaoAnamnese = () => {
         contrasteRetal,
         gelEndovaginal,
         tecnicoResponsavel,
-        relatorioFinal,
       };
 
       // Aqui você pode enviar para o webhook N8N
@@ -330,8 +323,6 @@ const RevisaoAnamnese = () => {
               contrasteRetal={contrasteRetal}
               gelEndovaginal={gelEndovaginal}
               tecnicoResponsavel={tecnicoResponsavel}
-              relatorioFinal={relatorioFinal}
-              transcriptionUrl={config?.transcriptionUrl || ''}
               onChange={handleInfoTecnicaChange}
             />
           </div>
