@@ -256,6 +256,9 @@ const RevisaoAnamnese = () => {
         // Extrair o conteúdo do objeto de resposta
         if (typeof data === 'string') {
           insights = data;
+        } else if (data.message?.content) {
+          // Resposta do n8n com formato {message: {content: "..."}}
+          insights = data.message.content;
         } else if (data.content) {
           insights = typeof data.content === 'string' ? data.content : JSON.stringify(data.content);
         } else if (data.output) {
