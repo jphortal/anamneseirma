@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,8 @@ import { TipoFormulario, FormData, AnamneseData } from '@/types/anamnese';
 import { FormularioDinamico } from '@/components/anamnese/FormularioDinamico';
 import { CanvasMarcacao } from '@/components/anamnese/CanvasMarcacao';
 import { Label } from '@/components/ui/label';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const RevisaoAnamnese = () => {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ const RevisaoAnamnese = () => {
   const { toast } = useToast();
 
   const estadoInicial = location.state || {};
+  const contentRef = useRef<HTMLDivElement>(null);
   
   const [tipoFormulario, setTipoFormulario] = useState<TipoFormulario>(
     estadoInicial.tipo || 'punho'
@@ -26,6 +29,7 @@ const RevisaoAnamnese = () => {
   const [salvando, setSalvando] = useState(false);
   const [iaInsights, setIaInsights] = useState<string>('');
   const [carregandoIA, setCarregandoIA] = useState(false);
+  const [exportandoPDF, setExportandoPDF] = useState(false);
 
   const handleCampoChange = (campo: string, valor: string | string[]) => {
     setFormData((prev) => ({
@@ -118,11 +122,61 @@ const RevisaoAnamnese = () => {
     }
   };
 
-  const handleExportarPDF = () => {
-    toast({
-      title: 'Em desenvolvimento',
-      description: 'Funcionalidade de exportar PDF será implementada em breve',
-    });
+  const handleExportarPDF = async () => {
+    if (!contentRef.current) return;
+    
+    setExportandoPDF(true);
+    
+    try {
+      const canvas = await html2canvas(contentRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      
+      // Add first page
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      // Add additional pages if needed
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      const nomeArquivo = `Anamnese_${tipoFormulario}_${(formData as any).nome || (formData as any).paciente || 'paciente'}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
+      pdf.save(nomeArquivo);
+      
+      toast({
+        title: 'Sucesso',
+        description: 'PDF exportado com sucesso!',
+      });
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível exportar o PDF',
+        variant: 'destructive',
+      });
+    } finally {
+      setExportandoPDF(false);
+    }
   };
 
   const handleCancelar = () => {
@@ -204,7 +258,7 @@ const RevisaoAnamnese = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen bg-background p-4 md:p-8" ref={contentRef}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -321,10 +375,10 @@ const RevisaoAnamnese = () => {
           <Button
             onClick={handleExportarPDF}
             variant="outline"
-            disabled={salvando}
+            disabled={salvando || exportandoPDF}
           >
             <FileText className="h-4 w-4 mr-2" />
-            Exportar PDF
+            {exportandoPDF ? 'Exportando...' : 'Exportar PDF'}
           </Button>
 
           <Button
