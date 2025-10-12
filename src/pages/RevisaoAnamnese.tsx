@@ -1,16 +1,13 @@
-import { useState, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { Save, FileText, X, ArrowLeft, Sparkles } from 'lucide-react';
-import { TipoFormulario, FormData, AnamneseData } from '@/types/anamnese';
-import { FormularioDinamico } from '@/components/anamnese/FormularioDinamico';
-import { CanvasMarcacao } from '@/components/anamnese/CanvasMarcacao';
-import { InfoTecnica } from '@/components/anamnese/InfoTecnica';
-import { Label } from '@/components/ui/label';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Save, FileText, X, ArrowLeft, Sparkles } from "lucide-react";
+import { TipoFormulario, FormData, AnamneseData } from "@/types/anamnese";
+import { FormularioDinamico } from "@/components/anamnese/FormularioDinamico";
+import { CanvasMarcacao } from "@/components/anamnese/CanvasMarcacao";
+import { Label } from "@/components/ui/label";
 
 const RevisaoAnamnese = () => {
   const navigate = useNavigate();
@@ -18,26 +15,13 @@ const RevisaoAnamnese = () => {
   const { toast } = useToast();
 
   const estadoInicial = location.state || {};
-  const contentRef = useRef<HTMLDivElement>(null);
-  
-  const [tipoFormulario, setTipoFormulario] = useState<TipoFormulario>(
-    estadoInicial.tipo || 'punho'
-  );
-  const [formData, setFormData] = useState<Partial<FormData>>(
-    estadoInicial.dados || {}
-  );
-  const [imagemMarcada, setImagemMarcada] = useState<string>('');
+
+  const [tipoFormulario, setTipoFormulario] = useState<TipoFormulario>(estadoInicial.tipo || "punho");
+  const [formData, setFormData] = useState<Partial<FormData>>(estadoInicial.dados || {});
+  const [imagemMarcada, setImagemMarcada] = useState<string>("");
   const [salvando, setSalvando] = useState(false);
-  const [iaInsights, setIaInsights] = useState<string>('');
+  const [iaInsights, setIaInsights] = useState<string>("");
   const [carregandoIA, setCarregandoIA] = useState(false);
-  const [exportandoPDF, setExportandoPDF] = useState(false);
-  
-  // Informações técnicas
-  const [contrasteEndovenoso, setContrasteEndovenoso] = useState(false);
-  const [contrasteOral, setContrasteOral] = useState(false);
-  const [contrasteRetal, setContrasteRetal] = useState(false);
-  const [gelEndovaginal, setGelEndovaginal] = useState(false);
-  const [tecnicoResponsavel, setTecnicoResponsavel] = useState('');
 
   const handleCampoChange = (campo: string, valor: string | string[]) => {
     setFormData((prev) => ({
@@ -46,40 +30,20 @@ const RevisaoAnamnese = () => {
     }));
   };
 
-  const handleInfoTecnicaChange = (campo: string, valor: boolean | string) => {
-    switch (campo) {
-      case 'contrasteEndovenoso':
-        setContrasteEndovenoso(valor as boolean);
-        break;
-      case 'contrasteOral':
-        setContrasteOral(valor as boolean);
-        break;
-      case 'contrasteRetal':
-        setContrasteRetal(valor as boolean);
-        break;
-      case 'gelEndovaginal':
-        setGelEndovaginal(valor as boolean);
-        break;
-      case 'tecnicoResponsavel':
-        setTecnicoResponsavel(valor as string);
-        break;
-    }
-  };
-
   const validarCamposObrigatorios = (): { valido: boolean; faltando: string[] } => {
     const camposObrigatorios: Record<string, string[]> = {
-      punho: ['paciente', 'idade'],
-      abdome: ['nome', 'idade'],
-      atm: ['nome', 'idade'],
-      cabeca: ['paciente', 'idade'],
-      coluna: ['paciente', 'idade'],
-      cotovelo: ['nome', 'idade'],
-      joelho: ['nome', 'idade'],
-      membros: ['trabalho'],
-      ombro: ['paciente', 'idade'],
-      quadril: ['nome', 'idade'],
-      tornozelo: ['nome', 'idade'],
-      mama: ['motivoExame'],
+      punho: ["paciente", "idade"],
+      abdome: ["nome", "idade"],
+      atm: ["nome", "idade"],
+      cabeca: ["paciente", "idade"],
+      coluna: ["paciente", "idade"],
+      cotovelo: ["nome", "idade"],
+      joelho: ["nome", "idade"],
+      membros: ["trabalho"],
+      ombro: ["paciente", "idade"],
+      quadril: ["nome", "idade"],
+      tornozelo: ["nome", "idade"],
+      mama: ["motivoExame"],
     };
 
     const campos = camposObrigatorios[tipoFormulario] || [];
@@ -100,12 +64,12 @@ const RevisaoAnamnese = () => {
 
   const handleSalvar = async () => {
     const validacao = validarCamposObrigatorios();
-    
+
     if (!validacao.valido) {
       toast({
-        title: 'Campos obrigatórios faltando',
-        description: `Por favor, preencha: ${validacao.faltando.join(', ')}`,
-        variant: 'destructive',
+        title: "Campos obrigatórios faltando",
+        description: `Por favor, preencha: ${validacao.faltando.join(", ")}`,
+        variant: "destructive",
       });
       return;
     }
@@ -118,11 +82,6 @@ const RevisaoAnamnese = () => {
         dados: formData as FormData,
         imagemMarcada: imagemMarcada || undefined,
         timestamp: new Date().toISOString(),
-        contrasteEndovenoso,
-        contrasteOral,
-        contrasteRetal,
-        gelEndovaginal,
-        tecnicoResponsavel,
       };
 
       // Aqui você pode enviar para o webhook N8N
@@ -132,161 +91,85 @@ const RevisaoAnamnese = () => {
       //   body: JSON.stringify(payload)
       // });
 
-      console.log('Payload para salvar:', payload);
+      console.log("Payload para salvar:", payload);
 
       toast({
-        title: 'Sucesso',
-        description: 'Anamnese salva com sucesso!',
+        title: "Sucesso",
+        description: "Anamnese salva com sucesso!",
       });
 
       // Redirecionar para dashboard ou próxima página
       setTimeout(() => {
-        navigate('/');
+        navigate("/");
       }, 1500);
     } catch (error) {
-      console.error('Erro ao salvar:', error);
+      console.error("Erro ao salvar:", error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível salvar a anamnese',
-        variant: 'destructive',
+        title: "Erro",
+        description: "Não foi possível salvar a anamnese",
+        variant: "destructive",
       });
     } finally {
       setSalvando(false);
     }
   };
 
-  const handleExportarPDF = async () => {
-    if (!contentRef.current) return;
-    
-    setExportandoPDF(true);
-    
-    try {
-      const canvas = await html2canvas(contentRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-      
-      // Add first page
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-      
-      // Add additional pages if needed
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-      
-      const nomeArquivo = `Anamnese_${tipoFormulario}_${(formData as any).nome || (formData as any).paciente || 'paciente'}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
-      pdf.save(nomeArquivo);
-      
-      toast({
-        title: 'Sucesso',
-        description: 'PDF exportado com sucesso!',
-      });
-    } catch (error) {
-      console.error('Erro ao exportar PDF:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível exportar o PDF',
-        variant: 'destructive',
-      });
-    } finally {
-      setExportandoPDF(false);
-    }
+  const handleExportarPDF = () => {
+    toast({
+      title: "Em desenvolvimento",
+      description: "Funcionalidade de exportar PDF será implementada em breve",
+    });
   };
 
   const handleCancelar = () => {
-    if (confirm('Deseja realmente cancelar? As alterações não salvas serão perdidas.')) {
-      navigate('/');
+    if (confirm("Deseja realmente cancelar? As alterações não salvas serão perdidas.")) {
+      navigate("/");
     }
   };
 
   const handleGerarInsights = async () => {
     setCarregandoIA(true);
-    setIaInsights('');
+    setIaInsights("");
 
     try {
       // Coletar todo o texto do formulário
       const textoCompleto = Object.entries(formData)
         .filter(([_, valor]) => valor)
         .map(([campo, valor]) => {
-          const label = campo.charAt(0).toUpperCase() + campo.slice(1).replace(/([A-Z])/g, ' $1');
-          return `${label}: ${Array.isArray(valor) ? valor.join(', ') : valor}`;
+          const label = campo.charAt(0).toUpperCase() + campo.slice(1).replace(/([A-Z])/g, " $1");
+          return `${label}: ${Array.isArray(valor) ? valor.join(", ") : valor}`;
         })
-        .join('\n');
+        .join("\n");
 
-      // Usar GET com query parameters
-      const params = new URLSearchParams({
+      const payload = {
         tipo: tipoFormulario,
         dados: textoCompleto,
         timestamp: new Date().toISOString(),
-      });
+      };
 
-      const response = await fetch(`https://jphortal.app.n8n.cloud/webhook-test/c314a3bb-6d2c-48d0-94a2-1287a5ecf858?${params.toString()}`);
+      const response = await fetch("https://jphortal.app.n8n.cloud/webhook/c314a3bb-6d2c-48d0-94a2-1287a5ecf858", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Erro da API:', response.status, errorText);
-        throw new Error(`Erro ao obter insights da IA: ${response.status}`);
+        throw new Error("Erro ao obter insights da IA");
       }
 
-      const responseText = await response.text();
-      console.log('Resposta recebida:', responseText);
-      
-      let insights = '';
-      try {
-        const data = JSON.parse(responseText);
-        // Extrair o conteúdo do objeto de resposta
-        if (typeof data === 'string') {
-          insights = data;
-        } else if (data.message?.content) {
-          // Resposta do n8n com formato {message: {content: "..."}}
-          insights = data.message.content;
-        } else if (data.content) {
-          insights = typeof data.content === 'string' ? data.content : JSON.stringify(data.content);
-        } else if (data.output) {
-          insights = typeof data.output === 'string' ? data.output : JSON.stringify(data.output);
-        } else if (data.insights) {
-          insights = typeof data.insights === 'string' ? data.insights : JSON.stringify(data.insights);
-        } else if (data.message) {
-          insights = typeof data.message === 'string' ? data.message : JSON.stringify(data.message);
-        } else {
-          insights = JSON.stringify(data, null, 2);
-        }
-      } catch (parseError) {
-        // Se não for JSON válido, usar o texto bruto
-        insights = responseText;
-      }
-      
-      setIaInsights(insights);
+      const data = await response.json();
+      setIaInsights(data.insights || data.message || JSON.stringify(data));
 
       toast({
-        title: 'Insights gerados',
-        description: 'Hipóteses diagnósticas obtidas com sucesso!',
+        title: "Insights gerados",
+        description: "Hipóteses diagnósticas obtidas com sucesso!",
       });
     } catch (error) {
-      console.error('Erro ao gerar insights:', error);
+      console.error("Erro ao gerar insights:", error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível gerar os insights da IA',
-        variant: 'destructive',
+        title: "Erro",
+        description: "Não foi possível gerar os insights da IA",
+        variant: "destructive",
       });
     } finally {
       setCarregandoIA(false);
@@ -294,38 +177,16 @@ const RevisaoAnamnese = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background p-4 md:p-8" ref={contentRef}>
+    <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-6 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-          <div className="flex-1">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/')}
-              className="mb-4"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-            <h1 className="text-3xl font-bold text-foreground">
-              Revisão de Anamnese Radiológica
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Revise e edite os dados coletados antes de finalizar
-            </p>
-          </div>
-          
-          {/* Info Técnica no canto superior direito */}
-          <div className="w-full md:w-80 flex-shrink-0">
-            <InfoTecnica
-              contrasteEndovenoso={contrasteEndovenoso}
-              contrasteOral={contrasteOral}
-              contrasteRetal={contrasteRetal}
-              gelEndovaginal={gelEndovaginal}
-              tecnicoResponsavel={tecnicoResponsavel}
-              onChange={handleInfoTecnicaChange}
-            />
-          </div>
+        <div className="mb-6">
+          <Button variant="ghost" onClick={() => navigate("/")} className="mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
+          <h1 className="text-3xl font-bold text-foreground">Revisão de Anamnese Radiológica</h1>
+          <p className="text-muted-foreground mt-2">Revise e edite os dados coletados antes de finalizar</p>
         </div>
 
         {/* Seletor de Tipo de Formulário */}
@@ -365,31 +226,19 @@ const RevisaoAnamnese = () => {
                 <CardTitle>Dados do Paciente</CardTitle>
               </CardHeader>
               <CardContent>
-                <FormularioDinamico
-                  tipo={tipoFormulario}
-                  dados={formData}
-                  onChange={handleCampoChange}
-                />
+                <FormularioDinamico tipo={tipoFormulario} dados={formData} onChange={handleCampoChange} />
               </CardContent>
             </Card>
           </div>
 
           {/* Coluna Direita - Canvas e IA Insights */}
           <div className="lg:col-span-2 space-y-6">
-            <CanvasMarcacao
-              tipo={tipoFormulario}
-              onImagemChange={setImagemMarcada}
-            />
-            
+            <CanvasMarcacao tipo={tipoFormulario} onImagemChange={setImagemMarcada} />
+
             {/* Botão de IA Insights */}
-            <Button
-              onClick={handleGerarInsights}
-              disabled={carregandoIA}
-              className="w-full"
-              variant="outline"
-            >
+            <Button onClick={handleGerarInsights} disabled={carregandoIA} className="w-full" variant="outline">
               <Sparkles className="h-4 w-4 mr-2" />
-              {carregandoIA ? 'Gerando Insights...' : 'Gerar Hipóteses Diagnósticas (IA)'}
+              {carregandoIA ? "Gerando Insights..." : "Gerar Hipóteses Diagnósticas (IA)"}
             </Button>
 
             {/* Exibição dos Insights */}
@@ -402,9 +251,7 @@ const RevisaoAnamnese = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-sm whitespace-pre-wrap text-muted-foreground">
-                    {iaInsights}
-                  </div>
+                  <div className="text-sm whitespace-pre-wrap text-muted-foreground">{iaInsights}</div>
                 </CardContent>
               </Card>
             )}
@@ -413,29 +260,17 @@ const RevisaoAnamnese = () => {
 
         {/* Botões de Ação */}
         <div className="mt-8 flex flex-wrap gap-4 justify-end">
-          <Button
-            onClick={handleCancelar}
-            variant="outline"
-            disabled={salvando}
-          >
+          <Button onClick={handleCancelar} variant="outline" disabled={salvando}>
             <X className="h-4 w-4 mr-2" />
             Cancelar
           </Button>
 
-          <Button
-            onClick={handleExportarPDF}
-            variant="outline"
-            disabled={salvando || exportandoPDF}
-          >
+          <Button onClick={handleExportarPDF} variant="outline" disabled={salvando}>
             <FileText className="h-4 w-4 mr-2" />
-            {exportandoPDF ? 'Exportando...' : 'Exportar PDF'}
+            Exportar PDF
           </Button>
 
-          <Button
-            onClick={handleSalvar}
-            disabled={salvando}
-            className="min-w-[150px]"
-          >
+          <Button onClick={handleSalvar} disabled={salvando} className="min-w-[150px]">
             {salvando ? (
               <>Salvando...</>
             ) : (
