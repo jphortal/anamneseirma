@@ -7,6 +7,7 @@ import { Save, FileText, X, ArrowLeft, Sparkles } from 'lucide-react';
 import { TipoFormulario, FormData, AnamneseData } from '@/types/anamnese';
 import { FormularioDinamico } from '@/components/anamnese/FormularioDinamico';
 import { CanvasMarcacao } from '@/components/anamnese/CanvasMarcacao';
+import { InfoTecnica } from '@/components/anamnese/InfoTecnica';
 import { Label } from '@/components/ui/label';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -30,12 +31,39 @@ const RevisaoAnamnese = () => {
   const [iaInsights, setIaInsights] = useState<string>('');
   const [carregandoIA, setCarregandoIA] = useState(false);
   const [exportandoPDF, setExportandoPDF] = useState(false);
+  
+  // Informações técnicas
+  const [contrasteEndovenoso, setContrasteEndovenoso] = useState(false);
+  const [contrasteOral, setContrasteOral] = useState(false);
+  const [contrasteRetal, setContrasteRetal] = useState(false);
+  const [gelEndovaginal, setGelEndovaginal] = useState(false);
+  const [tecnicoResponsavel, setTecnicoResponsavel] = useState('');
 
   const handleCampoChange = (campo: string, valor: string | string[]) => {
     setFormData((prev) => ({
       ...prev,
       [campo]: valor,
     }));
+  };
+
+  const handleInfoTecnicaChange = (campo: string, valor: boolean | string) => {
+    switch (campo) {
+      case 'contrasteEndovenoso':
+        setContrasteEndovenoso(valor as boolean);
+        break;
+      case 'contrasteOral':
+        setContrasteOral(valor as boolean);
+        break;
+      case 'contrasteRetal':
+        setContrasteRetal(valor as boolean);
+        break;
+      case 'gelEndovaginal':
+        setGelEndovaginal(valor as boolean);
+        break;
+      case 'tecnicoResponsavel':
+        setTecnicoResponsavel(valor as string);
+        break;
+    }
   };
 
   const validarCamposObrigatorios = (): { valido: boolean; faltando: string[] } => {
@@ -90,6 +118,11 @@ const RevisaoAnamnese = () => {
         dados: formData as FormData,
         imagemMarcada: imagemMarcada || undefined,
         timestamp: new Date().toISOString(),
+        contrasteEndovenoso,
+        contrasteOral,
+        contrasteRetal,
+        gelEndovaginal,
+        tecnicoResponsavel,
       };
 
       // Aqui você pode enviar para o webhook N8N
@@ -261,21 +294,35 @@ const RevisaoAnamnese = () => {
     <div className="min-h-screen bg-background p-4 md:p-8" ref={contentRef}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/')}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
-          </Button>
-          <h1 className="text-3xl font-bold text-foreground">
-            Revisão de Anamnese Radiológica
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Revise e edite os dados coletados antes de finalizar
-          </p>
+        <div className="mb-6 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <div className="flex-1">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/')}
+              className="mb-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
+            <h1 className="text-3xl font-bold text-foreground">
+              Revisão de Anamnese Radiológica
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Revise e edite os dados coletados antes de finalizar
+            </p>
+          </div>
+          
+          {/* Info Técnica no canto superior direito */}
+          <div className="w-full md:w-80 flex-shrink-0">
+            <InfoTecnica
+              contrasteEndovenoso={contrasteEndovenoso}
+              contrasteOral={contrasteOral}
+              contrasteRetal={contrasteRetal}
+              gelEndovaginal={gelEndovaginal}
+              tecnicoResponsavel={tecnicoResponsavel}
+              onChange={handleInfoTecnicaChange}
+            />
+          </div>
         </div>
 
         {/* Seletor de Tipo de Formulário */}

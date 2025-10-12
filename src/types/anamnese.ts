@@ -371,4 +371,9 @@ export interface AnamneseData {
   imagemAnatomicaUsada?: string;
   timestamp: string;
   funcionarioRevisor?: string;
+  contrasteEndovenoso?: boolean;
+  contrasteOral?: boolean;
+  contrasteRetal?: boolean;
+  gelEndovaginal?: boolean;
+  tecnicoResponsavel?: string;
 }
