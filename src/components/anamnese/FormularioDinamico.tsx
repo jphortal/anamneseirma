@@ -14,11 +14,16 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
 
   // Cálculo automático do clearance de creatinina usando Cockcroft-Gault
   useEffect(() => {
-    const idade = parseFloat((dados as any).idade || '0');
-    const peso = parseFloat((dados as any).peso || '0');
-    const creatinina = parseFloat((dados as any).creatinina || '0');
+    const toNumber = (v: any) => {
+      if (v === undefined || v === null) return 0;
+      const s = String(v).trim().replace(',', '.').replace(/[^0-9.]/g, '');
+      const n = parseFloat(s);
+      return isNaN(n) ? 0 : n;
+    };
+    const idade = toNumber((dados as any).idade);
+    const peso = toNumber((dados as any).peso);
+    const creatinina = toNumber((dados as any).creatinina);
     const sexo = (dados as any).sexo || '';
-
     console.log('Cálculo ClCr - Valores:', { idade, peso, creatinina, sexo });
 
     if (idade > 0 && peso > 0 && creatinina > 0 && sexo) {
