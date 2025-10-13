@@ -58,6 +58,19 @@ const Index = () => {
         return 'Não';
       };
 
+      // Extrair sexo ao nascimento
+      const sexoResp = extrairResposta(/(?:sexo|gênero|genero)(?:\s+(?:ao\s+)?nascimento)?[:?\s]*([^\n]+)/i);
+      if (sexoResp) {
+        const sexoLower = sexoResp.toLowerCase();
+        if (sexoLower.includes('masculino') || sexoLower.includes('homem') || sexoLower.includes('macho')) {
+          dados.sexo = 'Masculino';
+        } else if (sexoLower.includes('feminino') || sexoLower.includes('mulher') || sexoLower.includes('femea')) {
+          dados.sexo = 'Feminino';
+        } else {
+          dados.sexo = sexoResp;
+        }
+      }
+
       // Extrair idade
       const idadeResp = extrairResposta(/(?:idade|anos?)[:?\s]*([^\n]+)/i);
       if (idadeResp) {
