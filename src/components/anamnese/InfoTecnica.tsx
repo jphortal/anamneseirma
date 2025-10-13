@@ -20,6 +20,16 @@ export const InfoTecnica = ({
   tecnicoResponsavel,
   onChange,
 }: InfoTecnicaProps) => {
+  const contrastes = [
+    { id: 'contrasteEndovenoso', label: 'Contraste Endovenoso', checked: contrasteEndovenoso },
+    { id: 'contrasteOral', label: 'Contraste Oral', checked: contrasteOral },
+    { id: 'contrasteRetal', label: 'Contraste Retal', checked: contrasteRetal },
+    { id: 'gelEndovaginal', label: 'Gel Endovaginal', checked: gelEndovaginal },
+  ];
+
+  const contrastesSelecionados = contrastes.filter(c => c.checked);
+  const temContrasteSelecionado = contrastesSelecionados.length > 0;
+
   return (
     <Card className="border-2 border-primary/20">
       <CardContent className="pt-4 space-y-3">
@@ -28,62 +38,31 @@ export const InfoTecnica = ({
         </div>
         
         <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="contrasteEndovenoso"
-              checked={contrasteEndovenoso}
-              onCheckedChange={(checked) => onChange('contrasteEndovenoso', !!checked)}
-            />
-            <Label
-              htmlFor="contrasteEndovenoso"
-              className="text-sm cursor-pointer"
-            >
-              Contraste Endovenoso
-            </Label>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="contrasteOral"
-              checked={contrasteOral}
-              onCheckedChange={(checked) => onChange('contrasteOral', !!checked)}
-            />
-            <Label
-              htmlFor="contrasteOral"
-              className="text-sm cursor-pointer"
-            >
-              Contraste Oral
-            </Label>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="contrasteRetal"
-              checked={contrasteRetal}
-              onCheckedChange={(checked) => onChange('contrasteRetal', !!checked)}
-            />
-            <Label
-              htmlFor="contrasteRetal"
-              className="text-sm cursor-pointer"
-            >
-              Contraste Retal
-            </Label>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="gelEndovaginal"
-              checked={gelEndovaginal}
-              onCheckedChange={(checked) => onChange('gelEndovaginal', !!checked)}
-            />
-            <Label
-              htmlFor="gelEndovaginal"
-              className="text-sm cursor-pointer"
-            >
-              Gel Endovaginal
-            </Label>
-          </div>
+          {contrastes.map((contraste) => (
+            <div key={contraste.id} className="flex items-center space-x-2">
+              <Checkbox
+                id={contraste.id}
+                checked={contraste.checked}
+                onCheckedChange={(checked) => onChange(contraste.id, !!checked)}
+              />
+              <Label
+                htmlFor={contraste.id}
+                className="text-sm cursor-pointer"
+              >
+                {contraste.label}
+              </Label>
+            </div>
+          ))}
         </div>
+
+        {temContrasteSelecionado && (
+          <div className="p-2 bg-muted/50 rounded-md">
+            <div className="text-sm font-medium">Selecionados:</div>
+            <div className="text-sm text-muted-foreground">
+              {contrastesSelecionados.map(c => c.label).join(', ')}
+            </div>
+          </div>
+        )}
 
         <div className="pt-2">
           <Label htmlFor="tecnicoResponsavel" className="text-sm">
