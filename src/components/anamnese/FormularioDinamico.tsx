@@ -19,6 +19,8 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
     const creatinina = parseFloat((dados as any).creatinina || '0');
     const sexo = (dados as any).sexo || '';
 
+    console.log('Cálculo ClCr - Valores:', { idade, peso, creatinina, sexo });
+
     if (idade > 0 && peso > 0 && creatinina > 0 && sexo) {
       let clcr = ((140 - idade) * peso) / (72 * creatinina);
       
@@ -27,8 +29,10 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
         clcr = clcr * 0.85;
       }
 
+      console.log('ClCr calculado:', clcr.toFixed(1));
       setClearanceCreatinina(clcr.toFixed(1));
     } else {
+      console.log('ClCr não calculado - campos faltando');
       setClearanceCreatinina('');
     }
   }, [(dados as any).idade, (dados as any).peso, (dados as any).creatinina, (dados as any).sexo]);

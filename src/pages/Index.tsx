@@ -378,7 +378,7 @@ const Index = () => {
           examType = 'punho';
         } else if (procedure.includes('OMBRO')) {
           examType = 'ombro';
-        } else if (procedure.includes('TORNOZELO') || procedure.includes('PÉ') || procedure.includes('PE')) {
+        } else if (procedure.includes('TORNOZELO') || (procedure.includes('PÉ') && !procedure.includes('PELVE')) || (procedure.includes('PE ') && !procedure.includes('PELVE'))) {
           examType = 'tornozelo';
         } else if (procedure.includes('QUADRIL') || procedure.includes('BACIA')) {
           examType = 'quadril';
