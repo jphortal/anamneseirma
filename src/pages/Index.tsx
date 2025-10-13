@@ -312,8 +312,9 @@ const Index = () => {
         dados.historicoHomens = historicoHomensTexto;
       }
 
-      // Sempre preservar o relatório completo nas observações para garantir que nenhuma informação seja perdida
+      // Sempre preservar o relatório completo nas observações e no campo de relatório da anamnese
       dados.observacoes = markdown;
+      dados.informacoesAdicionais = markdown;
       return dados;
     };
 
