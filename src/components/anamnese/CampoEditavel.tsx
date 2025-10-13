@@ -17,6 +17,8 @@ interface CampoEditavelProps {
   opcoes?: string[];
   obrigatorio?: boolean;
   permiteTextoAdicional?: boolean;
+  sempreAberto?: boolean;
+  rows?: number;
 }
 
 export const CampoEditavel = ({
@@ -27,8 +29,10 @@ export const CampoEditavel = ({
   opcoes = [],
   obrigatorio = false,
   permiteTextoAdicional = true,
+  sempreAberto = false,
+  rows = 3,
 }: CampoEditavelProps) => {
-  const [editando, setEditando] = useState(false);
+  const [editando, setEditando] = useState(sempreAberto);
   const [valorTemp, setValorTemp] = useState(value);
   const [textoAdicional, setTextoAdicional] = useState('');
   const [transcrevendo, setTranscrevendo] = useState(false);
@@ -147,7 +151,7 @@ export const CampoEditavel = ({
   };
 
   const renderCampo = () => {
-    if (!editando) {
+    if (!editando && !sempreAberto) {
       const displayValue = Array.isArray(value) ? value.join(', ') : value || '';
       const isLongText = displayValue.length > 50;
       
@@ -215,7 +219,7 @@ export const CampoEditavel = ({
                 <Textarea
                   value={valorTemp as string}
                   onChange={(e) => setValorTemp(e.target.value)}
-                  rows={3}
+                  rows={rows}
                   className="w-full"
                 />
                 <Button
@@ -418,16 +422,18 @@ export const CampoEditavel = ({
             </Button>
           )}
 
-          <div className="flex gap-2 mt-3">
-            <Button onClick={handleSalvar} size="sm" className="flex-1">
-              <Check className="h-4 w-4 mr-1" />
-              Confirmar
-            </Button>
-            <Button onClick={handleCancelar} variant="outline" size="sm">
-              <X className="h-4 w-4 mr-1" />
-              Cancelar
-            </Button>
-          </div>
+          {!sempreAberto && (
+            <div className="flex gap-2 mt-3">
+              <Button onClick={handleSalvar} size="sm" className="flex-1">
+                <Check className="h-4 w-4 mr-1" />
+                Confirmar
+              </Button>
+              <Button onClick={handleCancelar} variant="outline" size="sm">
+                <X className="h-4 w-4 mr-1" />
+                Cancelar
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     );

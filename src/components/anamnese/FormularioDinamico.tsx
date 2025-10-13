@@ -105,10 +105,12 @@ export const FormularioDinamico = ({ tipo, dados, onChange }: FormularioDinamico
             <CampoExame />
             <CamposClinicosComuns />
             <CampoEditavel
-              label="Informações Adicionais"
+              label="Relatório da anamnese"
               value={(dados as any).informacoesAdicionais || ''}
               onChange={(v) => onChange('informacoesAdicionais', v as string)}
               tipo="textarea"
+              sempreAberto={true}
+              rows={10}
             />
           </>
         );
