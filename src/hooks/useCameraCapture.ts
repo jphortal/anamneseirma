@@ -10,14 +10,45 @@ export const useCameraCapture = () => {
 
   const startCamera = async () => {
     try {
+      console.log('Solicitando acesso à câmera...');
+      
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } // Câmera traseira em dispositivos móveis
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        } 
       });
       
+      console.log('Permissão concedida, stream obtido:', stream);
+      
       if (videoRef.current) {
+        console.log('VideoRef disponível, configurando stream...');
         videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        setIsCameraActive(true);
+        
+        // Aguardar o vídeo estar pronto antes de definir como ativo
+        videoRef.current.onloadedmetadata = () => {
+          console.log('Vídeo pronto para reprodução');
+          videoRef.current?.play().then(() => {
+            console.log('Vídeo iniciado com sucesso');
+            setIsCameraActive(true);
+            streamRef.current = stream;
+          }).catch((playError) => {
+            console.error('Erro ao iniciar reprodução do vídeo:', playError);
+            toast({
+              title: 'Erro',
+              description: 'Não foi possível iniciar a visualização da câmera',
+              variant: 'destructive',
+            });
+          });
+        };
+      } else {
+        console.error('VideoRef não está disponível');
+        toast({
+          title: 'Erro',
+          description: 'Elemento de vídeo não encontrado',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Error accessing camera:', error);
