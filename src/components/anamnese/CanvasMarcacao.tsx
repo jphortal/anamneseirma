@@ -62,20 +62,33 @@ export const CanvasMarcacao = ({
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     setHistoricoDesenhos(prev => [...prev, imageData]);
   };
-  const getMousePos = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const getMousePos = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
-    if (!canvas) return {
-      x: 0,
-      y: 0
-    };
+    if (!canvas) return { x: 0, y: 0 };
+    
     const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    let clientX, clientY;
+    if ('touches' in e && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else if ('clientX' in e) {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    } else {
+      return { x: 0, y: 0 };
+    }
+    
     return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
     };
   };
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!modoDesenho) return;
+    e.preventDefault();
     salvarEstado();
     setDesenhando(true);
     const pos = getMousePos(e);
@@ -84,8 +97,9 @@ export const CanvasMarcacao = ({
     ctx.beginPath();
     ctx.moveTo(pos.x, pos.y);
   };
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!desenhando || !modoDesenho) return;
+    e.preventDefault();
     const pos = getMousePos(e);
     const ctx = canvasRef.current?.getContext('2d');
     if (!ctx) return;
@@ -177,7 +191,19 @@ export const CanvasMarcacao = ({
             </div>
           </div>}
 
-        <canvas ref={canvasRef} width={400} height={500} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={stopDrawing} onMouseLeave={stopDrawing} className={`border-2 border-border rounded-lg w-full ${modoDesenho ? 'cursor-crosshair' : 'cursor-default'}`} />
+        <canvas 
+          ref={canvasRef} 
+          width={400} 
+          height={500} 
+          onMouseDown={startDrawing} 
+          onMouseMove={draw} 
+          onMouseUp={stopDrawing} 
+          onMouseLeave={stopDrawing}
+          onTouchStart={startDrawing}
+          onTouchMove={draw}
+          onTouchEnd={stopDrawing}
+          className={`border-2 border-border rounded-lg w-full touch-none ${modoDesenho ? 'cursor-crosshair' : 'cursor-default'}`} 
+        />
       </CardContent>
     </Card>;
 };
