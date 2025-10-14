@@ -369,6 +369,7 @@ export interface AnamneseData {
   dados: FormData;
   imagemMarcada?: string;
   imagemAnatomicaUsada?: string;
+  pedidoMedico?: string;
   timestamp: string;
   funcionarioRevisor?: string;
   contrasteEndovenoso?: boolean;

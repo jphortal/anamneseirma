@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Save, FileText, X, ArrowLeft, Sparkles } from 'lucide-react';
+import { Save, FileText, X, ArrowLeft, Sparkles, Camera, Trash2 } from 'lucide-react';
+import { useCameraCapture } from '@/hooks/useCameraCapture';
 import { TipoFormulario, FormData, AnamneseData } from '@/types/anamnese';
 import { FormularioDinamico } from '@/components/anamnese/FormularioDinamico';
 import { CanvasMarcacao } from '@/components/anamnese/CanvasMarcacao';
@@ -26,6 +27,17 @@ const RevisaoAnamnese = () => {
   const [iaInsights, setIaInsights] = useState<string>('');
   const [carregandoIA, setCarregandoIA] = useState(false);
   const [exportandoPDF, setExportandoPDF] = useState(false);
+  
+  // Camera capture hook
+  const { 
+    isCameraActive, 
+    capturedImage, 
+    videoRef, 
+    startCamera, 
+    capturePhoto, 
+    stopCamera, 
+    clearImage 
+  } = useCameraCapture();
 
   // Informações técnicas
   const [contrasteEndovenoso, setContrasteEndovenoso] = useState(false);
@@ -105,6 +117,7 @@ const RevisaoAnamnese = () => {
         tipo: tipoFormulario,
         dados: formData as FormData,
         imagemMarcada: imagemMarcada || undefined,
+        pedidoMedico: capturedImage || undefined,
         timestamp: new Date().toISOString(),
         contrasteEndovenoso,
         contrasteOral,
@@ -347,6 +360,81 @@ const RevisaoAnamnese = () => {
               </Card>}
           </div>
         </div>
+
+        {/* Seção de Captura de Pedido Médico */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5" />
+              Pedido Médico
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!capturedImage && !isCameraActive && (
+              <Button 
+                onClick={startCamera} 
+                variant="outline" 
+                className="w-full"
+              >
+                <Camera className="h-4 w-4 mr-2" />
+                Fotografar Pedido Médico
+              </Button>
+            )}
+
+            {isCameraActive && (
+              <div className="space-y-4">
+                <div className="relative bg-black rounded-lg overflow-hidden">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    className="w-full h-auto"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={capturePhoto} className="flex-1">
+                    <Camera className="h-4 w-4 mr-2" />
+                    Capturar Foto
+                  </Button>
+                  <Button onClick={stopCamera} variant="outline">
+                    <X className="h-4 w-4 mr-2" />
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {capturedImage && (
+              <div className="space-y-4">
+                <div className="relative rounded-lg overflow-hidden border">
+                  <img 
+                    src={capturedImage} 
+                    alt="Pedido médico capturado" 
+                    className="w-full h-auto"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={clearImage} 
+                    variant="outline" 
+                    className="flex-1"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Remover Foto
+                  </Button>
+                  <Button 
+                    onClick={startCamera} 
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    Tirar Nova Foto
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Botões de Ação */}
         <div className="mt-8 flex flex-wrap gap-4 justify-end">
