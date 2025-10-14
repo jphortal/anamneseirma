@@ -10,6 +10,14 @@ export const useCameraCapture = () => {
 
   const startCamera = async () => {
     try {
+      console.log('Iniciando processo de câmera...');
+      
+      // Primeiro ativa o estado para montar o elemento de vídeo
+      setIsCameraActive(true);
+      
+      // Aguarda um momento para o elemento ser montado no DOM
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       console.log('Solicitando acesso à câmera...');
       
       const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -25,25 +33,19 @@ export const useCameraCapture = () => {
       if (videoRef.current) {
         console.log('VideoRef disponível, configurando stream...');
         videoRef.current.srcObject = stream;
+        streamRef.current = stream;
         
-        // Aguardar o vídeo estar pronto antes de definir como ativo
-        videoRef.current.onloadedmetadata = () => {
-          console.log('Vídeo pronto para reprodução');
-          videoRef.current?.play().then(() => {
-            console.log('Vídeo iniciado com sucesso');
-            setIsCameraActive(true);
-            streamRef.current = stream;
-          }).catch((playError) => {
-            console.error('Erro ao iniciar reprodução do vídeo:', playError);
-            toast({
-              title: 'Erro',
-              description: 'Não foi possível iniciar a visualização da câmera',
-              variant: 'destructive',
-            });
-          });
-        };
+        // Garantir que o vídeo comece a reproduzir
+        await videoRef.current.play();
+        console.log('Vídeo iniciado com sucesso');
+        
+        toast({
+          title: 'Câmera ativada',
+          description: 'Câmera pronta para capturar',
+        });
       } else {
-        console.error('VideoRef não está disponível');
+        console.error('VideoRef não está disponível após timeout');
+        setIsCameraActive(false);
         toast({
           title: 'Erro',
           description: 'Elemento de vídeo não encontrado',
@@ -51,7 +53,8 @@ export const useCameraCapture = () => {
         });
       }
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      console.error('Erro ao acessar câmera:', error);
+      setIsCameraActive(false);
       toast({
         title: 'Erro',
         description: 'Não foi possível acessar a câmera',
