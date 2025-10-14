@@ -11,7 +11,7 @@ const App = () => <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter className="bg-[#29d729]">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/revisao-anamnese" element={<RevisaoAnamnese />} className="bg-[#10cd10]" />
