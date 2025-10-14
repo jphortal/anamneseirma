@@ -130,11 +130,11 @@ export const CanvasMarcacao = ({
     };
     setHistoricoDesenhos([]);
   };
-  return <Card className="bg-green-4/20">
-      <CardHeader className="bg-green-5/30">
+  return <Card className="bg-[#2bcc2b]">
+      <CardHeader className="bg-[#29c929]">
         <CardTitle>Marcação Anatômica</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 bg-green-4/20">
+      <CardContent className="space-y-4 bg-[#29cf29]">
         <div>
           <Label>Selecionar Imagem Anatômica</Label>
           <select value={imagemSelecionada.id} onChange={e => {
