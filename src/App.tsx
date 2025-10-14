@@ -10,7 +10,7 @@ const queryClient = new QueryClient();
 const App = () => <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner />
+      <Sonner className="bg-[#2add2a]" />
       <BrowserRouter className="bg-[#28d428]">
         <Routes>
           <Route path="/" element={<Index />} />

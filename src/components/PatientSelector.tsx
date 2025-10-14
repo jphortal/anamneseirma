@@ -80,13 +80,13 @@ export const PatientSelector = ({
     }
   };
   return <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader className="bg-green-400">
+      <CardHeader className="bg-[#2cdb2c]">
         <CardTitle>Buscar Paciente</CardTitle>
         <CardDescription>
           {exams.length === 0 ? 'Informe o número do prontuário para iniciar o atendimento' : 'Selecione o exame desejado'}
         </CardDescription>
       </CardHeader>
-      <CardContent className="bg-green-400">
+      <CardContent className="bg-[#2cd92c]">
         {exams.length === 0 ? <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="prontuario">Número do Prontuário</Label>
