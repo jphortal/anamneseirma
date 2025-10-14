@@ -10,11 +10,11 @@ const queryClient = new QueryClient();
 const App = () => <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner />
-      <BrowserRouter>
+      <Sonner className="bg-[#2add2a]" />
+      <BrowserRouter className="bg-[#28d128]">
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/revisao-anamnese" element={<RevisaoAnamnese />} />
+          <Route path="/revisao-anamnese" element={<RevisaoAnamnese />} className="bg-[#10cd10]" />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
