@@ -42,6 +42,13 @@ All colors MUST be HSL.
     --medical-blue-light: 210 40% 96%;
     --medical-success: 145 65% 45%;
     --medical-warning: 40 85% 55%;
+    
+    --green-1: 145 70% 92%;
+    --green-2: 145 65% 85%;
+    --green-3: 145 60% 78%;
+    --green-4: 145 55% 70%;
+    --green-5: 145 50% 62%;
+    --green-6: 145 45% 54%;
 
     --sidebar-background: 0 0% 98%;
 

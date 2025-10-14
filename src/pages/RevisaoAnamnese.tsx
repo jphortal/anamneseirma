@@ -284,8 +284,8 @@ const RevisaoAnamnese = () => {
         </div>
 
         {/* Seletor de Tipo de Formulário */}
-        <Card className="mb-6 bg-[#11d411]">
-          <CardHeader className="bg-[#10d110]">
+        <Card className="mb-6 bg-green-1">
+          <CardHeader className="bg-green-2">
             <CardTitle>Tipo de Exame</CardTitle>
           </CardHeader>
           <CardContent>
@@ -311,11 +311,11 @@ const RevisaoAnamnese = () => {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Coluna Esquerda - Formulário */}
           <div className="lg:col-span-3">
-            <Card>
-              <CardHeader className="bg-[#32cf32]">
+            <Card className="bg-green-2/50">
+              <CardHeader className="bg-green-3/60">
                 <CardTitle>Dados do Paciente</CardTitle>
               </CardHeader>
-              <CardContent className="bg-[#2ecf2e]">
+              <CardContent className="bg-green-2/50">
                 <FormularioDinamico tipo={tipoFormulario} dados={formData} onChange={handleCampoChange} />
               </CardContent>
             </Card>

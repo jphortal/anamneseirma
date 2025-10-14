@@ -21,8 +21,8 @@ export const InfoTecnica = ({
   onChange,
 }: InfoTecnicaProps) => {
   return (
-    <Card className="border-2 border-primary/20">
-      <CardContent className="pt-4 space-y-3">
+    <Card className="bg-green-1 border-2 border-green-4/30">
+      <CardContent className="pt-4 space-y-3 bg-green-1">
         <div className="text-sm font-semibold text-foreground mb-3">
           Informações Técnicas
         </div>

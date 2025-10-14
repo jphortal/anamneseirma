@@ -14,7 +14,7 @@ const App = () => <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/revisao-anamnese" element={<RevisaoAnamnese />} className="bg-[#10cd10]" />
+          <Route path="/revisao-anamnese" element={<RevisaoAnamnese />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
