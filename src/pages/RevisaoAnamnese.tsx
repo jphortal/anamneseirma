@@ -371,14 +371,14 @@ const RevisaoAnamnese = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             {!capturedImage && !isCameraActive && (
-              <Button 
-                onClick={startCamera} 
-                variant="outline" 
-                className="w-full"
+              <div 
+                onClick={startCamera}
+                className="cursor-pointer border-2 border-dashed border-muted-foreground/50 rounded-lg p-8 hover:border-primary transition-colors text-center"
               >
-                <Camera className="h-4 w-4 mr-2" />
-                Fotografar Pedido Médico
-              </Button>
+                <Camera className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-lg font-medium">Clique aqui para fotografar o pedido médico</p>
+                <p className="text-sm text-muted-foreground mt-2">A câmera será aberta automaticamente</p>
+              </div>
             )}
 
             {isCameraActive && (
@@ -388,7 +388,7 @@ const RevisaoAnamnese = () => {
                     ref={videoRef}
                     autoPlay
                     playsInline
-                    className="w-full h-auto"
+                    className="w-full h-auto max-h-[600px] object-contain"
                   />
                 </div>
                 <div className="flex gap-2">
@@ -406,11 +406,11 @@ const RevisaoAnamnese = () => {
 
             {capturedImage && (
               <div className="space-y-4">
-                <div className="relative rounded-lg overflow-hidden border">
+                <div className="relative rounded-lg overflow-hidden border bg-black">
                   <img 
                     src={capturedImage} 
                     alt="Pedido médico capturado" 
-                    className="w-full h-auto"
+                    className="w-full h-auto max-h-[600px] object-contain mx-auto"
                   />
                 </div>
                 <div className="flex gap-2">
