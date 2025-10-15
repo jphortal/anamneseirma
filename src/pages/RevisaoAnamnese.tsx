@@ -157,13 +157,63 @@ const RevisaoAnamnese = () => {
   const handleExportarPDF = async () => {
     if (!contentRef.current) return;
     setExportandoPDF(true);
+    
     try {
-      const canvas = await html2canvas(contentRef.current, {
+      // Expandir todos os elementos colapsáveis antes de gerar PDF
+      const content = contentRef.current;
+      const originalStyles = new Map<HTMLElement, string>();
+      
+      // Abrir todos os <details>
+      const detailsElements = content.querySelectorAll('details');
+      detailsElements.forEach(detail => {
+        detail.setAttribute('open', '');
+      });
+      
+      // Abrir todos os elementos com data-state="closed" (Radix Collapsible/Accordion)
+      const closedElements = content.querySelectorAll('[data-state="closed"]');
+      closedElements.forEach(el => {
+        (el as HTMLElement).setAttribute('data-state', 'open');
+      });
+      
+      // Forçar visibilidade de conteúdos colapsáveis
+      const collapsibleContents = content.querySelectorAll('[data-radix-collapsible-content], [role="region"]');
+      collapsibleContents.forEach(el => {
+        const htmlEl = el as HTMLElement;
+        originalStyles.set(htmlEl, htmlEl.style.cssText);
+        htmlEl.style.height = 'auto';
+        htmlEl.style.overflow = 'visible';
+        htmlEl.style.display = 'block';
+      });
+      
+      // Aumentar fonte de todos os textos para o PDF
+      const textElements = content.querySelectorAll('p, span, div, label, input, textarea, li');
+      textElements.forEach(el => {
+        const htmlEl = el as HTMLElement;
+        if (!originalStyles.has(htmlEl)) {
+          originalStyles.set(htmlEl, htmlEl.style.cssText);
+        }
+        const currentSize = window.getComputedStyle(htmlEl).fontSize;
+        const currentSizeNum = parseFloat(currentSize);
+        htmlEl.style.fontSize = `${Math.max(currentSizeNum * 1.3, 14)}px`;
+      });
+      
+      // Aguardar renderização
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        windowHeight: content.scrollHeight,
+        height: content.scrollHeight
       });
+      
+      // Restaurar estilos originais
+      originalStyles.forEach((style, el) => {
+        el.style.cssText = style;
+      });
+      
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'portrait',
