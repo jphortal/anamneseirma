@@ -187,17 +187,40 @@ const RevisaoAnamnese = () => {
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
+      
       const nomeArquivo = `Anamnese_${tipoFormulario}_${(formData as any).nome || (formData as any).paciente || 'paciente'}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
-      pdf.save(nomeArquivo);
+      
+      // Converter PDF para base64
+      const pdfBase64 = pdf.output('datauristring').split(',')[1];
+      
+      // Enviar para a API n8n
+      const response = await fetch('https://jphortal.app.n8n.cloud/webhook-test/f7f28ffd-1d92-445e-b5c2-7b3b038425ef', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          filename: nomeArquivo,
+          pdf: pdfBase64,
+          tipo: tipoFormulario,
+          paciente: (formData as any).nome || (formData as any).paciente || 'paciente',
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao enviar PDF: ${response.status}`);
+      }
+
       toast({
         title: 'Sucesso',
-        description: 'PDF exportado com sucesso!'
+        description: 'PDF enviado com sucesso para o sistema!'
       });
     } catch (error) {
       console.error('Erro ao exportar PDF:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível exportar o PDF',
+        description: 'Não foi possível enviar o PDF',
         variant: 'destructive'
       });
     } finally {
