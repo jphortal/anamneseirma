@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Save, FileText, X, ArrowLeft, Sparkles, Camera, Trash2 } from 'lucide-react';
 import { useCameraCapture } from '@/hooks/useCameraCapture';
-import { TipoFormulario, FormData, AnamneseData } from '@/types/anamnese';
+import { TipoFormulario, FormData as AnamneseFormData, AnamneseData } from '@/types/anamnese';
 import { FormularioDinamico } from '@/components/anamnese/FormularioDinamico';
 import { CanvasMarcacao } from '@/components/anamnese/CanvasMarcacao';
 import { InfoTecnica } from '@/components/anamnese/InfoTecnica';
@@ -21,7 +21,7 @@ const RevisaoAnamnese = () => {
   const estadoInicial = location.state || {};
   const contentRef = useRef<HTMLDivElement>(null);
   const [tipoFormulario, setTipoFormulario] = useState<TipoFormulario>(estadoInicial.tipo || 'punho');
-  const [formData, setFormData] = useState<Partial<FormData>>(estadoInicial.dados || {});
+  const [formData, setFormData] = useState<Partial<AnamneseFormData>>(estadoInicial.dados || {});
   const [imagemMarcada, setImagemMarcada] = useState<string>('');
   const [salvando, setSalvando] = useState(false);
   const [iaInsights, setIaInsights] = useState<string>('');
@@ -115,7 +115,7 @@ const RevisaoAnamnese = () => {
     try {
       const payload: AnamneseData = {
         tipo: tipoFormulario,
-        dados: formData as FormData,
+        dados: formData as AnamneseFormData,
         imagemMarcada: imagemMarcada || undefined,
         pedidoMedico: capturedImage || undefined,
         timestamp: new Date().toISOString(),
@@ -190,22 +190,17 @@ const RevisaoAnamnese = () => {
       
       const nomeArquivo = `Anamnese_${tipoFormulario}_${(formData as any).nome || (formData as any).paciente || 'paciente'}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
       
-      // Converter PDF para base64
-      const pdfBase64 = pdf.output('datauristring').split(',')[1];
+      // Converter PDF para Blob binário
+      const pdfBlob = pdf.output('blob');
+      
+      // Criar FormData para enviar arquivo binário
+      const uploadFormData = new FormData();
+      uploadFormData.append('data', pdfBlob, nomeArquivo);
       
       // Enviar para a API n8n
       const response = await fetch('https://jphortal.app.n8n.cloud/webhook-test/f7f28ffd-1d92-445e-b5c2-7b3b038425ef', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          filename: nomeArquivo,
-          pdf: pdfBase64,
-          tipo: tipoFormulario,
-          paciente: (formData as any).nome || (formData as any).paciente || 'paciente',
-          timestamp: new Date().toISOString()
-        })
+        body: uploadFormData
       });
 
       if (!response.ok) {
