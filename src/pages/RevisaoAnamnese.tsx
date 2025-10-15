@@ -157,19 +157,45 @@ const RevisaoAnamnese = () => {
   const handleExportarPDF = async () => {
     if (!contentRef.current) return;
     setExportandoPDF(true);
+    
     try {
+      // Garantir que todos os elementos estejam expandidos antes de gerar o PDF
+      const allDetails = contentRef.current.querySelectorAll('details');
+      const allAccordions = contentRef.current.querySelectorAll('[data-state="closed"]');
+      
+      // Abrir todos os elementos colapsáveis
+      allDetails.forEach(detail => {
+        detail.setAttribute('open', 'true');
+      });
+      
+      allAccordions.forEach(accordion => {
+        accordion.setAttribute('data-state', 'open');
+      });
+      
+      // Aguardar um momento para garantir renderização completa
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       const canvas = await html2canvas(contentRef.current, {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        allowTaint: true,
+        imageTimeout: 0,
+        // Garantir que o conteúdo completo seja capturado
+        windowWidth: contentRef.current.scrollWidth,
+        windowHeight: contentRef.current.scrollHeight,
+        scrollY: -window.scrollY,
+        scrollX: -window.scrollX
       });
+      
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
+      
       const imgWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
       const imgHeight = canvas.height * imgWidth / canvas.width;
