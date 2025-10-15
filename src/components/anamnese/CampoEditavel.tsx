@@ -90,6 +90,8 @@ export const CampoEditavel = ({
         method: 'POST',
         body: formData
       });
+      console.log('Resposta da transcrição - Status:', response.status);
+      
       if (!response.ok) {
         const errorText = await response.text().catch(() => '');
         throw new Error(`Erro ao transcrever áudio (${response.status}): ${errorText}`);
@@ -97,22 +99,41 @@ export const CampoEditavel = ({
 
       // Primeiro obtém o texto da resposta
       const responseText = await response.text();
+      console.log('Resposta da transcrição - Texto:', responseText);
 
       // Verifica se a resposta não está vazia
       if (!responseText || responseText.trim() === '') {
-        throw new Error('Resposta vazia do servidor de transcrição');
+        throw new Error('Resposta vazia do servidor de transcrição. Verifique se o webhook n8n está configurado para retornar JSON com o texto transcrito.');
       }
 
       // Tenta fazer parse do JSON
       let data: any;
       try {
         data = JSON.parse(responseText);
+        console.log('Resposta da transcrição - JSON parseado:', data);
       } catch (parseError) {
         console.error('Erro ao fazer parse do JSON:', parseError);
-        console.log('Resposta recebida:', responseText);
-        throw new Error('Resposta inválida do servidor de transcrição');
+        console.log('Resposta recebida (não é JSON):', responseText);
+        // Se não for JSON, tenta usar o texto diretamente
+        data = { text: responseText };
       }
-      const textoTranscrito = data.text || data.output || data.message || data.response || '';
+      
+      // Tenta extrair o texto de várias possíveis estruturas de resposta
+      const textoTranscrito = 
+        data.text || 
+        data.output || 
+        data.message || 
+        data.response || 
+        data.transcription ||
+        data.result ||
+        (typeof data === 'string' ? data : '');
+      
+      console.log('Texto transcrito extraído:', textoTranscrito);
+      
+      if (!textoTranscrito || textoTranscrito.trim() === '') {
+        console.error('Estrutura da resposta:', data);
+        throw new Error('Não foi possível extrair o texto da resposta. Estrutura: ' + JSON.stringify(data).substring(0, 100));
+      }
 
       // Adiciona ao campo principal se for text/textarea, ou ao campo adicional para outros tipos
       if (tipo === 'text' || tipo === 'textarea') {
