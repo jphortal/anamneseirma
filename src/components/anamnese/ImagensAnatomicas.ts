@@ -8,8 +8,10 @@ export const imagensAnatomicas: Record<TipoFormulario, ImagemAnatomica[]> = {
     { id: 'mao-dorsal', nome: 'Mão - Vista Dorsal', url: '/images/anatomia/mao-dorsal.png' },
   ],
   abdome: [
-    { id: 'abdome-frontal', nome: 'Abdome - Vista Frontal', url: '/images/anatomia/abdome-frontal.png' },
-    { id: 'abdome-orgaos', nome: 'Abdome - Órgãos Internos', url: '/images/anatomia/abdome-orgaos.png' },
+    { id: 'abdome-anterior', nome: 'Abdome - Vista Anterior', url: '/images/anatomia/abdome-anterior.png' },
+    { id: 'abdome-posterior', nome: 'Abdome - Vista Posterior', url: '/images/anatomia/abdome-posterior.png' },
+    { id: 'abdome-lateral-direita', nome: 'Abdome - Vista Lateral Direita', url: '/images/anatomia/abdome-lateral-direita.png' },
+    { id: 'abdome-lateral-esquerda', nome: 'Abdome - Vista Lateral Esquerda', url: '/images/anatomia/abdome-lateral-esquerda.png' },
   ],
   atm: [
     { id: 'atm-lateral', nome: 'ATM - Vista Lateral', url: '/images/anatomia/atm-lateral.png' },
