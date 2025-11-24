@@ -4,6 +4,7 @@ export const imagensAnatomicas: Record<TipoFormulario, ImagemAnatomica[]> = {
   punho: [
     { id: 'punho-frontal', nome: 'Punho - Vista Frontal', url: '/images/anatomia/punho-frontal.png' },
     { id: 'punho-lateral', nome: 'Punho - Vista Lateral', url: '/images/anatomia/punho-lateral.png' },
+    { id: 'punho-medial', nome: 'Punho - Vista Medial', url: '/images/anatomia/punho-medial.png' },
     { id: 'mao-palmar', nome: 'Mão - Vista Palmar', url: '/images/anatomia/mao-palmar.png' },
     { id: 'mao-dorsal', nome: 'Mão - Vista Dorsal', url: '/images/anatomia/mao-dorsal.png' },
   ],
