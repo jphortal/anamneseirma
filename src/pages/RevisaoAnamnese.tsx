@@ -27,6 +27,7 @@ const RevisaoAnamnese = () => {
   const [iaInsights, setIaInsights] = useState<string>('');
   const [carregandoIA, setCarregandoIA] = useState(false);
   const [exportandoPDF, setExportandoPDF] = useState(false);
+  const worklistData = estadoInicial.worklistData || null;
   
   // Camera capture hook
   const { 
@@ -243,12 +244,17 @@ const RevisaoAnamnese = () => {
       // Converter PDF para Blob binário
       const pdfBlob = pdf.output('blob');
       
-      // Criar FormData para enviar arquivo binário
+      // Criar FormData para enviar arquivo binário e dados do worklist
       const uploadFormData = new FormData();
       uploadFormData.append('data', pdfBlob, nomeArquivo);
       
+      // Adicionar dados do worklist como JSON
+      if (worklistData) {
+        uploadFormData.append('worklistData', JSON.stringify(worklistData));
+      }
+      
       // Enviar para a API n8n
-      const response = await fetch('https://jphortal.app.n8n.cloud/webhook-test/f7f28ffd-1d92-445e-b5c2-7b3b038425ef', {
+      const response = await fetch('https://jphortal.app.n8n.cloud/webhook-test/57ed4892-7c1d-4b38-9756-dc611daea8e1', {
         method: 'POST',
         body: uploadFormData
       });
