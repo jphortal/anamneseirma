@@ -356,7 +356,8 @@ const Index = () => {
             exame: `${selectedPatient?.modality || ''} - ${selectedPatient?.procedure || ''}`.trim()
           },
           patientId: selectedPatient?.patientId,
-          patientName: selectedPatient?.name
+          patientName: selectedPatient?.name,
+          worklistData: selectedPatient
         }
       });
     } catch (error) {
@@ -404,7 +405,8 @@ const Index = () => {
             exame: `${selectedPatient?.modality || ''} - ${selectedPatient?.procedure || ''}`.trim()
           },
           patientId: selectedPatient?.patientId,
-          patientName: selectedPatient?.name
+          patientName: selectedPatient?.name,
+          worklistData: selectedPatient
         }
       });
     }
