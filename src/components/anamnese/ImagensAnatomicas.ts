@@ -32,7 +32,9 @@ export const imagensAnatomicas: Record<TipoFormulario, ImagemAnatomica[]> = {
   ],
   cotovelo: [
     { id: 'cotovelo-frontal', nome: 'Cotovelo - Vista Frontal', url: '/images/anatomia/cotovelo-frontal.png' },
+    { id: 'cotovelo-posterior', nome: 'Cotovelo - Vista Posterior', url: '/images/anatomia/cotovelo-posterior.png' },
     { id: 'cotovelo-lateral', nome: 'Cotovelo - Vista Lateral', url: '/images/anatomia/cotovelo-lateral.png' },
+    { id: 'cotovelo-medial', nome: 'Cotovelo - Vista Medial', url: '/images/anatomia/cotovelo-medial.png' },
   ],
   joelho: [
     { id: 'joelho-frontal', nome: 'Joelho - Vista Frontal', url: '/images/anatomia/joelho-frontal.png' },
