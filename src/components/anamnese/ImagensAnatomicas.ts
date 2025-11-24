@@ -19,9 +19,10 @@ export const imagensAnatomicas: Record<TipoFormulario, ImagemAnatomica[]> = {
     { id: 'pescoco-frontal', nome: 'Pescoço - Vista Frontal', url: '/images/anatomia/pescoco-frontal.png' },
   ],
   cabeca: [
-    { id: 'cranio-frontal', nome: 'Crânio - Vista Frontal', url: '/images/anatomia/cranio-frontal.png' },
-    { id: 'cranio-lateral', nome: 'Crânio - Vista Lateral', url: '/images/anatomia/cranio-lateral.png' },
-    { id: 'cerebro-corte', nome: 'Cérebro - Corte Sagital', url: '/images/anatomia/cerebro-corte.png' },
+    { id: 'cranio-frontal', nome: 'Cabeça - Vista Anterior', url: '/images/anatomia/cranio-frontal.png' },
+    { id: 'cranio-posterior', nome: 'Cabeça - Vista Posterior', url: '/images/anatomia/cranio-posterior.png' },
+    { id: 'cranio-lateral-direita', nome: 'Cabeça - Vista Lateral Direita', url: '/images/anatomia/cranio-lateral-direita.png' },
+    { id: 'cranio-lateral-esquerda', nome: 'Cabeça - Vista Lateral Esquerda', url: '/images/anatomia/cranio-lateral-esquerda.png' },
   ],
   coluna: [
     { id: 'coluna-cervical', nome: 'Coluna Cervical', url: '/images/anatomia/coluna-cervical.png' },
