@@ -32,7 +32,7 @@ export const CanvasMarcacao = ({
 
     // Carregar imagem anatômica real
     const img = new Image();
-    img.src = imagemSelecionada.url;
+    img.src = `${imagemSelecionada.url}?t=${Date.now()}`;
     img.onload = () => {
       // Limpar canvas
       ctx.fillStyle = '#FFFFFF';
@@ -133,7 +133,7 @@ export const CanvasMarcacao = ({
 
     // Recarregar imagem base
     const img = new Image();
-    img.src = imagemSelecionada.url;
+    img.src = `${imagemSelecionada.url}?t=${Date.now()}`;
     img.onload = () => {
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
