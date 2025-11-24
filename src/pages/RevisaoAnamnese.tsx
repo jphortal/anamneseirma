@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { salvarAnamneseNoHistorico } from '@/components/anamnese/HistoricoAnamneses';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -135,6 +136,10 @@ const RevisaoAnamnese = () => {
       // });
 
       console.log('Payload para salvar:', payload);
+      
+      // Salvar no histórico
+      salvarAnamneseNoHistorico(tipoFormulario, formData, worklistData);
+
       toast({
         title: 'Sucesso',
         description: 'Anamnese salva com sucesso!'

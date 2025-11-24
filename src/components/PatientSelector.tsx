@@ -8,6 +8,8 @@ import { Patient } from '@/types/medical';
 import { Loader2, Database } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { WorklistDataDisplay } from './WorklistDataDisplay';
+import { HistoricoAnamneses } from './anamnese/HistoricoAnamneses';
+import { useNavigate } from 'react-router-dom';
 interface PatientSelectorProps {
   worklistUrl: string;
   onSelectPatient: (patient: Patient) => void;
@@ -16,6 +18,7 @@ export const PatientSelector = ({
   worklistUrl,
   onSelectPatient
 }: PatientSelectorProps) => {
+  const navigate = useNavigate();
   const [prontuario, setProntuario] = useState('');
   const [loading, setLoading] = useState(false);
   const [exams, setExams] = useState<Patient[]>([]);
@@ -24,6 +27,16 @@ export const PatientSelector = ({
   const {
     toast
   } = useToast();
+
+  const handleCarregarAnamnese = (anamnese: any) => {
+    navigate('/revisao-anamnese', {
+      state: {
+        tipo: anamnese.tipo,
+        dados: anamnese.dados,
+        worklistData: anamnese.worklistData
+      }
+    });
+  };
   const fetchPatient = async () => {
     if (!prontuario.trim()) {
       toast({
@@ -93,7 +106,9 @@ export const PatientSelector = ({
     />;
   }
 
-  return <Card className="w-full max-w-2xl mx-auto">
+  return (
+    <>
+      <Card className="w-full max-w-2xl mx-auto">
       <CardHeader className="bg-[#2cdb2c]">
         <div className="flex justify-between items-center">
           <div>
@@ -157,5 +172,9 @@ export const PatientSelector = ({
             </Button>
           </div>}
       </CardContent>
-    </Card>;
+    </Card>
+    
+    <HistoricoAnamneses onCarregarAnamnese={handleCarregarAnamnese} />
+    </>
+  );
 };
