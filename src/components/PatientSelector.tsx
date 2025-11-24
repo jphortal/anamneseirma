@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Patient } from '@/types/medical';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Database } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { WorklistDataDisplay } from './WorklistDataDisplay';
 interface PatientSelectorProps {
   worklistUrl: string;
   onSelectPatient: (patient: Patient) => void;
@@ -18,6 +19,8 @@ export const PatientSelector = ({
   const [prontuario, setProntuario] = useState('');
   const [loading, setLoading] = useState(false);
   const [exams, setExams] = useState<Patient[]>([]);
+  const [rawWorklistData, setRawWorklistData] = useState<any[]>([]);
+  const [showWorklistData, setShowWorklistData] = useState(false);
   const {
     toast
   } = useToast();
@@ -45,6 +48,10 @@ export const PatientSelector = ({
 
       // Map n8n response to Patient interface
       const patientList = Array.isArray(data) ? data : [data];
+      
+      // Armazenar dados brutos para visualização
+      setRawWorklistData(patientList);
+      
       if (!patientList || patientList.length === 0) {
         toast({
           title: 'Paciente não encontrado',
@@ -79,12 +86,33 @@ export const PatientSelector = ({
       setLoading(false);
     }
   };
+  if (showWorklistData && rawWorklistData.length > 0) {
+    return <WorklistDataDisplay 
+      data={rawWorklistData} 
+      onClose={() => setShowWorklistData(false)}
+    />;
+  }
+
   return <Card className="w-full max-w-2xl mx-auto">
       <CardHeader className="bg-[#2cdb2c]">
-        <CardTitle>Buscar Paciente</CardTitle>
-        <CardDescription>
-          {exams.length === 0 ? 'Informe o número do prontuário para iniciar o atendimento' : 'Selecione o exame desejado'}
-        </CardDescription>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>Buscar Paciente</CardTitle>
+            <CardDescription>
+              {exams.length === 0 ? 'Informe o número do prontuário para iniciar o atendimento' : 'Selecione o exame desejado'}
+            </CardDescription>
+          </div>
+          {rawWorklistData.length > 0 && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowWorklistData(true)}
+            >
+              <Database className="mr-2 h-4 w-4" />
+              Ver Dados Worklist
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="bg-[#2cd92c]">
         {exams.length === 0 ? <div className="space-y-4">
