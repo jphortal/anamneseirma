@@ -139,11 +139,6 @@ const RevisaoAnamnese = () => {
         title: 'Sucesso',
         description: 'Anamnese salva com sucesso!'
       });
-
-      // Redirecionar para dashboard ou próxima página
-      setTimeout(() => {
-        navigate('/');
-      }, 1500);
     } catch (error) {
       console.error('Erro ao salvar:', error);
       toast({
