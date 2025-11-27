@@ -325,14 +325,16 @@ const RevisaoAnamnese = () => {
         el.style.cssText = style;
       });
       
-      const imgData = canvas.toDataURL('image/png');
+      // Usar JPEG com compressão para reduzir tamanho do arquivo
+      const imgData = canvas.toDataURL('image/jpeg', 0.85);
       
       // Armazenar a imagem para preview
       setPdfPreviewImage(imgData);
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4'
+        format: 'a4',
+        compress: true
       });
       const imgWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
