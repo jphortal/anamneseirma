@@ -259,26 +259,21 @@ const RevisaoAnamnese = () => {
         
         // Copia estilos computados relevantes
         const computedStyle = window.getComputedStyle(inputEl);
-        const paddingTop = parseFloat(computedStyle.paddingTop) || 8;
-        const paddingBottom = parseFloat(computedStyle.paddingBottom) || 8;
-        const paddingLeft = parseFloat(computedStyle.paddingLeft) || 12;
-        const paddingRight = parseFloat(computedStyle.paddingRight) || 12;
         
         div.style.cssText = inputEl.style.cssText;
         div.style.width = computedStyle.width;
         div.style.minHeight = computedStyle.height;
-        div.style.paddingTop = paddingTop + 'px';
-        div.style.paddingBottom = paddingBottom + 'px';
-        div.style.paddingLeft = paddingLeft + 'px';
-        div.style.paddingRight = paddingRight + 'px';
+        div.style.padding = '12px';
         div.style.border = computedStyle.border || '1px solid #ccc';
         div.style.borderRadius = computedStyle.borderRadius;
         div.style.backgroundColor = computedStyle.backgroundColor;
         div.style.color = computedStyle.color;
         div.style.fontSize = computedStyle.fontSize || '14px';
         div.style.fontFamily = computedStyle.fontFamily;
-        div.style.lineHeight = '1.5';
-        div.style.display = 'block';
+        div.style.lineHeight = computedStyle.lineHeight;
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
+        div.style.justifyContent = 'flex-start';
         div.style.boxSizing = 'border-box';
         div.style.overflow = 'visible';
         
