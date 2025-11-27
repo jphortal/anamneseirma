@@ -4,13 +4,14 @@ import { salvarAnamneseNoHistorico } from '@/components/anamnese/HistoricoAnamne
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Save, FileText, X, ArrowLeft, Sparkles, Camera, Trash2 } from 'lucide-react';
+import { Save, FileText, X, ArrowLeft, Sparkles, Camera, Trash2, Eye, Send } from 'lucide-react';
 import { useCameraCapture } from '@/hooks/useCameraCapture';
 import { TipoFormulario, FormData as AnamneseFormData, AnamneseData } from '@/types/anamnese';
 import { FormularioDinamico } from '@/components/anamnese/FormularioDinamico';
 import { CanvasMarcacao } from '@/components/anamnese/CanvasMarcacao';
 import { InfoTecnica } from '@/components/anamnese/InfoTecnica';
 import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 const RevisaoAnamnese = () => {
@@ -27,7 +28,12 @@ const RevisaoAnamnese = () => {
   const [salvando, setSalvando] = useState(false);
   const [iaInsights, setIaInsights] = useState<string>('');
   const [carregandoIA, setCarregandoIA] = useState(false);
-  const [exportandoPDF, setExportandoPDF] = useState(false);
+  const [gerandoPreview, setGerandoPreview] = useState(false);
+  const [enviandoPDF, setEnviandoPDF] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string>('');
+  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+  const [pdfNomeArquivo, setPdfNomeArquivo] = useState<string>('');
   const worklistData = estadoInicial.worklistData || null;
   
   // Camera capture hook
@@ -155,9 +161,9 @@ const RevisaoAnamnese = () => {
       setSalvando(false);
     }
   };
-  const handleExportarPDF = async () => {
+  const handleGerarPreviewPDF = async () => {
     if (!contentRef.current) return;
-    setExportandoPDF(true);
+    setGerandoPreview(true);
     
     try {
       // Expandir todos os elementos colapsáveis antes de gerar PDF
@@ -242,11 +248,42 @@ const RevisaoAnamnese = () => {
       const nomeArquivo = `Anamnese_${tipoFormulario}_${(formData as any).nome || (formData as any).paciente || 'paciente'}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
       
       // Converter PDF para Blob binário
-      const pdfBlob = pdf.output('blob');
+      const generatedPdfBlob = pdf.output('blob');
       
+      // Criar URL para preview
+      const previewUrl = URL.createObjectURL(generatedPdfBlob);
+      
+      // Armazenar dados para envio posterior
+      setPdfBlob(generatedPdfBlob);
+      setPdfNomeArquivo(nomeArquivo);
+      setPdfPreviewUrl(previewUrl);
+      setShowPreview(true);
+
+      toast({
+        title: 'Preview gerado',
+        description: 'Revise o PDF antes de enviar'
+      });
+    } catch (error) {
+      console.error('Erro ao gerar preview do PDF:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível gerar o preview do PDF',
+        variant: 'destructive'
+      });
+    } finally {
+      setGerandoPreview(false);
+    }
+  };
+
+  const handleEnviarPDF = async () => {
+    if (!pdfBlob || !pdfNomeArquivo) return;
+    
+    setEnviandoPDF(true);
+    
+    try {
       // Criar FormData para enviar arquivo binário e dados do worklist
       const uploadFormData = new FormData();
-      uploadFormData.append('data', pdfBlob, nomeArquivo);
+      uploadFormData.append('data', pdfBlob, pdfNomeArquivo);
       
       // Adicionar dados do worklist como JSON
       if (worklistData) {
@@ -267,16 +304,29 @@ const RevisaoAnamnese = () => {
         title: 'Sucesso',
         description: 'PDF enviado com sucesso para o sistema!'
       });
+      
+      // Fechar preview e limpar dados
+      handleFecharPreview();
     } catch (error) {
-      console.error('Erro ao exportar PDF:', error);
+      console.error('Erro ao enviar PDF:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível enviar o PDF',
         variant: 'destructive'
       });
     } finally {
-      setExportandoPDF(false);
+      setEnviandoPDF(false);
     }
+  };
+
+  const handleFecharPreview = () => {
+    setShowPreview(false);
+    if (pdfPreviewUrl) {
+      URL.revokeObjectURL(pdfPreviewUrl);
+    }
+    setPdfPreviewUrl('');
+    setPdfBlob(null);
+    setPdfNomeArquivo('');
   };
   const handleCancelar = () => {
     if (confirm('Deseja realmente cancelar? As alterações não salvas serão perdidas.')) {
@@ -517,9 +567,9 @@ const RevisaoAnamnese = () => {
             Cancelar
           </Button>
 
-          <Button onClick={handleExportarPDF} variant="outline" disabled={salvando || exportandoPDF}>
-            <FileText className="h-4 w-4 mr-2" />
-            {exportandoPDF ? 'Exportando...' : 'Exportar PDF'}
+          <Button onClick={handleGerarPreviewPDF} variant="outline" disabled={salvando || gerandoPreview}>
+            <Eye className="h-4 w-4 mr-2" />
+            {gerandoPreview ? 'Gerando Preview...' : 'Preview e Exportar PDF'}
           </Button>
 
           <Button onClick={handleSalvar} disabled={salvando} className="min-w-[150px]">
@@ -530,6 +580,53 @@ const RevisaoAnamnese = () => {
           </Button>
         </div>
       </div>
+
+      {/* Dialog de Preview do PDF */}
+      <Dialog open={showPreview} onOpenChange={(open) => !open && handleFecharPreview()}>
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Preview do PDF</DialogTitle>
+            <DialogDescription>
+              Revise o documento antes de enviar. Role para ver todo o conteúdo.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-auto border rounded-lg bg-muted/20">
+            {pdfPreviewUrl && (
+              <iframe
+                src={pdfPreviewUrl}
+                className="w-full h-[70vh] rounded"
+                title="Preview do PDF"
+              />
+            )}
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={handleFecharPreview}
+              disabled={enviandoPDF}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleEnviarPDF}
+              disabled={enviandoPDF}
+              className="min-w-[150px]"
+            >
+              {enviandoPDF ? (
+                <>Enviando...</>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Confirmar e Enviar
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>;
 };
 export default RevisaoAnamnese;
