@@ -251,16 +251,39 @@ const RevisaoAnamnese = () => {
         htmlEl.style.wordWrap = 'break-word';
       });
       
-      // Ajustar inputs para mostrar valores
-      const inputs = content.querySelectorAll('input[type="text"], input[type="number"]');
-      inputs.forEach(input => {
-        const htmlEl = input as HTMLInputElement;
-        if (!originalStyles.has(htmlEl)) {
-          originalStyles.set(htmlEl, htmlEl.style.cssText);
-        }
-        htmlEl.style.border = '1px solid #ccc';
-        htmlEl.style.padding = '8px';
-        htmlEl.style.fontSize = '14px';
+      // Substituir inputs por divs para garantir renderização correta no PDF
+      const inputsMap = new Map<HTMLInputElement, HTMLDivElement>();
+      content.querySelectorAll('input[type="text"], input[type="number"]').forEach((input: any) => {
+        const inputEl = input as HTMLInputElement;
+        const div = document.createElement('div');
+        
+        // Copia estilos computados relevantes
+        const computedStyle = window.getComputedStyle(inputEl);
+        div.style.cssText = inputEl.style.cssText;
+        div.style.width = computedStyle.width;
+        div.style.height = computedStyle.height;
+        div.style.padding = computedStyle.padding;
+        div.style.border = computedStyle.border || '1px solid #ccc';
+        div.style.borderRadius = computedStyle.borderRadius;
+        div.style.backgroundColor = computedStyle.backgroundColor;
+        div.style.color = computedStyle.color;
+        div.style.fontSize = computedStyle.fontSize || '14px';
+        div.style.fontFamily = computedStyle.fontFamily;
+        div.style.lineHeight = computedStyle.lineHeight;
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
+        div.style.boxSizing = 'border-box';
+        div.style.overflow = 'visible';
+        
+        // Copia o valor
+        div.textContent = inputEl.value;
+        
+        // Copia classes
+        div.className = inputEl.className;
+        
+        // Substitui no DOM
+        inputEl.parentNode?.replaceChild(div, inputEl);
+        inputsMap.set(inputEl, div);
       });
       
       // Aguardar renderização
@@ -283,6 +306,11 @@ const RevisaoAnamnese = () => {
             (btn as HTMLElement).style.display = 'none';
           });
         }
+      });
+      
+      // Restaurar inputs originais
+      inputsMap.forEach((div, input) => {
+        div.parentNode?.replaceChild(input, div);
       });
       
       // Restaurar textareas originais
