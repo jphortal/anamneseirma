@@ -32,6 +32,7 @@ const RevisaoAnamnese = () => {
   const [enviandoPDF, setEnviandoPDF] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string>('');
+  const [pdfPreviewImage, setPdfPreviewImage] = useState<string>('');
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [pdfNomeArquivo, setPdfNomeArquivo] = useState<string>('');
   const worklistData = estadoInicial.worklistData || null;
@@ -222,6 +223,9 @@ const RevisaoAnamnese = () => {
       });
       
       const imgData = canvas.toDataURL('image/png');
+      
+      // Armazenar a imagem para preview
+      setPdfPreviewImage(imgData);
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -325,8 +329,26 @@ const RevisaoAnamnese = () => {
       URL.revokeObjectURL(pdfPreviewUrl);
     }
     setPdfPreviewUrl('');
+    setPdfPreviewImage('');
     setPdfBlob(null);
     setPdfNomeArquivo('');
+  };
+
+  const handleAbrirPDFNovaAba = () => {
+    if (pdfPreviewUrl) {
+      window.open(pdfPreviewUrl, '_blank');
+    }
+  };
+
+  const handleBaixarPDF = () => {
+    if (pdfPreviewUrl && pdfNomeArquivo) {
+      const link = document.createElement('a');
+      link.href = pdfPreviewUrl;
+      link.download = pdfNomeArquivo;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
   const handleCancelar = () => {
     if (confirm('Deseja realmente cancelar? As alterações não salvas serão perdidas.')) {
@@ -583,26 +605,44 @@ const RevisaoAnamnese = () => {
 
       {/* Dialog de Preview do PDF */}
       <Dialog open={showPreview} onOpenChange={(open) => !open && handleFecharPreview()}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Preview do PDF</DialogTitle>
             <DialogDescription>
-              Revise o documento antes de enviar. Role para ver todo o conteúdo.
+              Revise o documento antes de enviar. Use os botões abaixo para visualizar ou baixar o PDF completo.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="flex-1 overflow-auto border rounded-lg bg-muted/20">
-            {pdfPreviewUrl && (
-              <embed
-                src={`${pdfPreviewUrl}#toolbar=1&navpanes=1&scrollbar=1`}
-                type="application/pdf"
-                className="w-full h-[70vh] rounded"
-                title="Preview do PDF"
+          <div className="flex gap-2 mb-4">
+            <Button
+              variant="outline"
+              onClick={handleAbrirPDFNovaAba}
+              className="flex-1"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Abrir PDF em Nova Aba
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleBaixarPDF}
+              className="flex-1"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Baixar PDF
+            </Button>
+          </div>
+          
+          <div className="flex-1 overflow-auto border rounded-lg bg-white p-4">
+            {pdfPreviewImage && (
+              <img
+                src={pdfPreviewImage}
+                alt="Preview do documento"
+                className="w-full h-auto"
               />
             )}
           </div>
 
-          <DialogFooter className="gap-2">
+          <DialogFooter className="gap-2 mt-4">
             <Button
               variant="outline"
               onClick={handleFecharPreview}
