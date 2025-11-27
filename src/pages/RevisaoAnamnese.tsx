@@ -388,13 +388,31 @@ const RevisaoAnamnese = () => {
     setEnviandoPDF(true);
     
     try {
-      // Criar FormData para enviar arquivo binário e dados do worklist
+      // Criar FormData no formato esperado pelo n8n
       const uploadFormData = new FormData();
-      uploadFormData.append('data', pdfBlob, pdfNomeArquivo);
       
-      // Adicionar dados do worklist como JSON
+      // Anexar o arquivo PDF
+      uploadFormData.append('file', pdfBlob, pdfNomeArquivo);
+      
+      // Adicionar campos individuais dos dados do worklist
       if (worklistData) {
-        uploadFormData.append('worklistData', JSON.stringify(worklistData));
+        uploadFormData.append('patient_id', worklistData.patientId || '');
+        uploadFormData.append('patient_name', worklistData.name || worklistData.ds_paciente || '');
+        uploadFormData.append('accession_number', worklistData.nr_controle || worklistData.cd_atendimento || '');
+        
+        // Campos adicionais do worklist que podem ser úteis
+        if (worklistData.studyDescription) {
+          uploadFormData.append('study_description', worklistData.studyDescription);
+        }
+        if (worklistData.modality) {
+          uploadFormData.append('modality', worklistData.modality);
+        }
+        if (worklistData.procedure || worklistData.ds_procedimento) {
+          uploadFormData.append('procedure', worklistData.procedure || worklistData.ds_procedimento || '');
+        }
+        if (worklistData.birthDate) {
+          uploadFormData.append('birth_date', worklistData.birthDate);
+        }
       }
       
       // Enviar para a API n8n
