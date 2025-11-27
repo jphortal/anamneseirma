@@ -203,34 +203,53 @@ const RevisaoAnamnese = () => {
         htmlEl.style.display = 'block';
       });
       
-      // Ajustar textareas e divs com texto para mostrar todo o conteúdo
-      const textareas = content.querySelectorAll('textarea, [class*="whitespace-pre-wrap"]');
-      textareas.forEach(el => {
-        const htmlEl = el as HTMLElement;
-        if (!originalStyles.has(htmlEl)) {
-          originalStyles.set(htmlEl, htmlEl.style.cssText);
-        }
-        htmlEl.style.height = 'auto';
-        htmlEl.style.maxHeight = 'none';
-        htmlEl.style.overflow = 'visible';
-        htmlEl.style.whiteSpace = 'pre-wrap';
-        htmlEl.style.wordWrap = 'break-word';
+      // Substituir textareas por divs com o texto (html2canvas não renderiza textareas bem)
+      const textareaReplacements = new Map<HTMLTextAreaElement, HTMLDivElement>();
+      const textareas = content.querySelectorAll('textarea');
+      textareas.forEach(textarea => {
+        const ta = textarea as HTMLTextAreaElement;
+        const div = document.createElement('div');
+        div.textContent = ta.value;
+        div.style.cssText = window.getComputedStyle(ta).cssText;
+        div.style.whiteSpace = 'pre-wrap';
+        div.style.wordWrap = 'break-word';
+        div.style.overflow = 'visible';
+        div.style.height = 'auto';
+        div.style.minHeight = ta.scrollHeight + 'px';
+        div.style.border = '1px solid #e5e7eb';
+        div.style.borderRadius = '6px';
+        div.style.padding = '12px';
+        div.style.fontSize = '14px';
+        div.style.lineHeight = '1.5';
+        div.style.fontFamily = 'inherit';
+        div.style.backgroundColor = '#ffffff';
         
-        if (el instanceof HTMLTextAreaElement) {
-          htmlEl.style.height = el.scrollHeight + 20 + 'px';
-        }
+        ta.parentNode?.insertBefore(div, ta);
+        ta.style.display = 'none';
+        textareaReplacements.set(ta, div);
       });
       
-      // Ajustar inputs para mostrar valores
+      // Substituir inputs por divs com o valor
+      const inputReplacements = new Map<HTMLInputElement, HTMLDivElement>();
       const inputs = content.querySelectorAll('input[type="text"], input[type="number"]');
       inputs.forEach(input => {
-        const htmlEl = input as HTMLInputElement;
-        if (!originalStyles.has(htmlEl)) {
-          originalStyles.set(htmlEl, htmlEl.style.cssText);
-        }
-        htmlEl.style.border = '1px solid #ccc';
-        htmlEl.style.padding = '8px';
-        htmlEl.style.fontSize = '14px';
+        const inp = input as HTMLInputElement;
+        const div = document.createElement('div');
+        div.textContent = inp.value;
+        div.style.cssText = window.getComputedStyle(inp).cssText;
+        div.style.display = 'inline-block';
+        div.style.border = '1px solid #e5e7eb';
+        div.style.borderRadius = '6px';
+        div.style.padding = '8px 12px';
+        div.style.fontSize = '14px';
+        div.style.lineHeight = '1.5';
+        div.style.fontFamily = 'inherit';
+        div.style.backgroundColor = '#ffffff';
+        div.style.minWidth = inp.offsetWidth + 'px';
+        
+        inp.parentNode?.insertBefore(div, inp);
+        inp.style.display = 'none';
+        inputReplacements.set(inp, div);
       });
       
       // Aguardar renderização
@@ -253,6 +272,17 @@ const RevisaoAnamnese = () => {
             (btn as HTMLElement).style.display = 'none';
           });
         }
+      });
+      
+      // Restaurar textareas e inputs originais
+      textareaReplacements.forEach((div, textarea) => {
+        textarea.style.display = '';
+        div.remove();
+      });
+      
+      inputReplacements.forEach((div, input) => {
+        input.style.display = '';
+        div.remove();
       });
       
       // Restaurar estilos originais
