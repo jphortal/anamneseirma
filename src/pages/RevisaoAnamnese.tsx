@@ -203,9 +203,43 @@ const RevisaoAnamnese = () => {
         htmlEl.style.display = 'block';
       });
       
-      // Ajustar textareas e divs com texto para mostrar todo o conteúdo
-      const textareas = content.querySelectorAll('textarea, [class*="whitespace-pre-wrap"]');
-      textareas.forEach(el => {
+      // Substituir textareas por divs para garantir renderização correta no PDF
+      const textareasMap = new Map<HTMLTextAreaElement, HTMLDivElement>();
+      content.querySelectorAll('textarea').forEach((textarea: any) => {
+        const textareaEl = textarea as HTMLTextAreaElement;
+        const div = document.createElement('div');
+        
+        // Copia estilos computados relevantes
+        const computedStyle = window.getComputedStyle(textareaEl);
+        div.style.cssText = textareaEl.style.cssText;
+        div.style.width = computedStyle.width;
+        div.style.minHeight = computedStyle.minHeight;
+        div.style.padding = computedStyle.padding;
+        div.style.border = computedStyle.border;
+        div.style.borderRadius = computedStyle.borderRadius;
+        div.style.backgroundColor = computedStyle.backgroundColor;
+        div.style.color = computedStyle.color;
+        div.style.fontSize = computedStyle.fontSize;
+        div.style.fontFamily = computedStyle.fontFamily;
+        div.style.lineHeight = computedStyle.lineHeight;
+        div.style.whiteSpace = 'pre-wrap';
+        div.style.wordWrap = 'break-word';
+        div.style.overflow = 'visible';
+        div.style.boxSizing = 'border-box';
+        
+        // Copia o conteúdo
+        div.textContent = textareaEl.value;
+        
+        // Copia classes
+        div.className = textareaEl.className;
+        
+        // Substitui no DOM
+        textareaEl.parentNode?.replaceChild(div, textareaEl);
+        textareasMap.set(textareaEl, div);
+      });
+      
+      // Ajustar divs com texto para mostrar todo o conteúdo
+      content.querySelectorAll('[class*="whitespace-pre-wrap"]').forEach(el => {
         const htmlEl = el as HTMLElement;
         if (!originalStyles.has(htmlEl)) {
           originalStyles.set(htmlEl, htmlEl.style.cssText);
@@ -215,10 +249,6 @@ const RevisaoAnamnese = () => {
         htmlEl.style.overflow = 'visible';
         htmlEl.style.whiteSpace = 'pre-wrap';
         htmlEl.style.wordWrap = 'break-word';
-        
-        if (el instanceof HTMLTextAreaElement) {
-          htmlEl.style.height = el.scrollHeight + 20 + 'px';
-        }
       });
       
       // Ajustar inputs para mostrar valores
@@ -253,6 +283,11 @@ const RevisaoAnamnese = () => {
             (btn as HTMLElement).style.display = 'none';
           });
         }
+      });
+      
+      // Restaurar textareas originais
+      textareasMap.forEach((div, textarea) => {
+        div.parentNode?.replaceChild(textarea, div);
       });
       
       // Restaurar estilos originais
