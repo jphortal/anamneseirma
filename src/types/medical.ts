@@ -11,6 +11,9 @@ export interface Patient {
   cd_atendimento?: string;
   ds_modalidade?: string;
   ds_procedimento?: string;
+  dt_data?: string;
+  cd_paciente?: string;
+  cd_exame?: string;
 }
 
 export interface Message {
