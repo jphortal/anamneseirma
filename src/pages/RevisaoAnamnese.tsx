@@ -388,38 +388,76 @@ const RevisaoAnamnese = () => {
     setEnviandoPDF(true);
     
     try {
+      // Log dos dados do worklist para debugging
+      console.log('=== DADOS DO WORKLIST ===');
+      console.log('worklistData completo:', worklistData);
+      
       // Criar FormData no formato esperado pelo n8n
       const uploadFormData = new FormData();
       
       // Anexar o arquivo PDF
       uploadFormData.append('file', pdfBlob, pdfNomeArquivo);
+      console.log('PDF anexado:', pdfNomeArquivo, 'Tamanho:', pdfBlob.size, 'bytes');
       
       // Adicionar campos individuais dos dados do worklist
       if (worklistData) {
-        uploadFormData.append('patient_id', worklistData.patientId || '');
-        uploadFormData.append('patient_name', worklistData.name || worklistData.ds_paciente || '');
-        uploadFormData.append('accession_number', worklistData.nr_controle || worklistData.cd_atendimento || '');
+        const patientId = worklistData.patientId || worklistData.id || '';
+        const patientName = worklistData.name || worklistData.ds_paciente || '';
+        const accessionNumber = worklistData.nr_controle || worklistData.cd_atendimento || '';
+        
+        uploadFormData.append('patient_id', patientId);
+        uploadFormData.append('patient_name', patientName);
+        uploadFormData.append('accession_number', accessionNumber);
+        
+        console.log('Campos básicos adicionados:');
+        console.log('- patient_id:', patientId);
+        console.log('- patient_name:', patientName);
+        console.log('- accession_number:', accessionNumber);
         
         // Campos adicionais do worklist que podem ser úteis
-        if (worklistData.studyDescription) {
-          uploadFormData.append('study_description', worklistData.studyDescription);
+        if (worklistData.studyDescription || worklistData.ds_procedimento) {
+          const studyDesc = worklistData.studyDescription || worklistData.ds_procedimento || '';
+          uploadFormData.append('study_description', studyDesc);
+          console.log('- study_description:', studyDesc);
         }
-        if (worklistData.modality) {
-          uploadFormData.append('modality', worklistData.modality);
+        if (worklistData.modality || worklistData.ds_modalidade) {
+          const modality = worklistData.modality || worklistData.ds_modalidade || '';
+          uploadFormData.append('modality', modality);
+          console.log('- modality:', modality);
         }
         if (worklistData.procedure || worklistData.ds_procedimento) {
-          uploadFormData.append('procedure', worklistData.procedure || worklistData.ds_procedimento || '');
+          const procedure = worklistData.procedure || worklistData.ds_procedimento || '';
+          uploadFormData.append('procedure', procedure);
+          console.log('- procedure:', procedure);
         }
         if (worklistData.birthDate) {
           uploadFormData.append('birth_date', worklistData.birthDate);
+          console.log('- birth_date:', worklistData.birthDate);
+        }
+      } else {
+        console.warn('⚠️ ATENÇÃO: worklistData está vazio ou indefinido!');
+      }
+      
+      // Log de todos os campos do FormData
+      console.log('=== FORMDATA COMPLETO ===');
+      for (const [key, value] of uploadFormData.entries()) {
+        if (value instanceof Blob) {
+          console.log(`${key}: [Blob] ${value.size} bytes`);
+        } else {
+          console.log(`${key}: ${value}`);
         }
       }
       
       // Enviar para a API n8n
+      console.log('=== ENVIANDO PARA N8N ===');
       const response = await fetch('https://jphortal.app.n8n.cloud/webhook-test/57ed4892-7c1d-4b38-9756-dc611daea8e1', {
         method: 'POST',
         body: uploadFormData
       });
+
+      console.log('Resposta do n8n - Status:', response.status);
+      const responseData = await response.json();
+      console.log('Resposta do n8n - Body:', responseData);
 
       if (!response.ok) {
         throw new Error(`Erro ao enviar PDF: ${response.status}`);
