@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Edit2, Check, X, Mic, Square } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,6 +34,24 @@ export const CampoEditavel = ({
   const [valorTemp, setValorTemp] = useState(value);
   const [textoAdicional, setTextoAdicional] = useState('');
   const [transcrevendo, setTranscrevendo] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaAdicionalRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea
+  const autoResizeTextarea = (element: HTMLTextAreaElement | null) => {
+    if (element) {
+      element.style.height = 'auto';
+      element.style.height = element.scrollHeight + 'px';
+    }
+  };
+
+  useEffect(() => {
+    autoResizeTextarea(textareaRef.current);
+  }, [valorTemp]);
+
+  useEffect(() => {
+    autoResizeTextarea(textareaAdicionalRef.current);
+  }, [textoAdicional]);
   const {
     isRecording,
     audioBlob,
@@ -172,10 +190,11 @@ export const CampoEditavel = ({
     if (!editando && !sempreAberto) {
       const displayValue = Array.isArray(value) ? value.join(', ') : value || '';
       const isLongText = displayValue.length > 50;
+      const calculatedRows = Math.min(Math.ceil(displayValue.length / 50), 20);
       return <div className="space-y-2">
           <Label className="text-sm font-medium">{label}</Label>
           <div className="flex gap-2">
-            {isLongText ? <Textarea value={displayValue} disabled className="flex-1 min-h-[60px] resize-none" rows={Math.min(Math.ceil(displayValue.length / 50), 10)} /> : <Input value={displayValue} disabled className="flex-1" />}
+            {isLongText ? <Textarea value={displayValue} disabled className="flex-1 min-h-[80px] resize-none text-base overflow-hidden" rows={calculatedRows} style={{ height: 'auto' }} /> : <Input value={displayValue} disabled className="flex-1 text-base" />}
             <Button variant="ghost" size="icon" onClick={() => setEditando(true)} className="self-start">
               <Edit2 className="h-4 w-4" />
             </Button>
@@ -190,7 +209,7 @@ export const CampoEditavel = ({
 
         <div className="mt-2 space-y-2">
           {tipo === 'text' && <div className="flex gap-2">
-              <Input value={valorTemp as string} onChange={e => setValorTemp(e.target.value)} className="w-full" />
+              <Input value={valorTemp as string} onChange={e => setValorTemp(e.target.value)} className="w-full text-base" />
               <Button type="button" size="icon" variant={isRecording ? 'destructive' : 'outline'} onClick={handleMicClick} disabled={transcrevendo}>
                 {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
               </Button>
@@ -198,7 +217,16 @@ export const CampoEditavel = ({
 
           {tipo === 'textarea' && <div className="space-y-2">
               <div className="flex gap-2">
-                <Textarea value={valorTemp as string} onChange={e => setValorTemp(e.target.value)} rows={rows} className="w-full" />
+                <Textarea 
+                  ref={textareaRef}
+                  value={valorTemp as string} 
+                  onChange={e => {
+                    setValorTemp(e.target.value);
+                    autoResizeTextarea(e.target);
+                  }} 
+                  className="w-full text-base resize-none overflow-hidden min-h-[100px]" 
+                  style={{ height: 'auto' }}
+                />
                 <Button type="button" size="icon" variant={isRecording ? 'destructive' : 'outline'} onClick={handleMicClick} disabled={transcrevendo}>
                   {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>
@@ -224,7 +252,17 @@ export const CampoEditavel = ({
               {permiteTextoAdicional && <div className="mt-2 space-y-2">
                   <Label className="text-xs text-muted-foreground">Observações adicionais</Label>
                   <div className="flex gap-2">
-                    <Textarea value={textoAdicional} onChange={e => setTextoAdicional(e.target.value)} rows={2} className="w-full" placeholder="Adicione detalhes se necessário..." />
+                    <Textarea 
+                      ref={textareaAdicionalRef}
+                      value={textoAdicional} 
+                      onChange={e => {
+                        setTextoAdicional(e.target.value);
+                        autoResizeTextarea(e.target);
+                      }} 
+                      className="w-full text-base resize-none overflow-hidden min-h-[60px]" 
+                      placeholder="Adicione detalhes se necessário..."
+                      style={{ height: 'auto' }}
+                    />
                     <Button type="button" size="icon" variant={isRecording ? 'destructive' : 'outline'} onClick={handleMicClick} disabled={transcrevendo}>
                       {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                     </Button>
@@ -252,7 +290,16 @@ export const CampoEditavel = ({
               {permiteTextoAdicional && <div className="mt-2 space-y-2">
                   <Label className="text-xs text-muted-foreground">Observações adicionais</Label>
                   <div className="flex gap-2">
-                    <Textarea value={textoAdicional} onChange={e => setTextoAdicional(e.target.value)} rows={2} className="w-full" placeholder="Adicione detalhes se necessário..." />
+                    <Textarea 
+                      value={textoAdicional} 
+                      onChange={e => {
+                        setTextoAdicional(e.target.value);
+                        autoResizeTextarea(e.target);
+                      }} 
+                      className="w-full text-base resize-none overflow-hidden min-h-[60px]" 
+                      placeholder="Adicione detalhes se necessário..."
+                      style={{ height: 'auto' }}
+                    />
                     <Button type="button" size="icon" variant={isRecording ? 'destructive' : 'outline'} onClick={handleMicClick} disabled={transcrevendo}>
                       {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                     </Button>
@@ -273,7 +320,16 @@ export const CampoEditavel = ({
               {permiteTextoAdicional && <div className="mt-2 space-y-2">
                   <Label className="text-xs text-muted-foreground">Observações adicionais</Label>
                   <div className="flex gap-2">
-                    <Textarea value={textoAdicional} onChange={e => setTextoAdicional(e.target.value)} rows={2} className="w-full" placeholder="Adicione detalhes se necessário..." />
+                    <Textarea 
+                      value={textoAdicional} 
+                      onChange={e => {
+                        setTextoAdicional(e.target.value);
+                        autoResizeTextarea(e.target);
+                      }} 
+                      className="w-full text-base resize-none overflow-hidden min-h-[60px]" 
+                      placeholder="Adicione detalhes se necessário..."
+                      style={{ height: 'auto' }}
+                    />
                     <Button type="button" size="icon" variant={isRecording ? 'destructive' : 'outline'} onClick={handleMicClick} disabled={transcrevendo}>
                       {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                     </Button>
