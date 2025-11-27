@@ -593,8 +593,9 @@ const RevisaoAnamnese = () => {
           
           <div className="flex-1 overflow-auto border rounded-lg bg-muted/20">
             {pdfPreviewUrl && (
-              <iframe
-                src={pdfPreviewUrl}
+              <embed
+                src={`${pdfPreviewUrl}#toolbar=1&navpanes=1&scrollbar=1`}
+                type="application/pdf"
                 className="w-full h-[70vh] rounded"
                 title="Preview do PDF"
               />
