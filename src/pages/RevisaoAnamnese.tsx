@@ -193,28 +193,29 @@ const RevisaoAnamnese = () => {
         htmlEl.style.display = 'block';
       });
       
-      // Aumentar fonte de todos os textos para o PDF
-      const textElements = content.querySelectorAll('p, span, div, label, input, textarea, li');
-      textElements.forEach(el => {
-        const htmlEl = el as HTMLElement;
-        if (!originalStyles.has(htmlEl)) {
-          originalStyles.set(htmlEl, htmlEl.style.cssText);
-        }
-        const currentSize = window.getComputedStyle(htmlEl).fontSize;
-        const currentSizeNum = parseFloat(currentSize);
-        htmlEl.style.fontSize = `${Math.max(currentSizeNum * 1.3, 14)}px`;
+      // Ajustar textareas para mostrar todo o conteúdo
+      const textareas = content.querySelectorAll('textarea');
+      textareas.forEach(textarea => {
+        const htmlEl = textarea as HTMLTextAreaElement;
+        originalStyles.set(htmlEl, htmlEl.style.cssText);
+        htmlEl.style.height = 'auto';
+        htmlEl.style.height = htmlEl.scrollHeight + 'px';
+        htmlEl.style.overflow = 'hidden';
       });
       
       // Aguardar renderização
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       const canvas = await html2canvas(content, {
-        scale: 2,
+        scale: 1.5,
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
         windowHeight: content.scrollHeight,
-        height: content.scrollHeight
+        height: content.scrollHeight,
+        width: content.scrollWidth,
+        scrollX: 0,
+        scrollY: 0
       });
       
       // Restaurar estilos originais
