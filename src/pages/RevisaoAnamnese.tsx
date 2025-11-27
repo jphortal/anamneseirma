@@ -399,41 +399,27 @@ const RevisaoAnamnese = () => {
       uploadFormData.append('file', pdfBlob, pdfNomeArquivo);
       console.log('PDF anexado:', pdfNomeArquivo, 'Tamanho:', pdfBlob.size, 'bytes');
       
-      // Adicionar campos individuais dos dados do worklist
+      // Adicionar TODOS os campos do worklist conforme solicitado
       if (worklistData) {
-        const patientId = worklistData.patientId || worklistData.id || '';
-        const patientName = worklistData.name || worklistData.ds_paciente || '';
-        const accessionNumber = worklistData.nr_controle || worklistData.cd_atendimento || '';
+        // Campos obrigatórios com nomes exatos
+        uploadFormData.append('ds_paciente', worklistData.ds_paciente || worklistData.name || '');
+        uploadFormData.append('ds_modalidade', worklistData.ds_modalidade || worklistData.modality || '');
+        uploadFormData.append('ds_procedimento', worklistData.ds_procedimento || worklistData.procedure || worklistData.studyDescription || '');
+        uploadFormData.append('dt_data', worklistData.dt_data || '');
+        uploadFormData.append('cd_atendimento', worklistData.cd_atendimento || '');
+        uploadFormData.append('cd_paciente', worklistData.cd_paciente || worklistData.patientId || worklistData.id || '');
+        uploadFormData.append('nr_controle', worklistData.nr_controle || '');
+        uploadFormData.append('cd_exame', worklistData.cd_exame || '');
         
-        uploadFormData.append('patient_id', patientId);
-        uploadFormData.append('patient_name', patientName);
-        uploadFormData.append('accession_number', accessionNumber);
-        
-        console.log('Campos básicos adicionados:');
-        console.log('- patient_id:', patientId);
-        console.log('- patient_name:', patientName);
-        console.log('- accession_number:', accessionNumber);
-        
-        // Campos adicionais do worklist que podem ser úteis
-        if (worklistData.studyDescription || worklistData.ds_procedimento) {
-          const studyDesc = worklistData.studyDescription || worklistData.ds_procedimento || '';
-          uploadFormData.append('study_description', studyDesc);
-          console.log('- study_description:', studyDesc);
-        }
-        if (worklistData.modality || worklistData.ds_modalidade) {
-          const modality = worklistData.modality || worklistData.ds_modalidade || '';
-          uploadFormData.append('modality', modality);
-          console.log('- modality:', modality);
-        }
-        if (worklistData.procedure || worklistData.ds_procedimento) {
-          const procedure = worklistData.procedure || worklistData.ds_procedimento || '';
-          uploadFormData.append('procedure', procedure);
-          console.log('- procedure:', procedure);
-        }
-        if (worklistData.birthDate) {
-          uploadFormData.append('birth_date', worklistData.birthDate);
-          console.log('- birth_date:', worklistData.birthDate);
-        }
+        console.log('=== TODOS OS CAMPOS DO WORKLIST ===');
+        console.log('- ds_paciente:', worklistData.ds_paciente || worklistData.name || '');
+        console.log('- ds_modalidade:', worklistData.ds_modalidade || worklistData.modality || '');
+        console.log('- ds_procedimento:', worklistData.ds_procedimento || worklistData.procedure || '');
+        console.log('- dt_data:', worklistData.dt_data || '');
+        console.log('- cd_atendimento:', worklistData.cd_atendimento || '');
+        console.log('- cd_paciente:', worklistData.cd_paciente || worklistData.patientId || '');
+        console.log('- nr_controle:', worklistData.nr_controle || '');
+        console.log('- cd_exame:', worklistData.cd_exame || '');
       } else {
         console.warn('⚠️ ATENÇÃO: worklistData está vazio ou indefinido!');
       }
