@@ -161,7 +161,7 @@ export const CanvasMarcacao = ({
           </select>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 no-print">
           <Button onClick={() => setModoDesenho(!modoDesenho)} variant={modoDesenho ? 'default' : 'outline'} size="sm">
             <Paintbrush className="h-4 w-4 mr-1" />
             {modoDesenho ? 'Desenho Ativado' : 'Ativar Desenho'}
@@ -178,7 +178,7 @@ export const CanvasMarcacao = ({
           </Button>
         </div>
 
-        {modoDesenho && <div className="flex gap-4 items-center">
+        {modoDesenho && <div className="flex gap-4 items-center no-print">
             <div className="flex items-center gap-2">
               <Label>Cor:</Label>
               <input type="color" value={corDesenho} onChange={e => setCorDesenho(e.target.value)} className="h-8 w-16 rounded border border-input" />

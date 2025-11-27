@@ -171,6 +171,14 @@ const RevisaoAnamnese = () => {
       const content = contentRef.current;
       const originalStyles = new Map<HTMLElement, string>();
       
+      // Ocultar elementos que não devem aparecer no PDF
+      const hideInPdf = content.querySelectorAll('button, .no-print, [data-no-pdf]');
+      hideInPdf.forEach(el => {
+        const htmlEl = el as HTMLElement;
+        originalStyles.set(htmlEl, htmlEl.style.cssText);
+        htmlEl.style.display = 'none';
+      });
+      
       // Abrir todos os <details>
       const detailsElements = content.querySelectorAll('details');
       detailsElements.forEach(detail => {
@@ -187,35 +195,64 @@ const RevisaoAnamnese = () => {
       const collapsibleContents = content.querySelectorAll('[data-radix-collapsible-content], [role="region"]');
       collapsibleContents.forEach(el => {
         const htmlEl = el as HTMLElement;
-        originalStyles.set(htmlEl, htmlEl.style.cssText);
+        if (!originalStyles.has(htmlEl)) {
+          originalStyles.set(htmlEl, htmlEl.style.cssText);
+        }
         htmlEl.style.height = 'auto';
         htmlEl.style.overflow = 'visible';
         htmlEl.style.display = 'block';
       });
       
-      // Ajustar textareas para mostrar todo o conteúdo
-      const textareas = content.querySelectorAll('textarea');
-      textareas.forEach(textarea => {
-        const htmlEl = textarea as HTMLTextAreaElement;
-        originalStyles.set(htmlEl, htmlEl.style.cssText);
+      // Ajustar textareas e divs com texto para mostrar todo o conteúdo
+      const textareas = content.querySelectorAll('textarea, [class*="whitespace-pre-wrap"]');
+      textareas.forEach(el => {
+        const htmlEl = el as HTMLElement;
+        if (!originalStyles.has(htmlEl)) {
+          originalStyles.set(htmlEl, htmlEl.style.cssText);
+        }
         htmlEl.style.height = 'auto';
-        htmlEl.style.height = htmlEl.scrollHeight + 'px';
-        htmlEl.style.overflow = 'hidden';
+        htmlEl.style.maxHeight = 'none';
+        htmlEl.style.overflow = 'visible';
+        htmlEl.style.whiteSpace = 'pre-wrap';
+        htmlEl.style.wordWrap = 'break-word';
+        
+        if (el instanceof HTMLTextAreaElement) {
+          htmlEl.style.height = el.scrollHeight + 20 + 'px';
+        }
+      });
+      
+      // Ajustar inputs para mostrar valores
+      const inputs = content.querySelectorAll('input[type="text"], input[type="number"]');
+      inputs.forEach(input => {
+        const htmlEl = input as HTMLInputElement;
+        if (!originalStyles.has(htmlEl)) {
+          originalStyles.set(htmlEl, htmlEl.style.cssText);
+        }
+        htmlEl.style.border = '1px solid #ccc';
+        htmlEl.style.padding = '8px';
+        htmlEl.style.fontSize = '14px';
       });
       
       // Aguardar renderização
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       const canvas = await html2canvas(content, {
-        scale: 1.5,
+        scale: 2,
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
-        windowHeight: content.scrollHeight,
-        height: content.scrollHeight,
+        windowHeight: content.scrollHeight + 100,
+        height: content.scrollHeight + 100,
         width: content.scrollWidth,
         scrollX: 0,
-        scrollY: 0
+        scrollY: 0,
+        onclone: (clonedDoc) => {
+          // No documento clonado, também ocultar botões e elementos interativos
+          const clonedButtons = clonedDoc.querySelectorAll('button, .no-print');
+          clonedButtons.forEach(btn => {
+            (btn as HTMLElement).style.display = 'none';
+          });
+        }
       });
       
       // Restaurar estilos originais
@@ -425,7 +462,7 @@ const RevisaoAnamnese = () => {
         {/* Header */}
         <div className="mb-6 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div className="flex-1">
-            <Button variant="ghost" onClick={() => navigate('/')} className="mb-4">
+            <Button variant="ghost" onClick={() => navigate('/')} className="mb-4 no-print">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar
             </Button>
@@ -486,7 +523,7 @@ const RevisaoAnamnese = () => {
             <CanvasMarcacao tipo={tipoFormulario} onImagemChange={setImagemMarcada} />
             
             {/* Botão de IA Insights */}
-            <Button onClick={handleGerarInsights} disabled={carregandoIA} className="w-full" variant="outline">
+            <Button onClick={handleGerarInsights} disabled={carregandoIA} className="w-full no-print" variant="outline">
               <Sparkles className="h-4 w-4 mr-2" />
               {carregandoIA ? 'Gerando Insights...' : 'Gerar Hipóteses Diagnósticas (IA)'}
             </Button>
@@ -520,7 +557,7 @@ const RevisaoAnamnese = () => {
             {!capturedImage && !isCameraActive && (
               <div 
                 onClick={startCamera}
-                className="cursor-pointer border-2 border-dashed border-muted-foreground/50 rounded-lg p-8 hover:border-primary transition-colors text-center"
+                className="no-print cursor-pointer border-2 border-dashed border-muted-foreground/50 rounded-lg p-8 hover:border-primary transition-colors text-center"
               >
                 <Camera className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-lg font-medium">Clique aqui para fotografar o pedido médico</p>
@@ -529,7 +566,7 @@ const RevisaoAnamnese = () => {
             )}
 
             {isCameraActive && (
-              <div className="space-y-4">
+              <div className="space-y-4 no-print">
                 <div className="relative bg-black rounded-lg overflow-hidden">
                   <video
                     ref={videoRef}
@@ -560,7 +597,7 @@ const RevisaoAnamnese = () => {
                     className="w-full h-auto max-h-[600px] object-contain mx-auto"
                   />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 no-print">
                   <Button 
                     onClick={clearImage} 
                     variant="outline" 
@@ -584,7 +621,7 @@ const RevisaoAnamnese = () => {
         </Card>
 
         {/* Botões de Ação */}
-        <div className="mt-8 flex flex-wrap gap-4 justify-end">
+        <div className="mt-8 flex flex-wrap gap-4 justify-end no-print">
           <Button onClick={handleCancelar} variant="outline" disabled={salvando}>
             <X className="h-4 w-4 mr-2" />
             Cancelar
