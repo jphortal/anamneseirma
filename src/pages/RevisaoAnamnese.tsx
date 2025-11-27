@@ -426,8 +426,8 @@ const RevisaoAnamnese = () => {
                     IA Insights
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-sm whitespace-pre-wrap text-muted-foreground">
+                <CardContent className="max-h-none overflow-visible">
+                  <div className="text-lg whitespace-pre-wrap text-foreground leading-relaxed">
                     {iaInsights}
                   </div>
                 </CardContent>
