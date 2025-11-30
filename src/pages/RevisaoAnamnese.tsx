@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { salvarAnamneseNoHistorico } from '@/components/anamnese/HistoricoAnamneses';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { Save, FileText, X, ArrowLeft, Sparkles, Camera, Trash2, Eye, Send } from 'lucide-react';
 import { useCameraCapture } from '@/hooks/useCameraCapture';
 import { TipoFormulario, FormData as AnamneseFormData, AnamneseData } from '@/types/anamnese';
@@ -16,6 +17,9 @@ import html2canvas from 'html2canvas';
 const RevisaoAnamnese = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const {
+    toast
+  } = useToast();
   const estadoInicial = location.state || {};
   const contentRef = useRef<HTMLDivElement>(null);
   const [tipoFormulario, setTipoFormulario] = useState<TipoFormulario>(estadoInicial.tipo || 'punho');
@@ -109,7 +113,11 @@ const RevisaoAnamnese = () => {
   const handleSalvar = async () => {
     const validacao = validarCamposObrigatorios();
     if (!validacao.valido) {
-      console.warn('Campos obrigatórios faltando:', validacao.faltando.join(', '));
+      toast({
+        title: 'Campos obrigatórios faltando',
+        description: `Por favor, preencha: ${validacao.faltando.join(', ')}`,
+        variant: 'destructive'
+      });
       return;
     }
     setSalvando(true);
@@ -139,9 +147,17 @@ const RevisaoAnamnese = () => {
       // Salvar no histórico
       salvarAnamneseNoHistorico(tipoFormulario, formData, worklistData);
 
-      console.log('Anamnese salva com sucesso!');
+      toast({
+        title: 'Sucesso',
+        description: 'Anamnese salva com sucesso!'
+      });
     } catch (error) {
       console.error('Erro ao salvar:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar a anamnese',
+        variant: 'destructive'
+      });
     } finally {
       setSalvando(false);
     }
@@ -352,9 +368,17 @@ const RevisaoAnamnese = () => {
       setPdfPreviewUrl(previewUrl);
       setShowPreview(true);
 
-      console.log('Preview do PDF gerado com sucesso');
+      toast({
+        title: 'Preview gerado',
+        description: 'Revise o PDF antes de enviar'
+      });
     } catch (error) {
       console.error('Erro ao gerar preview do PDF:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível gerar o preview do PDF',
+        variant: 'destructive'
+      });
     } finally {
       setGerandoPreview(false);
     }
@@ -430,12 +454,20 @@ const RevisaoAnamnese = () => {
         throw new Error(`Erro ao enviar PDF: ${response.status}`);
       }
 
-      console.log('PDF enviado com sucesso para o sistema!');
+      toast({
+        title: 'Sucesso',
+        description: 'PDF enviado com sucesso para o sistema!'
+      });
       
       // Fechar preview e limpar dados
       handleFecharPreview();
     } catch (error) {
       console.error('Erro ao enviar PDF:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível enviar o PDF',
+        variant: 'destructive'
+      });
     } finally {
       setEnviandoPDF(false);
     }
@@ -522,9 +554,17 @@ const RevisaoAnamnese = () => {
         insights = responseText;
       }
       setIaInsights(insights);
-      console.log('Insights gerados com sucesso!');
+      toast({
+        title: 'Insights gerados',
+        description: 'Hipóteses diagnósticas obtidas com sucesso!'
+      });
     } catch (error) {
       console.error('Erro ao gerar insights:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível gerar os insights da IA',
+        variant: 'destructive'
+      });
     } finally {
       setCarregandoIA(false);
     }
