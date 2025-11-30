@@ -437,8 +437,11 @@ const RevisaoAnamnese = () => {
       }
       
       // Enviar para a API n8n
+      const webhookUrl = 'http://localhost:5678/webhook-test/57ed4892-7c1d-4b38-9756-dc611daea8e1';
       console.log('=== ENVIANDO PARA N8N ===');
-      const response = await fetch('http://localhost:5678/webhook-test/57ed4892-7c1d-4b38-9756-dc611daea8e1', {
+      console.log('URL do webhook:', webhookUrl);
+      
+      const response = await fetch(webhookUrl, {
         method: 'POST',
         body: uploadFormData
       });
