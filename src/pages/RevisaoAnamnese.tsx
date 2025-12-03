@@ -438,7 +438,7 @@ const RevisaoAnamnese = () => {
       
       // Enviar para a API n8n
       console.log('=== ENVIANDO PARA N8N ===');
-      const response = await fetch('http://localhost:5678/webhook-test/57ed4892-7c1d-4b38-9756-dc611daea8e1', {
+      const response = await fetch('https://jphortal.app.n8n.cloud/webhook-test/57ed4892-7c1d-4b38-9756-dc611daea8e1', {
         method: 'POST',
         body: uploadFormData
       });
