@@ -211,25 +211,21 @@ const RevisaoAnamnese = () => {
         
         // Copia estilos computados relevantes
         const computedStyle = window.getComputedStyle(textareaEl);
-        
-        // Usar altura automática baseada no conteúdo
+        div.style.cssText = textareaEl.style.cssText;
         div.style.width = computedStyle.width;
-        div.style.minHeight = '60px';
-        div.style.height = 'auto';
-        div.style.padding = '12px';
+        div.style.minHeight = computedStyle.minHeight;
+        div.style.padding = computedStyle.padding;
         div.style.border = computedStyle.border;
         div.style.borderRadius = computedStyle.borderRadius;
         div.style.backgroundColor = computedStyle.backgroundColor;
         div.style.color = computedStyle.color;
         div.style.fontSize = computedStyle.fontSize;
         div.style.fontFamily = computedStyle.fontFamily;
-        div.style.lineHeight = '1.6';
+        div.style.lineHeight = computedStyle.lineHeight;
         div.style.whiteSpace = 'pre-wrap';
         div.style.wordWrap = 'break-word';
-        div.style.wordBreak = 'break-word';
         div.style.overflow = 'visible';
         div.style.boxSizing = 'border-box';
-        div.style.display = 'block';
         
         // Copia o conteúdo
         div.textContent = textareaEl.value;
@@ -264,25 +260,22 @@ const RevisaoAnamnese = () => {
         // Copia estilos computados relevantes
         const computedStyle = window.getComputedStyle(inputEl);
         
-        // Usar altura automática baseada no conteúdo
+        div.style.cssText = inputEl.style.cssText;
         div.style.width = computedStyle.width;
-        div.style.minHeight = '40px';
-        div.style.height = 'auto';
-        div.style.padding = '8px 12px';
+        div.style.minHeight = computedStyle.height;
+        div.style.padding = '12px';
         div.style.border = computedStyle.border || '1px solid #ccc';
         div.style.borderRadius = computedStyle.borderRadius;
         div.style.backgroundColor = computedStyle.backgroundColor;
         div.style.color = computedStyle.color;
         div.style.fontSize = computedStyle.fontSize || '14px';
         div.style.fontFamily = computedStyle.fontFamily;
-        div.style.lineHeight = '1.5';
-        div.style.display = 'block';
+        div.style.lineHeight = computedStyle.lineHeight;
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
+        div.style.justifyContent = 'flex-start';
         div.style.boxSizing = 'border-box';
         div.style.overflow = 'visible';
-        div.style.whiteSpace = 'pre-wrap';
-        div.style.wordWrap = 'break-word';
-        div.style.paddingTop = '10px';
-        div.style.paddingBottom = '10px';
         
         // Copia o valor
         div.textContent = inputEl.value;
