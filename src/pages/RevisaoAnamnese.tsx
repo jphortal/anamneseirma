@@ -263,50 +263,120 @@ const RevisaoAnamnese = () => {
         htmlEl.style.wordWrap = 'break-word';
       });
       
-      // Substituir inputs por divs para garantir renderização correta no PDF
+      // Substituir inputs e selects por divs para garantir renderização correta no PDF
       const inputsMap = new Map<HTMLInputElement, HTMLDivElement>();
-      content.querySelectorAll('input[type="text"], input[type="number"]').forEach((input: any) => {
-        const inputEl = input as HTMLInputElement;
-        const div = document.createElement('div');
+      const selectsMap = new Map<HTMLSelectElement, HTMLDivElement>();
 
+      const shouldSkipInputType = (type: string) => {
+        const t = (type || '').toLowerCase();
+        return ['checkbox', 'radio', 'hidden', 'button', 'submit', 'reset', 'file', 'range', 'color'].includes(t);
+      };
+
+      // Inputs (inclui inputs sem atributo type)
+      content.querySelectorAll('input').forEach((node) => {
+        const inputEl = node as HTMLInputElement;
+        const typeAttr = inputEl.getAttribute('type');
+        const type = (typeAttr || inputEl.type || 'text').toLowerCase();
+        if (shouldSkipInputType(type)) return;
+
+        const div = document.createElement('div');
         const computedStyle = window.getComputedStyle(inputEl);
         const rect = inputEl.getBoundingClientRect();
 
-        const fontSize = parseInt(computedStyle.fontSize) || 14;
-        // Usar line-height maior para evitar corte de caracteres com descendentes (g, p, y, etc)
+        const fontSize = parseFloat(computedStyle.fontSize) || 14;
         const safeLineHeight = fontSize * 1.6;
-        
-        // Padding generoso para garantir que texto não seja cortado
-        const verticalPadding = Math.max(12, fontSize * 0.8);
+        const verticalPadding = Math.max(10, fontSize * 0.6);
 
+        // Layout/box
+        div.style.boxSizing = 'border-box';
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
         div.style.width = computedStyle.width || `${rect.width}px`;
-        div.style.minHeight = `${rect.height + 10}px`;
-        div.style.height = 'auto';
+        div.style.margin = computedStyle.margin;
+        div.style.flex = computedStyle.flex;
+        div.style.alignSelf = computedStyle.alignSelf;
+
+        // Estilo visual
+        div.style.border = computedStyle.border;
+        div.style.borderRadius = computedStyle.borderRadius;
+        div.style.backgroundColor = computedStyle.backgroundColor;
+        div.style.color = computedStyle.color;
+        div.style.fontFamily = computedStyle.fontFamily;
+        div.style.fontWeight = computedStyle.fontWeight;
+        div.style.fontSize = `${fontSize}px`;
+        div.style.lineHeight = `${safeLineHeight}px`;
+        div.style.letterSpacing = computedStyle.letterSpacing;
+        div.style.textTransform = computedStyle.textTransform;
+
+        // Espaçamento seguro para evitar corte inferior
         div.style.paddingTop = `${verticalPadding}px`;
         div.style.paddingBottom = `${verticalPadding}px`;
         div.style.paddingLeft = computedStyle.paddingLeft || '12px';
         div.style.paddingRight = computedStyle.paddingRight || '12px';
-        div.style.border = computedStyle.border || '1px solid #ccc';
+
+        // Texto
+        div.style.whiteSpace = 'pre-wrap';
+        div.style.wordBreak = 'break-word';
+        div.style.overflow = 'visible';
+
+        div.textContent = inputEl.value || inputEl.placeholder || ' ';
+
+        // Garantir altura mínima semelhante ao controle original
+        const computedMinHeight = parseFloat(computedStyle.minHeight);
+        const minH = Math.max(rect.height + 8, Number.isFinite(computedMinHeight) ? computedMinHeight : 0);
+        div.style.minHeight = `${minH}px`;
+
+        inputEl.parentNode?.replaceChild(div, inputEl);
+        inputsMap.set(inputEl, div);
+      });
+
+      // Selects (ex.: "Tipo de exame")
+      content.querySelectorAll('select').forEach((node) => {
+        const selectEl = node as HTMLSelectElement;
+        const div = document.createElement('div');
+
+        const computedStyle = window.getComputedStyle(selectEl);
+        const rect = selectEl.getBoundingClientRect();
+
+        const fontSize = parseFloat(computedStyle.fontSize) || 14;
+        const safeLineHeight = fontSize * 1.6;
+        const verticalPadding = Math.max(10, fontSize * 0.6);
+
+        div.style.boxSizing = 'border-box';
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
+        div.style.width = computedStyle.width || `${rect.width}px`;
+        div.style.margin = computedStyle.margin;
+        div.style.flex = computedStyle.flex;
+        div.style.alignSelf = computedStyle.alignSelf;
+
+        div.style.border = computedStyle.border;
         div.style.borderRadius = computedStyle.borderRadius;
         div.style.backgroundColor = computedStyle.backgroundColor;
         div.style.color = computedStyle.color;
-        div.style.fontSize = `${fontSize}px`;
         div.style.fontFamily = computedStyle.fontFamily;
         div.style.fontWeight = computedStyle.fontWeight;
+        div.style.fontSize = `${fontSize}px`;
         div.style.lineHeight = `${safeLineHeight}px`;
-        div.style.display = 'flex';
-        div.style.alignItems = 'center';
-        div.style.boxSizing = 'border-box';
-        div.style.overflow = 'visible';
+
+        div.style.paddingTop = `${verticalPadding}px`;
+        div.style.paddingBottom = `${verticalPadding}px`;
+        div.style.paddingLeft = computedStyle.paddingLeft || '12px';
+        div.style.paddingRight = computedStyle.paddingRight || '12px';
+
         div.style.whiteSpace = 'pre-wrap';
         div.style.wordBreak = 'break-word';
+        div.style.overflow = 'visible';
 
-        div.textContent = inputEl.value || ' ';
-        div.className = inputEl.className;
+        const selectedText = selectEl.selectedOptions?.[0]?.textContent;
+        div.textContent = selectedText || selectEl.value || ' ';
 
-        inputEl.parentNode?.replaceChild(div, inputEl);
+        const computedMinHeight = parseFloat(computedStyle.minHeight);
+        const minH = Math.max(rect.height + 8, Number.isFinite(computedMinHeight) ? computedMinHeight : 0);
+        div.style.minHeight = `${minH}px`;
 
-        inputsMap.set(inputEl, div);
+        selectEl.parentNode?.replaceChild(div, selectEl);
+        selectsMap.set(selectEl, div);
       });
       
       // Aguardar renderização
@@ -331,11 +401,15 @@ const RevisaoAnamnese = () => {
         }
       });
       
+      // Restaurar selects originais
+      selectsMap.forEach((div, select) => {
+        div.parentNode?.replaceChild(select, div);
+      });
+
       // Restaurar inputs originais
       inputsMap.forEach((div, input) => {
         div.parentNode?.replaceChild(input, div);
       });
-      
       // Restaurar textareas originais
       textareasMap.forEach((div, textarea) => {
         div.parentNode?.replaceChild(textarea, div);
