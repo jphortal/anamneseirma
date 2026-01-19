@@ -270,19 +270,20 @@ const RevisaoAnamnese = () => {
         const div = document.createElement('div');
 
         const computedStyle = window.getComputedStyle(inputEl);
+        const rect = inputEl.getBoundingClientRect();
 
         const fontSize = parseInt(computedStyle.fontSize) || 14;
-        const parsedLineHeight = parseFloat(computedStyle.lineHeight);
-        const lineHeight = Number.isFinite(parsedLineHeight) ? parsedLineHeight : fontSize * 1.4;
-        const paddingTop = parseInt(computedStyle.paddingTop) || 8;
-        const paddingBottom = (parseInt(computedStyle.paddingBottom) || 8) + 4; // safety
-        const minHeight = lineHeight + paddingTop + paddingBottom + 4;
+        // Usar line-height maior para evitar corte de caracteres com descendentes (g, p, y, etc)
+        const safeLineHeight = fontSize * 1.6;
+        
+        // Padding generoso para garantir que texto não seja cortado
+        const verticalPadding = Math.max(12, fontSize * 0.8);
 
-        div.style.width = computedStyle.width;
-        div.style.minHeight = `${minHeight}px`;
+        div.style.width = computedStyle.width || `${rect.width}px`;
+        div.style.minHeight = `${rect.height + 10}px`;
         div.style.height = 'auto';
-        div.style.paddingTop = `${paddingTop}px`;
-        div.style.paddingBottom = `${paddingBottom}px`;
+        div.style.paddingTop = `${verticalPadding}px`;
+        div.style.paddingBottom = `${verticalPadding}px`;
         div.style.paddingLeft = computedStyle.paddingLeft || '12px';
         div.style.paddingRight = computedStyle.paddingRight || '12px';
         div.style.border = computedStyle.border || '1px solid #ccc';
@@ -292,21 +293,18 @@ const RevisaoAnamnese = () => {
         div.style.fontSize = `${fontSize}px`;
         div.style.fontFamily = computedStyle.fontFamily;
         div.style.fontWeight = computedStyle.fontWeight;
-        div.style.lineHeight = `${lineHeight}px`;
-        div.style.display = 'block';
+        div.style.lineHeight = `${safeLineHeight}px`;
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
         div.style.boxSizing = 'border-box';
         div.style.overflow = 'visible';
         div.style.whiteSpace = 'pre-wrap';
         div.style.wordBreak = 'break-word';
 
-        div.textContent = inputEl.value || ' '; // mantém altura mínima
+        div.textContent = inputEl.value || ' ';
         div.className = inputEl.className;
 
         inputEl.parentNode?.replaceChild(div, inputEl);
-
-        // Forçar altura suficiente para não cortar a parte inferior das letras
-        div.style.height = 'auto';
-        div.style.height = `${div.scrollHeight + 6}px`;
 
         inputsMap.set(inputEl, div);
       });
