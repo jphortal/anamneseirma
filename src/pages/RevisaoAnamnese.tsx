@@ -205,21 +205,34 @@ const RevisaoAnamnese = () => {
       
       // Substituir textareas por divs para garantir renderização correta no PDF
       const textareasMap = new Map<HTMLTextAreaElement, HTMLDivElement>();
+      const px = (v: string) => {
+        const n = parseFloat(v);
+        return Number.isFinite(n) ? n : 0;
+      };
+      const safeLineHeight = (computedStyle: CSSStyleDeclaration) => {
+        const fontSize = px(computedStyle.fontSize) || 14;
+        const lh = px(computedStyle.lineHeight);
+        return lh > 0 ? lh : fontSize * 1.4;
+      };
+
       content.querySelectorAll('textarea').forEach((textarea: any) => {
         const textareaEl = textarea as HTMLTextAreaElement;
         const div = document.createElement('div');
 
         const computedStyle = window.getComputedStyle(textareaEl);
-        const fontSize = parseFloat(computedStyle.fontSize) || 14;
-        const parsedLineHeight = parseFloat(computedStyle.lineHeight);
-        const lineHeight = Number.isFinite(parsedLineHeight) ? parsedLineHeight : fontSize * 1.4;
-        const minHeight = parseFloat(computedStyle.minHeight);
+        const fontSize = px(computedStyle.fontSize) || 14;
+        const lineHeight = safeLineHeight(computedStyle);
+        const minHeight = px(computedStyle.minHeight);
+        const borderY = px(computedStyle.borderTopWidth) + px(computedStyle.borderBottomWidth);
 
         div.style.cssText = textareaEl.style.cssText;
         div.style.display = 'block';
         div.style.width = computedStyle.width;
         div.style.minHeight = computedStyle.minHeight;
-        div.style.padding = computedStyle.padding;
+        div.style.paddingTop = computedStyle.paddingTop;
+        div.style.paddingRight = computedStyle.paddingRight;
+        div.style.paddingBottom = `${px(computedStyle.paddingBottom) + 2}px`;
+        div.style.paddingLeft = computedStyle.paddingLeft;
         div.style.border = computedStyle.border;
         div.style.borderRadius = computedStyle.borderRadius;
         div.style.backgroundColor = computedStyle.backgroundColor;
@@ -244,12 +257,17 @@ const RevisaoAnamnese = () => {
 
         // Forçar altura suficiente para não cortar a parte inferior das letras
         div.style.height = 'auto';
-        const targetHeight = Math.max(div.scrollHeight + 6, Number.isFinite(minHeight) ? minHeight : 0);
+        div.style.minHeight = '0px';
+        div.getBoundingClientRect(); // força layout
+
+        const targetHeight = Math.ceil(
+          Math.max(minHeight, div.scrollHeight + borderY + 8)
+        );
         div.style.height = `${targetHeight}px`;
 
         textareasMap.set(textareaEl, div);
       });
-      
+
       // Ajustar divs com texto para mostrar todo o conteúdo
       content.querySelectorAll('[class*="whitespace-pre-wrap"]').forEach(el => {
         const htmlEl = el as HTMLElement;
@@ -262,7 +280,7 @@ const RevisaoAnamnese = () => {
         htmlEl.style.whiteSpace = 'pre-wrap';
         htmlEl.style.wordWrap = 'break-word';
       });
-      
+
       // Substituir inputs e selects por divs para garantir renderização correta no PDF
       const inputsMap = new Map<HTMLInputElement, HTMLDivElement>();
       const selectsMap = new Map<HTMLSelectElement, HTMLDivElement>();
@@ -283,11 +301,11 @@ const RevisaoAnamnese = () => {
         const computedStyle = window.getComputedStyle(inputEl);
         const rect = inputEl.getBoundingClientRect();
 
-        const fontSize = parseFloat(computedStyle.fontSize) || 14;
-        const safeLineHeight = fontSize * 1.6;
-        const verticalPadding = Math.max(10, fontSize * 0.6);
+        const fontSize = px(computedStyle.fontSize) || 14;
+        const lineHeight = safeLineHeight(computedStyle);
+        const borderY = px(computedStyle.borderTopWidth) + px(computedStyle.borderBottomWidth);
 
-        // Layout/box
+        // Layout/box (preservar comportamento em flex layouts)
         div.style.boxSizing = 'border-box';
         div.style.display = 'flex';
         div.style.alignItems = 'center';
@@ -304,15 +322,15 @@ const RevisaoAnamnese = () => {
         div.style.fontFamily = computedStyle.fontFamily;
         div.style.fontWeight = computedStyle.fontWeight;
         div.style.fontSize = `${fontSize}px`;
-        div.style.lineHeight = `${safeLineHeight}px`;
+        div.style.lineHeight = `${lineHeight}px`;
         div.style.letterSpacing = computedStyle.letterSpacing;
         div.style.textTransform = computedStyle.textTransform;
 
-        // Espaçamento seguro para evitar corte inferior
-        div.style.paddingTop = `${verticalPadding}px`;
-        div.style.paddingBottom = `${verticalPadding}px`;
-        div.style.paddingLeft = computedStyle.paddingLeft || '12px';
-        div.style.paddingRight = computedStyle.paddingRight || '12px';
+        // Padding do próprio input + “folga” no bottom para evitar clipping no canvas
+        div.style.paddingTop = computedStyle.paddingTop;
+        div.style.paddingRight = computedStyle.paddingRight;
+        div.style.paddingBottom = `${px(computedStyle.paddingBottom) + 2}px`;
+        div.style.paddingLeft = computedStyle.paddingLeft;
 
         // Texto
         div.style.whiteSpace = 'pre-wrap';
@@ -320,13 +338,20 @@ const RevisaoAnamnese = () => {
         div.style.overflow = 'visible';
 
         div.textContent = inputEl.value || inputEl.placeholder || ' ';
-
-        // Garantir altura mínima semelhante ao controle original
-        const computedMinHeight = parseFloat(computedStyle.minHeight);
-        const minH = Math.max(rect.height + 8, Number.isFinite(computedMinHeight) ? computedMinHeight : 0);
-        div.style.minHeight = `${minH}px`;
+        div.className = inputEl.className;
 
         inputEl.parentNode?.replaceChild(div, inputEl);
+
+        // Altura segura: sempre soma uma folga (principal causa do corte inferior)
+        div.style.height = 'auto';
+        div.style.minHeight = '0px';
+        div.getBoundingClientRect(); // força layout
+
+        const safeHeight = Math.ceil(
+          Math.max(rect.height + 6, div.scrollHeight + borderY + 6)
+        );
+        div.style.height = `${safeHeight}px`;
+
         inputsMap.set(inputEl, div);
       });
 
@@ -338,9 +363,9 @@ const RevisaoAnamnese = () => {
         const computedStyle = window.getComputedStyle(selectEl);
         const rect = selectEl.getBoundingClientRect();
 
-        const fontSize = parseFloat(computedStyle.fontSize) || 14;
-        const safeLineHeight = fontSize * 1.6;
-        const verticalPadding = Math.max(10, fontSize * 0.6);
+        const fontSize = px(computedStyle.fontSize) || 14;
+        const lineHeight = safeLineHeight(computedStyle);
+        const borderY = px(computedStyle.borderTopWidth) + px(computedStyle.borderBottomWidth);
 
         div.style.boxSizing = 'border-box';
         div.style.display = 'flex';
@@ -357,12 +382,12 @@ const RevisaoAnamnese = () => {
         div.style.fontFamily = computedStyle.fontFamily;
         div.style.fontWeight = computedStyle.fontWeight;
         div.style.fontSize = `${fontSize}px`;
-        div.style.lineHeight = `${safeLineHeight}px`;
+        div.style.lineHeight = `${lineHeight}px`;
 
-        div.style.paddingTop = `${verticalPadding}px`;
-        div.style.paddingBottom = `${verticalPadding}px`;
-        div.style.paddingLeft = computedStyle.paddingLeft || '12px';
-        div.style.paddingRight = computedStyle.paddingRight || '12px';
+        div.style.paddingTop = computedStyle.paddingTop;
+        div.style.paddingRight = computedStyle.paddingRight;
+        div.style.paddingBottom = `${px(computedStyle.paddingBottom) + 2}px`;
+        div.style.paddingLeft = computedStyle.paddingLeft;
 
         div.style.whiteSpace = 'pre-wrap';
         div.style.wordBreak = 'break-word';
@@ -370,12 +395,19 @@ const RevisaoAnamnese = () => {
 
         const selectedText = selectEl.selectedOptions?.[0]?.textContent;
         div.textContent = selectedText || selectEl.value || ' ';
-
-        const computedMinHeight = parseFloat(computedStyle.minHeight);
-        const minH = Math.max(rect.height + 8, Number.isFinite(computedMinHeight) ? computedMinHeight : 0);
-        div.style.minHeight = `${minH}px`;
+        div.className = selectEl.className;
 
         selectEl.parentNode?.replaceChild(div, selectEl);
+
+        div.style.height = 'auto';
+        div.style.minHeight = '0px';
+        div.getBoundingClientRect();
+
+        const safeHeight = Math.ceil(
+          Math.max(rect.height + 6, div.scrollHeight + borderY + 6)
+        );
+        div.style.height = `${safeHeight}px`;
+
         selectsMap.set(selectEl, div);
       });
       
