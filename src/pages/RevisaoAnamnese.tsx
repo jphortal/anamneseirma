@@ -208,10 +208,15 @@ const RevisaoAnamnese = () => {
       content.querySelectorAll('textarea').forEach((textarea: any) => {
         const textareaEl = textarea as HTMLTextAreaElement;
         const div = document.createElement('div');
-        
-        // Copia estilos computados relevantes
+
         const computedStyle = window.getComputedStyle(textareaEl);
+        const fontSize = parseFloat(computedStyle.fontSize) || 14;
+        const parsedLineHeight = parseFloat(computedStyle.lineHeight);
+        const lineHeight = Number.isFinite(parsedLineHeight) ? parsedLineHeight : fontSize * 1.4;
+        const minHeight = parseFloat(computedStyle.minHeight);
+
         div.style.cssText = textareaEl.style.cssText;
+        div.style.display = 'block';
         div.style.width = computedStyle.width;
         div.style.minHeight = computedStyle.minHeight;
         div.style.padding = computedStyle.padding;
@@ -219,22 +224,29 @@ const RevisaoAnamnese = () => {
         div.style.borderRadius = computedStyle.borderRadius;
         div.style.backgroundColor = computedStyle.backgroundColor;
         div.style.color = computedStyle.color;
-        div.style.fontSize = computedStyle.fontSize;
+        div.style.fontSize = `${fontSize}px`;
         div.style.fontFamily = computedStyle.fontFamily;
-        div.style.lineHeight = computedStyle.lineHeight;
+        div.style.fontWeight = computedStyle.fontWeight;
+        div.style.lineHeight = `${lineHeight}px`;
         div.style.whiteSpace = 'pre-wrap';
-        div.style.wordWrap = 'break-word';
+        div.style.wordBreak = 'break-word';
         div.style.overflow = 'visible';
         div.style.boxSizing = 'border-box';
-        
-        // Copia o conteúdo
-        div.textContent = textareaEl.value;
-        
+
+        // Copia o conteúdo (espaço para manter altura mínima)
+        div.textContent = textareaEl.value || ' ';
+
         // Copia classes
         div.className = textareaEl.className;
-        
+
         // Substitui no DOM
         textareaEl.parentNode?.replaceChild(div, textareaEl);
+
+        // Forçar altura suficiente para não cortar a parte inferior das letras
+        div.style.height = 'auto';
+        const targetHeight = Math.max(div.scrollHeight + 6, Number.isFinite(minHeight) ? minHeight : 0);
+        div.style.height = `${targetHeight}px`;
+
         textareasMap.set(textareaEl, div);
       });
       
@@ -256,17 +268,16 @@ const RevisaoAnamnese = () => {
       content.querySelectorAll('input[type="text"], input[type="number"]').forEach((input: any) => {
         const inputEl = input as HTMLInputElement;
         const div = document.createElement('div');
-        
-        // Copia estilos computados relevantes
+
         const computedStyle = window.getComputedStyle(inputEl);
-        
-        // Calcular altura baseada no conteúdo
+
         const fontSize = parseInt(computedStyle.fontSize) || 14;
-        const lineHeight = parseFloat(computedStyle.lineHeight) || fontSize * 1.5;
+        const parsedLineHeight = parseFloat(computedStyle.lineHeight);
+        const lineHeight = Number.isFinite(parsedLineHeight) ? parsedLineHeight : fontSize * 1.4;
         const paddingTop = parseInt(computedStyle.paddingTop) || 8;
-        const paddingBottom = parseInt(computedStyle.paddingBottom) || 8;
+        const paddingBottom = (parseInt(computedStyle.paddingBottom) || 8) + 4; // safety
         const minHeight = lineHeight + paddingTop + paddingBottom + 4;
-        
+
         div.style.width = computedStyle.width;
         div.style.minHeight = `${minHeight}px`;
         div.style.height = 'auto';
@@ -280,21 +291,23 @@ const RevisaoAnamnese = () => {
         div.style.color = computedStyle.color;
         div.style.fontSize = `${fontSize}px`;
         div.style.fontFamily = computedStyle.fontFamily;
+        div.style.fontWeight = computedStyle.fontWeight;
         div.style.lineHeight = `${lineHeight}px`;
         div.style.display = 'block';
         div.style.boxSizing = 'border-box';
         div.style.overflow = 'visible';
         div.style.whiteSpace = 'pre-wrap';
         div.style.wordBreak = 'break-word';
-        
-        // Copia o valor
-        div.textContent = inputEl.value || ' '; // Espaço para manter altura mínima
-        
-        // Copia classes
+
+        div.textContent = inputEl.value || ' '; // mantém altura mínima
         div.className = inputEl.className;
-        
-        // Substitui no DOM
+
         inputEl.parentNode?.replaceChild(div, inputEl);
+
+        // Forçar altura suficiente para não cortar a parte inferior das letras
+        div.style.height = 'auto';
+        div.style.height = `${div.scrollHeight + 6}px`;
+
         inputsMap.set(inputEl, div);
       });
       
@@ -353,14 +366,14 @@ const RevisaoAnamnese = () => {
       let position = 0;
 
       // Add first page
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
       // Add additional pages if needed
       while (heightLeft > 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
       
