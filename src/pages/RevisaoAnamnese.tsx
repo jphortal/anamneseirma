@@ -260,25 +260,35 @@ const RevisaoAnamnese = () => {
         // Copia estilos computados relevantes
         const computedStyle = window.getComputedStyle(inputEl);
         
-        div.style.cssText = inputEl.style.cssText;
+        // Calcular altura baseada no conteúdo
+        const fontSize = parseInt(computedStyle.fontSize) || 14;
+        const lineHeight = parseFloat(computedStyle.lineHeight) || fontSize * 1.5;
+        const paddingTop = parseInt(computedStyle.paddingTop) || 8;
+        const paddingBottom = parseInt(computedStyle.paddingBottom) || 8;
+        const minHeight = lineHeight + paddingTop + paddingBottom + 4;
+        
         div.style.width = computedStyle.width;
-        div.style.minHeight = computedStyle.height;
-        div.style.padding = '12px';
+        div.style.minHeight = `${minHeight}px`;
+        div.style.height = 'auto';
+        div.style.paddingTop = `${paddingTop}px`;
+        div.style.paddingBottom = `${paddingBottom}px`;
+        div.style.paddingLeft = computedStyle.paddingLeft || '12px';
+        div.style.paddingRight = computedStyle.paddingRight || '12px';
         div.style.border = computedStyle.border || '1px solid #ccc';
         div.style.borderRadius = computedStyle.borderRadius;
         div.style.backgroundColor = computedStyle.backgroundColor;
         div.style.color = computedStyle.color;
-        div.style.fontSize = computedStyle.fontSize || '14px';
+        div.style.fontSize = `${fontSize}px`;
         div.style.fontFamily = computedStyle.fontFamily;
-        div.style.lineHeight = computedStyle.lineHeight;
-        div.style.display = 'flex';
-        div.style.alignItems = 'center';
-        div.style.justifyContent = 'flex-start';
+        div.style.lineHeight = `${lineHeight}px`;
+        div.style.display = 'block';
         div.style.boxSizing = 'border-box';
         div.style.overflow = 'visible';
+        div.style.whiteSpace = 'pre-wrap';
+        div.style.wordBreak = 'break-word';
         
         // Copia o valor
-        div.textContent = inputEl.value;
+        div.textContent = inputEl.value || ' '; // Espaço para manter altura mínima
         
         // Copia classes
         div.className = inputEl.className;
